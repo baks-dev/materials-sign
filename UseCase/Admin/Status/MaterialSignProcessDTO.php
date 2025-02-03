@@ -25,13 +25,13 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\UseCase\Admin\Status;
 
-use BaksDev\Materials\Catalog\Type\Id\MaterialUid;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEventInterface;
 use BaksDev\Materials\Sign\Type\Event\MaterialSignEventUid;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusProcess;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Orders\Order\Type\Material\OrderMaterialUid;
+use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
 

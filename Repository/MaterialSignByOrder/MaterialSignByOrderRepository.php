@@ -27,7 +27,6 @@ namespace BaksDev\Materials\Sign\Repository\MaterialSignByOrder;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Materials\Catalog\Entity\Material;
-use BaksDev\Materials\Catalog\Type\Id\MaterialUid;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
@@ -41,6 +40,7 @@ use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusProc
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Entity\User\OrderUser;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Entity\Event\UserProfileEvent;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;

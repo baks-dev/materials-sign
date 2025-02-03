@@ -26,7 +26,6 @@ declare(strict_types=1);
 namespace BaksDev\Materials\Sign\Repository\MaterialSignNew\Tests;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
-use BaksDev\Materials\Catalog\Type\Id\MaterialUid;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
@@ -35,6 +34,7 @@ use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
 use BaksDev\Materials\Sign\Repository\MaterialSignNew\MaterialSignNewInterface;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusNew;
+use BaksDev\Products\Product\Type\Material\MaterialUid;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;

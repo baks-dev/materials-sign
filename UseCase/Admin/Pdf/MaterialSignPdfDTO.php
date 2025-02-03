@@ -25,11 +25,11 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\UseCase\Admin\Pdf;
 
-use BaksDev\Materials\Catalog\Type\Id\MaterialUid;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
 use BaksDev\Materials\Category\Type\Id\CategoryMaterialUid;
+use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\Common\Collections\ArrayCollection;

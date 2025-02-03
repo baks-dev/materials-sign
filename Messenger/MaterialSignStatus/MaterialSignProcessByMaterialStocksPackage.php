@@ -28,7 +28,6 @@ namespace BaksDev\Materials\Sign\Messenger\MaterialSignStatus;
 
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Materials\Catalog\Repository\CurrentMaterialIdentifier\CurrentIdentifierMaterialByValueInterface;
-use BaksDev\Materials\Catalog\Type\Id\MaterialUid;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Repository\MaterialSignNew\MaterialSignNewInterface;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
@@ -36,6 +35,7 @@ use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignProcessDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignStatusHandler;
 use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierByConstInterface;
 use BaksDev\Products\Product\Repository\ProductMaterials\ProductMaterialsInterface;
+use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use BaksDev\Products\Stocks\Entity\Stock\Event\ProductStockEvent;
 use BaksDev\Products\Stocks\Entity\Stock\Products\ProductStockProduct;

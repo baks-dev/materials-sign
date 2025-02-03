@@ -24,11 +24,11 @@
 namespace BaksDev\Materials\Sign\Repository\MaterialSignNew;
 
 use BaksDev\Materials\Catalog\Entity\Material;
-use BaksDev\Materials\Catalog\Type\Id\MaterialUid;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
+use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Entity\User;

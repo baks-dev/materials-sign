@@ -24,12 +24,12 @@
 namespace BaksDev\Materials\Sign\Entity\Invariable;
 
 use BaksDev\Core\Entity\EntityReadonly;
-use BaksDev\Materials\Catalog\Type\Id\MaterialUid;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
+use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
