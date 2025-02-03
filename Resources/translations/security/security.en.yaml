@@ -1,0 +1,25 @@
+# Role
+ROLE_MATERIAL_SIGN:
+  name: 'Honest Sign'
+  desc: 'List of QR codes for "Honest Sign" materials'
+
+# Rules
+ROLE_MATERIAL_SIGN_INDEX:
+  name: 'View'
+  desc: ''
+
+ROLE_MATERIAL_SIGN_NEW:
+  name: 'Add'
+  desc: ''
+
+ROLE_MATERIAL_SIGN_EDIT:
+  name: 'Edit'
+  desc: ''
+
+ROLE_MATERIAL_SIGN_DELETE:
+  name: 'Delete'
+  desc: ''
+
+ROLE_MATERIAL_SIGN_STATUS:
+  name: 'Status'
+  desc: ''

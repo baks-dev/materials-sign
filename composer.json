@@ -1,6 +1,6 @@
 {
   "name": "baks-dev/materials-sign",
-  "description": "Модуль Честный знак продукции ",
+  "description": "Модуль Честный знак сырья",
   "homepage": "https://github.com/baks-dev/materials-sign",
   "keywords": [
     "symfony",

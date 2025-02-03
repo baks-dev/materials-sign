@@ -1,0 +1,151 @@
+<?php
+/*
+ *  Copyright 2023.  Baks.dev <admin@baks.dev>
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is furnished
+ *  to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ */
+
+declare(strict_types=1);
+
+namespace BaksDev\Materials\Sign\UseCase\Admin\New\Tests;
+
+use BaksDev\Core\Doctrine\DBALQueryBuilder;
+use BaksDev\Materials\Catalog\Type\Id\MaterialUid;
+use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
+use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
+use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
+use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
+use BaksDev\Materials\Sign\Entity\MaterialSign;
+use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
+use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\Collection\MaterialSignStatusCollection;
+use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusNew;
+use BaksDev\Materials\Sign\UseCase\Admin\New\Code\MaterialSignCodeDTO;
+use BaksDev\Materials\Sign\UseCase\Admin\New\MaterialSignDTO;
+use BaksDev\Materials\Sign\UseCase\Admin\New\MaterialSignHandler;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Type\Id\UserUid;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\DependencyInjection\Attribute\When;
+
+/**
+ * @group materials-sign
+ */
+#[When(env: 'test')]
+final class MaterialSignNewHandleTest extends KernelTestCase
+{
+    public static function setUpBeforeClass(): void
+    {
+        /**
+         * Инициируем статус для итератора тегов
+         * @var MaterialSignStatusCollection $WbSupplyStatus
+         */
+        $WbSupplyStatus = self::getContainer()->get(MaterialSignStatusCollection::class);
+        $WbSupplyStatus->cases();
+
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+
+        $main = $em->getRepository(MaterialSign::class)
+            ->findOneBy(['id' => MaterialSignUid::TEST]);
+
+        if($main)
+        {
+            $em->remove($main);
+        }
+
+        /* WbBarcodeEvent */
+
+        $event = $em->getRepository(MaterialSignEvent::class)
+            ->findBy(['main' => MaterialSignUid::TEST]);
+
+        foreach($event as $remove)
+        {
+            $em->remove($remove);
+        }
+
+        $em->flush();
+        $em->clear();
+    }
+
+
+    public function testUseCase(): void
+    {
+        /** @see MaterialSignDTO */
+
+        $MaterialSignDTO = new MaterialSignDTO();
+        $MaterialSignDTO->setProfile($UserProfileUid = new UserProfileUid());
+        self::assertSame($UserProfileUid, $MaterialSignDTO->getProfile());
+        self::assertTrue($MaterialSignDTO->getStatus()->equals(MaterialSignStatusNew::class));
+
+
+        /** @see MaterialSignCodeDTO */
+
+        $MaterialSignCodeDTO = $MaterialSignDTO->getCode();
+
+        $MaterialSignCodeDTO->setUsr($UserUid = new UserUid());
+        self::assertSame($UserUid, $MaterialSignCodeDTO->getUsr());
+
+        $MaterialSignCodeDTO->setCode('code');
+        self::assertEquals('code', $MaterialSignCodeDTO->getCode());
+
+        $MaterialSignCodeDTO->setQr('qr');
+        self::assertEquals('qr', $MaterialSignCodeDTO->getQr());
+
+        $MaterialUid = new MaterialUid();
+        $MaterialSignCodeDTO->setMaterial($MaterialUid);
+        self::assertSame($MaterialUid, $MaterialSignCodeDTO->getMaterial());
+
+        $MaterialOfferConst = new MaterialOfferConst();
+        $MaterialSignCodeDTO->setOffer($MaterialOfferConst);
+        self::assertSame($MaterialOfferConst, $MaterialSignCodeDTO->getOffer());
+
+        $MaterialVariationConst = new MaterialVariationConst();
+        $MaterialSignCodeDTO->setVariation($MaterialVariationConst);
+        self::assertSame($MaterialVariationConst, $MaterialSignCodeDTO->getVariation());
+
+        $MaterialModificationConst = new MaterialModificationConst();
+        $MaterialSignCodeDTO->setModification($MaterialModificationConst);
+        self::assertSame($MaterialModificationConst, $MaterialSignCodeDTO->getModification());
+
+
+        /** @var MaterialSignHandler $MaterialSignHandler */
+        $MaterialSignHandler = self::getContainer()->get(MaterialSignHandler::class);
+        $handle = $MaterialSignHandler->handle($MaterialSignDTO);
+
+        self::assertTrue(($handle instanceof MaterialSign), $handle.': Ошибка MaterialSign');
+
+    }
+
+    public function testComplete(): void
+    {
+
+        /** @var DBALQueryBuilder $dbal */
+        $dbal = self::getContainer()->get(DBALQueryBuilder::class);
+
+        $dbal->createQueryBuilder(self::class);
+
+        $dbal->from(MaterialSign::class)
+            ->where('id = :id')
+            ->setParameter('id', MaterialSignUid::TEST);
+
+        self::assertTrue($dbal->fetchExist());
+
+    }
+}

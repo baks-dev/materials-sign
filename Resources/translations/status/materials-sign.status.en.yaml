@@ -1,0 +1,7 @@
+new: 'New'
+decommission: 'Decommissioned'
+done: 'Done'
+error: 'Error'
+cancel: 'Cancelled'
+process: 'In progress'
+delete: 'Delete'

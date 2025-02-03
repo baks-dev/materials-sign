@@ -1,0 +1,135 @@
+<?php
+/*
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is furnished
+ *  to do so, subject to the following conditions:
+ *  
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *  
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ */
+
+declare(strict_types=1);
+
+namespace BaksDev\Materials\Sign\Messenger;
+
+use BaksDev\Core\Deduplicator\DeduplicatorInterface;
+use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Materials\Sign\Entity\MaterialSign;
+use BaksDev\Materials\Sign\Repository\MaterialSignByOrder\MaterialSignByOrderInterface;
+use BaksDev\Materials\Sign\Type\Event\MaterialSignEventUid;
+use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignCancelDTO;
+use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignStatusHandler;
+use BaksDev\Materials\Stocks\Entity\Stock\Event\MaterialStockEvent;
+use BaksDev\Materials\Stocks\Messenger\MaterialStockMessage;
+use BaksDev\Materials\Stocks\Type\Status\MaterialStockStatus\MaterialStockStatusIncoming;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler(priority: 0)]
+final readonly class ReturnMaterialSignByIncomingStock
+{
+    public function __construct(
+        #[Target('materialsSignLogger')] private LoggerInterface $logger,
+        private EntityManagerInterface $entityManager,
+        private DeduplicatorInterface $deduplicator,
+        private MaterialSignByOrderInterface $materialSignByOrder,
+        private MaterialSignStatusHandler $materialSignStatusHandler,
+    ) {}
+
+    /**
+     * Отменить (вернуть в оборот) «Честный знак» при возврате заказа
+     */
+    public function __invoke(MaterialStockMessage $message): void
+    {
+        /** Получаем статус заявки */
+        $MaterialStockEvent = $this->entityManager
+            ->getRepository(MaterialStockEvent::class)
+            ->find($message->getEvent());
+
+        if(!$MaterialStockEvent)
+        {
+            return;
+        }
+
+        $this->entityManager->clear();
+
+        $OrderUid = $MaterialStockEvent->getOrder();
+
+        if(false === ($OrderUid instanceof OrderUid))
+        {
+            return;
+        }
+
+        /** Если Статус заявки не является Incoming «Приход на склад» */
+        if(false === $MaterialStockEvent->getStatus()->equals(MaterialStockStatusIncoming::class))
+        {
+            return;
+        }
+
+        /** Идентификатор профиля склада при поступлении */
+        $UserProfileUid = $MaterialStockEvent->getProfile();
+
+        /** Получаем все знаки по идентификатору заказа со статусом Done «Выполнен» */
+        $sign = $this
+            ->materialSignByOrder
+            ->forOrder($OrderUid)
+            ->withStatusDone()
+            ->findAll();
+
+        if(false === $sign)
+        {
+            return;
+        }
+
+        $Deduplicator = $this->deduplicator
+            ->namespace('materials-stocks')
+            ->deduplication([
+                (string) $message->getId(),
+                MaterialStockStatusIncoming::STATUS,
+                md5(self::class)
+            ]);
+
+        if($Deduplicator->isExecuted())
+        {
+            return;
+        }
+
+        foreach($sign as $code)
+        {
+            $MaterialSignCancelDTO = new MaterialSignCancelDTO($UserProfileUid);
+            $MaterialSignCancelDTO->setId(new MaterialSignEventUid($code['code_event']));
+            $handle = $this->materialSignStatusHandler->handle($MaterialSignCancelDTO);
+
+            if($handle instanceof MaterialSign)
+            {
+                $this->logger->info(
+                    sprintf('%s: Ошибка при отмене «Честного знака» при возврате сырья по заказу %s', $handle, $MaterialStockEvent->getNumber()),
+                    [self::class.':'.__LINE__]
+                );
+            }
+        }
+
+        $Deduplicator->save();
+
+        $this->logger->info(
+            sprintf('%s: Отменили «Честные знаки» при возврате сырья по заказу', $MaterialStockEvent->getNumber()),
+            [self::class.':'.__LINE__]
+        );
+
+    }
+}

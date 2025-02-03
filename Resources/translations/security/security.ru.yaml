@@ -1,0 +1,27 @@
+# Роль
+ROLE_MATERIAL_SIGN:
+  name: 'Честный знак'
+  desc: 'Список QR кодов "Честный знак" сырья'
+
+# Правила
+ROLE_MATERIAL_SIGN_INDEX:
+  name: 'Просмотр'
+  desc: ''
+
+ROLE_MATERIAL_SIGN_NEW:
+  name: 'Добавить'
+  desc: ''
+
+ROLE_MATERIAL_SIGN_EDIT:
+  name: 'Редактировать'
+  desc: ''
+
+ROLE_MATERIAL_SIGN_DELETE:
+  name: 'Удалить'
+  desc: ''
+
+ROLE_MATERIAL_SIGN_STATUS:
+  name: 'Статус'
+  desc: ''
+
+
