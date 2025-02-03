@@ -32,7 +32,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 #[AutoconfigureTag('baks.security.voter')]
 class VoterStatus implements VoterInterface
 {
-    public const VOTER = 'STATUS';
+    public const string VOTER = 'STATUS';
 
     public static function getVoter(): string
     {
