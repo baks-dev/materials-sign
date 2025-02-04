@@ -248,34 +248,33 @@ final readonly class MaterialSignPdfHandler
                 $MaterialSignDTO = new MaterialSignDTO();
                 $MaterialSignDTO->setProfile($message->getProfile());
 
-
                 /** Сканируем честный знак */
                 $decode = $this->barcodeRead->decode($fileMove);
                 $code = $decode->getText();
 
-                if($decode->isError())
-                {
-                    /** Пробуем обрезать изображение по углу и просканировать повторно */
-                    $cropWidth = 450;
-                    $cropHeight = 500;
-
-                    $x = 55; // Позиция по оси X
-                    $y = 200; // Позиция по оси Y
-
-                    // Обрезаем изображение
-                    $Imagick->cropImage($cropWidth, $cropHeight, $x, $y);
-                    $Imagick->writeImage($fileMove);
-
-                    /** Пробуем считать честный знак с обрезанного файла */
-                    $decode = $this->barcodeRead->decode($fileMove);
-                    $code = $decode->getText();
-
-                    if($decode->isError())
-                    {
-                        $code = uniqid('error_', true);
-                        $MaterialSignDTO->setStatus(MaterialSignStatusError::class);
-                    }
-                }
+                //                if($decode->isError())
+                //                {
+                //                    /** Пробуем обрезать изображение по углу и просканировать повторно */
+                //                    $cropWidth = 450;
+                //                    $cropHeight = 500;
+                //
+                //                    $x = 55; // Позиция по оси X
+                //                    $y = 200; // Позиция по оси Y
+                //
+                //                    // Обрезаем изображение
+                //                    $Imagick->cropImage($cropWidth, $cropHeight, $x, $y);
+                //                    $Imagick->writeImage($fileMove);
+                //
+                //                    /** Пробуем считать честный знак с обрезанного файла */
+                //                    $decode = $this->barcodeRead->decode($fileMove);
+                //                    $code = $decode->getText();
+                //
+                //                    if($decode->isError())
+                //                    {
+                //                        $code = uniqid('error_', true);
+                //                        $MaterialSignDTO->setStatus(MaterialSignStatusError::class);
+                //                    }
+                //                }
 
                 $decode->isError() ? ++$errors : ++$counter;
 

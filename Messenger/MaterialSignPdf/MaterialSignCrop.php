@@ -110,32 +110,18 @@ final readonly class MaterialSignCrop
                 continue;
             }
 
-            /**
-             * Пробуем просканировать без обрезки
-             */
 
             $cropFilename = $info->getPath().DIRECTORY_SEPARATOR.uniqid('crop_', true).'.pdf';
-
-            $decode = $this->barcodeRead->decode($info->getRealPath());
-
-            if(false === $decode->isError())
-            {
-                $this->filesystem->remove($info->getRealPath().'.png');
-                $this->filesystem->rename($info->getRealPath(), $cropFilename);
-                continue;
-            }
-
 
             /**
              * Обрезаем пустую область
              */
 
-            $processCrop = new Process(['sudo', 'pdfcrop', $info->getRealPath(), $cropFilename]);
+            $processCrop = new Process(['sudo', 'pdfcrop', '--margins', '1', $info->getRealPath(), $cropFilename]);
             $processCrop->mustRun();
 
             /** Удаляем после обработки основной файл PDF */
             $this->filesystem->remove($info->getRealPath());
-
         }
     }
 }

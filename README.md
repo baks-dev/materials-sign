@@ -1,6 +1,6 @@
 # BaksDev Material Sign
 
-[![Version](https://img.shields.io/badge/version-7.2.4-blue)](https://github.com/baks-dev/materials-sign/releases)
+[![Version](https://img.shields.io/badge/version-7.2.5-blue)](https://github.com/baks-dev/materials-sign/releases)
 ![php 8.4+](https://img.shields.io/badge/php-min%208.4-red.svg)
 
 Модуль Честный знак сырья
@@ -23,7 +23,7 @@ sudo chown -R unit:unit <path_to_project>/public/upload/material_sign_code
 Установка приложения для обрезки из PDF пустые области:
 
 ```bash
-sudo apt install pdftk texlive-extra-utils
+sudo apt install pdftk imagemagick texlive-extra-utils
 ```
 
 * Для запуска pdfcrop от пользователя sudo:
@@ -43,7 +43,6 @@ unit ALL=(ALL) NOPASSWD: /usr/bin/pdfcrop
 * Pазрешить работу с PDF, изменив в файле /etc/ImageMagick-6/policy.xml и перезапустить web-сервер
 
 ```html
-
 <policy domain="coder" rights="none" pattern="PDF"/>
 ```
 

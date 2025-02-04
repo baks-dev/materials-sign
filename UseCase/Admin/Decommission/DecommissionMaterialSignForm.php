@@ -306,7 +306,7 @@ final class DecommissionMaterialSignForm extends AbstractType
             return;
         }
 
-        $materials = $this->materialChoice->fetchAllMaterial($category);
+        $materials = $this->materialChoice->findAll($category);
 
         // Если у сырья нет ТП
         if(!$materials)
@@ -323,7 +323,7 @@ final class DecommissionMaterialSignForm extends AbstractType
         // Продукт
         $form
             ->add('material', ChoiceType::class, [
-                'choices' => $this->materialChoice->fetchAllMaterial($category),
+                'choices' => $this->materialChoice->findAll($category),
                 'choice_value' => function(?MaterialUid $material) {
                     return $material?->getValue();
                 },
