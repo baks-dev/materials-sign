@@ -80,7 +80,7 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
             $material = new MaterialUid($material);
         }
 
-        if(!$material instanceof Material)
+        if($material instanceof Material)
         {
 
             $material = $material->getId();

@@ -39,6 +39,7 @@ use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartInter
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
+use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use Doctrine\ORM\Mapping\Table;
 use ReflectionAttribute;
@@ -84,7 +85,29 @@ final class PdfController extends AbstractController
             ->modification($modification)
             ->findAll();
 
-        return $this->BinaryFileResponse((string) $order, $codes);
+
+        /**
+         * Создаем путь для создания PDF файла
+         */
+
+        $ref = new ReflectionClass(MaterialSignCode::class);
+        /** @var ReflectionAttribute $current */
+        $current = current($ref->getAttributes(Table::class));
+        $dirName = $current->getArguments()['name'] ?? 'barcode';
+
+        $paths[] = $projectDir;
+        $paths[] = 'public';
+        $paths[] = 'upload';
+        $paths[] = $dirName;
+
+        $paths[] = (string) $order;
+        !$material ?: $paths[] = (string) $material;
+        !$offer ?: $paths[] = (string) $offer;
+        !$variation ?: $paths[] = (string) $variation;
+        !$modification ?: $paths[] = (string) $modification;
+
+
+        return $this->BinaryFileResponse($paths, $codes);
 
     }
 
@@ -104,14 +127,6 @@ final class PdfController extends AbstractController
             ->withStatusDone()
             ->findAll();
 
-        return $this->BinaryFileResponse((string) $part, $codes);
-    }
-
-
-    private function BinaryFileResponse(string $identifier, array $codes): BinaryFileResponse
-    {
-        $filesystem = new Filesystem();
-
         /**
          * Создаем путь для создания PDF файла
          */
@@ -121,13 +136,22 @@ final class PdfController extends AbstractController
         $current = current($ref->getAttributes(Table::class));
         $dirName = $current->getArguments()['name'] ?? 'barcode';
 
-        $uploadDir = implode(DIRECTORY_SEPARATOR, [
-            $this->projectDir,
-            'public',
-            'upload',
-            $dirName,
-            $identifier
-        ]);
+        $paths[] = $projectDir;
+        $paths[] = 'public';
+        $paths[] = 'upload';
+        $paths[] = $dirName;
+
+        $paths[] = (string) $part;
+
+        return $this->BinaryFileResponse($paths, $codes);
+    }
+
+
+    private function BinaryFileResponse(array $paths, array $codes): BinaryFileResponse
+    {
+        $filesystem = new Filesystem();
+
+        $uploadDir = implode(DIRECTORY_SEPARATOR, $paths);
 
         $uploadFile = $uploadDir.DIRECTORY_SEPARATOR.'output.pdf';
 
@@ -159,6 +183,7 @@ final class PdfController extends AbstractController
 
         $Process[] = 'convert';
 
+        /** Присваиваем директорию public для локальных файлов */
         $projectDir = implode(DIRECTORY_SEPARATOR, [
             $this->projectDir,
             'public',
