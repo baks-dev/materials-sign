@@ -29,11 +29,16 @@ use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Files\Resources\Twig\ImagePathExtension;
+use BaksDev\Materials\Catalog\Entity\Material;
+use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
+use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
+use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Repository\MaterialSignByOrder\MaterialSignByOrderInterface;
 use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartInterface;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use Doctrine\ORM\Mapping\Table;
 use ReflectionAttribute;
@@ -55,12 +60,16 @@ final class PdfController extends AbstractController
 
     private ImagePathExtension $ImagePathExtension;
 
-    #[Route('/admin/material/sign/document/pdf/orders/{order}', name: 'document.pdf.orders', methods: ['GET'])]
+    #[Route('/admin/material/sign/document/pdf/orders/{order}/{material}/{offer}/{variation}/{modification}', name: 'document.pdf.orders', methods: ['GET'])]
     public function orders(
-        #[Autowire('%kernel.project_dir%')] $projectDir,
-        #[ParamConverter(OrderUid::class)] $order,
         MaterialSignByOrderInterface $materialSignByOrder,
         ImagePathExtension $ImagePathExtension,
+        #[Autowire('%kernel.project_dir%')] string $projectDir,
+        #[ParamConverter(OrderUid::class)] OrderUid $order,
+        #[ParamConverter(MaterialUid::class)] MaterialUid $material,
+        #[ParamConverter(MaterialOfferConst::class)] ?MaterialOfferConst $offer = null,
+        #[ParamConverter(MaterialVariationConst::class)] ?MaterialVariationConst $variation = null,
+        #[ParamConverter(MaterialModificationConst::class)] ?MaterialModificationConst $modification = null,
     ): Response
     {
 
@@ -69,6 +78,10 @@ final class PdfController extends AbstractController
 
         $codes = $materialSignByOrder
             ->forOrder($order)
+            ->material($material)
+            ->offer($offer)
+            ->variation($variation)
+            ->modification($modification)
             ->findAll();
 
         return $this->BinaryFileResponse((string) $order, $codes);

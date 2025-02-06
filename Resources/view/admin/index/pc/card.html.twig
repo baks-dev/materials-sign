@@ -138,6 +138,10 @@
 
             {# EXEL #}
 
+
+
+
+
             {% if (item.sign_status != 'new' and item.sign_status != 'error') and (is_granted('ROLE_MATERIAL_SIGN') or is_granted('ROLE_ADMIN')) %}
 
                 {# {% set document_csv = null %} #}
@@ -148,9 +152,24 @@
                     {% set document_txt = path('materials-sign:admin.txt.parts', { part: item.sign_part }) %}
                     {% set document_pdf = path('materials-sign:document.pdf.parts', { part: item.sign_part }) %}
                 {% else %}
-                    {# {% set document_csv = path('materials-sign:admin.csv.orders', { order: item.order_id }) %} #}
-                    {% set document_txt = path('materials-sign:admin.txt.orders', { order: item.order_id }) %}
-                    {% set document_pdf = path('materials-sign:document.pdf.orders', { order: item.order_id }) %}
+
+                    {% set document_txt = path('materials-sign:admin.txt.orders', {
+                        order: item.order_id,
+                        material: material_id,
+                        offer: material_offer_const,
+                        variation: material_variation_const,
+                        modification: material_modification_const
+                    }) %}
+
+                    {% set document_pdf = path('materials-sign:document.pdf.orders', {
+                        order: item.order_id,
+                        material: material_id,
+                        offer: material_offer_const,
+                        variation: material_variation_const,
+                        modification: material_modification_const
+                    }) %}
+
+
                 {% endif %}
 
                 <a

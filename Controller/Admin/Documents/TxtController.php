@@ -28,10 +28,14 @@ namespace BaksDev\Materials\Sign\Controller\Admin\Documents;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
+use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
+use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
+use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
 use BaksDev\Materials\Sign\Repository\MaterialSignByOrder\MaterialSignByOrderInterface;
 use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartInterface;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Product\Type\Material\MaterialUid;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -45,11 +49,19 @@ final class TxtController extends AbstractController
     public function orders(
         MaterialSignByOrderInterface $materialSignByOrder,
         #[ParamConverter(OrderUid::class)] $order,
+        #[ParamConverter(MaterialUid::class)] MaterialUid $material,
+        #[ParamConverter(MaterialOfferConst::class)] ?MaterialOfferConst $offer = null,
+        #[ParamConverter(MaterialVariationConst::class)] ?MaterialVariationConst $variation = null,
+        #[ParamConverter(MaterialModificationConst::class)] ?MaterialModificationConst $modification = null,
     ): Response
     {
 
         $codes = $materialSignByOrder
             ->forOrder($order)
+            ->material($material)
+            ->offer($offer)
+            ->variation($variation)
+            ->modification($modification)
             //->withStatusDone()
             ->findAll();
 

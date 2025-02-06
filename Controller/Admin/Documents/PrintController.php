@@ -40,7 +40,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[RoleSecurity(['ROLE_ORDERS', 'ROLE_MATERIAL_SIGN'])]
 final class PrintController extends AbstractController
 {
-    #[Route('/admin/material/sign/document/print/orders/{order}', name: 'admin.print.orders', methods: ['GET'])]
+    #[Route('/admin/material/sign/document/print/orders/{order}/{material}/{offer}/{variation}/{modification}', name: 'admin.print.orders', methods: ['GET'])]
     public function orders(
         MaterialSignByOrderInterface $materialSignByOrder,
         #[ParamConverter(OrderUid::class)] $order,
