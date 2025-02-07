@@ -37,6 +37,7 @@ use BaksDev\Materials\Sign\UseCase\Admin\New\MaterialSignHandler;
 use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\Materials\MaterialStockDTO;
 use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\PurchaseMaterialStockDTO;
 use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\PurchaseMaterialStockHandler;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
@@ -275,6 +276,12 @@ final readonly class MaterialSignPdfHandler
                 //                        $MaterialSignDTO->setStatus(MaterialSignStatusError::class);
                 //                    }
                 //                }
+
+                if($decode->isError())
+                {
+                    $code = uniqid('error_', true);
+                    $MaterialSignDTO->setStatus(MaterialSignStatusError::class);
+                }
 
                 $decode->isError() ? ++$errors : ++$counter;
 

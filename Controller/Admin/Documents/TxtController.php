@@ -45,7 +45,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[RoleSecurity(['ROLE_ORDERS', 'ROLE_MATERIAL_SIGN'])]
 final class TxtController extends AbstractController
 {
-    #[Route('/admin/material/sign/document/txt/orders/{order}', name: 'admin.txt.orders', methods: ['GET'])]
+    #[Route('/admin/material/sign/document/txt/orders/{order}/{material}/{offer}/{variation}/{modification}', name: 'admin.txt.orders', methods: ['GET'])]
     public function orders(
         MaterialSignByOrderInterface $materialSignByOrder,
         #[ParamConverter(OrderUid::class)] $order,

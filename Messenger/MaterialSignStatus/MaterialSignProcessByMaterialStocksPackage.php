@@ -46,18 +46,16 @@ use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusInc
 use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusPackage;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(priority: -5)]
 final readonly class MaterialSignProcessByMaterialStocksPackage
 {
     public function __construct(
         #[Target('materialsSignLogger')] private LoggerInterface $logger,
         private ProductStocksByIdInterface $ProductStocks,
-        private EntityManagerInterface $entityManager,
         private CurrentProductStocksInterface $currentProductStocks,
         private UserByUserProfileInterface $userByUserProfile,
         private DeduplicatorInterface $deduplicator,
@@ -73,34 +71,42 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
      */
     public function __invoke(ProductStockMessage $message): void
     {
+        $Deduplicator = $this->deduplicator
+            ->namespace('materials-sign')
+            ->deduplication([
+                $message,
+                self::class
+            ]);
 
-        /** Log Data */
-        $dataLogs['ProductStockUid'] = (string) $message->getId();
-        $dataLogs['ProductStockEventUid'] = (string) $message->getEvent();
-        $dataLogs['LastProductStockEventUid'] = (string) $message->getLast();
+        if($Deduplicator->isExecuted())
+        {
+            return;
+        }
 
         $ProductStockEvent = $this->currentProductStocks->getCurrentEvent($message->getId());
 
         if(!$ProductStockEvent)
         {
-            $dataLogs[0] = self::class.':'.__LINE__;
-            $this->logger->critical('products-sign: Не найдено событие ProductStock', $dataLogs);
-
+            $this->logger->critical('products-sign: Не найдено событие ProductStock', [$message, self::class.':'.__LINE__]);
             return;
         }
 
         if(false === $ProductStockEvent->equalsProductStockStatus(ProductStockStatusPackage::class))
         {
-            $dataLogs[0] = self::class.':'.__LINE__;
-            $this->logger->notice('Не резервируем честный знак: Складская заявка не является Package «Упаковка»', $dataLogs);
+            $this->logger->notice(
+                'Не резервируем честный знак: Складская заявка не является Package «Упаковка»',
+                [$message, self::class.':'.__LINE__]
+            );
 
             return;
         }
 
         if(!$ProductStockEvent->getOrder())
         {
-            $dataLogs[0] = self::class.':'.__LINE__;
-            $this->logger->notice('Не резервируем честный знак: упаковка без идентификатора заказа', $dataLogs);
+            $this->logger->notice(
+                'Не резервируем честный знак: упаковка без идентификатора заказа',
+                [$message, self::class.':'.__LINE__]
+            );
 
             return;
         }
@@ -113,31 +119,14 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
 
         if(false === $User)
         {
-            $dataLogs[0] = self::class.':'.__LINE__;
+
             $this->logger
                 ->critical(
-                    sprintf('products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ', $ProductStockEvent->getProfile()),
-                    $dataLogs
+                    sprintf('products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ', $ProductStockEvent->getStocksProfile()),
+                    [$message, self::class.':'.__LINE__]
                 );
 
             return;
-        }
-
-        if($message->getLast())
-        {
-            $lastProductStockEvent = $this
-                ->entityManager
-                ->getRepository(ProductStockEvent::class)
-                ->find($message->getLast());
-
-            /** Если предыдущая заявка на перемещение и совершается поступление по этой заявке - резерв уже был */
-            if($lastProductStockEvent === null || $lastProductStockEvent->equalsProductStockStatus(ProductStockStatusIncoming::class) === true)
-            {
-                $dataLogs[0] = self::class.':'.__LINE__;
-                $this->logger->notice('Не резервируем честный знак: Складская заявка при поступлении на склад по заказу (резерв уже имеется)', $dataLogs);
-
-                return;
-            }
         }
 
         // Получаем всю продукцию в ордере со статусом Package (УПАКОВКА)
@@ -145,22 +134,11 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
 
         if(empty($products))
         {
-            $dataLogs[0] = self::class.':'.__LINE__;
-            $this->logger->warning('Заявка на упаковку не имеет продукции в коллекции', $dataLogs);
+            $this->logger->warning(
+                'Заявка на упаковку не имеет продукции в коллекции',
+                [$message, self::class.':'.__LINE__]
+            );
 
-            return;
-        }
-
-        $Deduplicator = $this->deduplicator
-            ->namespace('materials-sign-sign')
-            ->deduplication([
-                (string) $message->getId(),
-                ProductSignStatusProcess::STATUS,
-                md5(self::class)
-            ]);
-
-        if($Deduplicator->isExecuted())
-        {
             return;
         }
 
@@ -199,7 +177,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
                 ->forEvent($CurrentProductIdentifier->getEvent())
                 ->findAll();
 
-            if(false === $ProductMaterials || false === $ProductMaterials->valid())
+            if(false === ($ProductMaterials || $ProductMaterials->valid()))
             {
                 continue;
             }
@@ -233,7 +211,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
                         ->forModificationConst($CurrentMaterialDTO->getModificationConst())
                         ->getOneMaterialSign();
 
-                    if(!$MaterialSignEvent)
+                    if(false === $MaterialSignEvent)
                     {
                         $this->logger->warning(
                             'Честный знак на сырьё не найдено',
@@ -250,14 +228,14 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
 
                     $handle = $this->MaterialSignStatusHandler->handle($MaterialSignProcessDTO);
 
-                    if(!$handle instanceof MaterialSign)
+                    if(false === ($handle instanceof MaterialSign))
                     {
                         $this->logger->critical(
                             sprintf('%s: Ошибка при обновлении статуса честного знака на сырье', $handle),
                             [$MaterialSignProcessDTO, self::class.':'.__LINE__]
                         );
 
-                        throw new InvalidArgumentException('Ошибка при обновлении статуса честного знака');
+                        continue 2;
                     }
 
                     $this->logger->info(

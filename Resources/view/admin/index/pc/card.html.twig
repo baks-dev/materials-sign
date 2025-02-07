@@ -104,8 +104,16 @@
                 {% if item.sign_status == 'decommission' %}
                     {% set print_path = path('materials-sign:admin.print.parts', { part: item.sign_part }) %}
                 {% else %}
-                    {% set print_path = path('materials-sign:admin.print.orders', { order: item.order_id }) %}
+                    {% set print_path = path('materials-sign:admin.print.orders', {
+                        order: item.order_id,
+                        material: item.material_id,
+                        offer: item.material_offer_const,
+                        variation: item.material_variation_const,
+                        modification: item.material_modification_const
+                    }) %}
                 {% endif %}
+
+
 
                 <a href="{{ print_path }}"
                    class="btn btn-sm btn-light disabled prnt"
