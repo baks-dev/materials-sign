@@ -105,6 +105,7 @@
                     {% set print_path = path('materials-sign:admin.print.parts', { part: item.sign_part }) %}
                 {% else %}
                     {% set print_path = path('materials-sign:admin.print.orders', {
+                        article: item.material_article,
                         order: item.order_id,
                         material: item.material_id,
                         offer: item.material_offer_const,
@@ -157,11 +158,12 @@
 
                 {% if item.sign_status == 'decommission' %}
                     {# {% set document_csv = path('materials-sign:admin.csv.parts', { part: item.sign_part }) %} #}
-                    {% set document_txt = path('materials-sign:admin.txt.parts', { part: item.sign_part }) %}
-                    {% set document_pdf = path('materials-sign:document.pdf.parts', { part: item.sign_part }) %}
+                    {% set document_txt = path('materials-sign:admin.txt.parts', { part: item.material_article, item.sign_part }) %}
+                    {% set document_pdf = path('materials-sign:document.pdf.parts', { article: item.material_article, part: item.sign_part }) %}
                 {% else %}
 
                     {% set document_txt = path('materials-sign:admin.txt.orders', {
+                        article: item.material_article,
                         order: item.order_id,
                         material: material_id,
                         offer: material_offer_const,
@@ -170,6 +172,7 @@
                     }) %}
 
                     {% set document_pdf = path('materials-sign:document.pdf.orders', {
+                        article: item.material_article,
                         order: item.order_id,
                         material: material_id,
                         offer: material_offer_const,
@@ -235,7 +238,7 @@
                 </button>
 
                 <a
-                        href="{{ path('materials-sign:admin.txt.parts', { part: item.sign_part }) }}"
+                        href="{{ path('materials-sign:admin.txt.parts', { article: item.material_article, part: item.sign_part }) }}"
                         class='btn btn-sm btn-light d-flex gap-3'
                         title='Скачать TXT'
                 >

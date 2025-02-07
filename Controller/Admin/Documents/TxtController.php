@@ -45,9 +45,10 @@ use Symfony\Component\Routing\Attribute\Route;
 #[RoleSecurity(['ROLE_ORDERS', 'ROLE_MATERIAL_SIGN'])]
 final class TxtController extends AbstractController
 {
-    #[Route('/admin/material/sign/document/txt/orders/{order}/{material}/{offer}/{variation}/{modification}', name: 'admin.txt.orders', methods: ['GET'])]
+    #[Route('/admin/material/sign/document/txt/orders/{article}/{order}/{material}/{offer}/{variation}/{modification}', name: 'admin.txt.orders', methods: ['GET'])]
     public function orders(
         MaterialSignByOrderInterface $materialSignByOrder,
+        string $article,
         #[ParamConverter(OrderUid::class)] $order,
         #[ParamConverter(MaterialUid::class)] MaterialUid $material,
         #[ParamConverter(MaterialOfferConst::class)] ?MaterialOfferConst $offer = null,
@@ -106,15 +107,15 @@ final class TxtController extends AbstractController
         });
 
 
-        $filename = uniqid('document_sign_', false).'.txt';
         $response->headers->set('Content-Type', 'text/plain');
-        $response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+        $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'.txt"');
 
         return $response;
     }
 
-    #[Route('/admin/material/sign/document/txt/parts/{part}', name: 'admin.txt.parts', methods: ['GET'])]
+    #[Route('/admin/material/sign/document/txt/parts/{article}/{part}', name: 'admin.txt.parts', methods: ['GET'])]
     public function parts(
+        string $article,
         MaterialSignByPartInterface $materialSignByPart,
         #[ParamConverter(MaterialSignUid::class)] $part,
     ): Response
@@ -168,9 +169,8 @@ final class TxtController extends AbstractController
             fclose($handle);
         });
 
-        $filename = uniqid('document_sign_', false).'.txt';
         $response->headers->set('Content-Type', 'text/plain');
-        $response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+        $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'.txt"');
 
         return $response;
 

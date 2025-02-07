@@ -60,11 +60,13 @@ final class PdfController extends AbstractController
     private string $projectDir;
 
     private ImagePathExtension $ImagePathExtension;
+    private string $article;
 
-    #[Route('/admin/material/sign/document/pdf/orders/{order}/{material}/{offer}/{variation}/{modification}', name: 'document.pdf.orders', methods: ['GET'])]
+    #[Route('/admin/material/sign/document/pdf/orders/{article}/{order}/{material}/{offer}/{variation}/{modification}', name: 'document.pdf.orders', methods: ['GET'])]
     public function orders(
         MaterialSignByOrderInterface $materialSignByOrder,
         ImagePathExtension $ImagePathExtension,
+        string $article,
         #[Autowire('%kernel.project_dir%')] string $projectDir,
         #[ParamConverter(OrderUid::class)] OrderUid $order,
         #[ParamConverter(MaterialUid::class)] MaterialUid $material,
@@ -74,6 +76,7 @@ final class PdfController extends AbstractController
     ): Response
     {
 
+        $this->article = $article;
         $this->projectDir = $projectDir;
         $this->ImagePathExtension = $ImagePathExtension;
 
@@ -111,16 +114,18 @@ final class PdfController extends AbstractController
 
     }
 
-    #[Route('/admin/material/sign/document/pdf/parts/{part}', name: 'document.pdf.parts', methods: ['GET'])]
+    #[Route('/admin/material/sign/document/pdf/parts/{article}/{part}', name: 'document.pdf.parts', methods: ['GET'])]
     public function parts(
         #[Autowire('%kernel.project_dir%')] $projectDir,
         #[ParamConverter(MaterialSignUid::class)] $part,
+        string $article,
         MaterialSignByPartInterface $materialSignByPart,
         ImagePathExtension $ImagePathExtension,
     ): Response
     {
         $this->projectDir = $projectDir;
         $this->ImagePathExtension = $ImagePathExtension;
+        $this->article = $article;
 
         $codes = $materialSignByPart
             ->forPart($part)
@@ -203,7 +208,7 @@ final class PdfController extends AbstractController
         return new BinaryFileResponse($uploadFile, Response::HTTP_OK)
             ->setContentDisposition(
                 ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                'sign.pdf'
+                $this->article.'.pdf'
             );
 
     }
