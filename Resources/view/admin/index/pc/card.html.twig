@@ -158,7 +158,7 @@
 
                 {% if item.sign_status == 'decommission' %}
                     {# {% set document_csv = path('materials-sign:admin.csv.parts', { part: item.sign_part }) %} #}
-                    {% set document_txt = path('materials-sign:admin.txt.parts', { part: item.material_article, item.sign_part }) %}
+                    {% set document_txt = path('materials-sign:admin.txt.parts', { article: item.material_article, part: item.sign_part }) %}
                     {% set document_pdf = path('materials-sign:document.pdf.parts', { article: item.material_article, part: item.sign_part }) %}
                 {% else %}
 
