@@ -165,19 +165,19 @@
                     {% set document_txt = path('materials-sign:admin.txt.orders', {
                         article: item.material_article,
                         order: item.order_id,
-                        material: material_id,
-                        offer: material_offer_const,
-                        variation: material_variation_const,
-                        modification: material_modification_const
+                        material: item.material_id,
+                        offer: item.material_offer_const,
+                        variation: item.material_variation_const,
+                        modification: item.material_modification_const
                     }) %}
 
                     {% set document_pdf = path('materials-sign:document.pdf.orders', {
                         article: item.material_article,
                         order: item.order_id,
-                        material: material_id,
-                        offer: material_offer_const,
-                        variation: material_variation_const,
-                        modification: material_modification_const
+                        material: item.material_id,
+                        offer: item.material_offer_const,
+                        variation: item.material_variation_const,
+                        modification: item.material_modification_const
                     }) %}
 
 
