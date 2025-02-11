@@ -37,7 +37,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler(priority: -5)]
+#[AsMessageHandler(priority: -10)]
 final readonly class MaterialSignCancelByOrderCanceled
 {
     public function __construct(
@@ -47,7 +47,6 @@ final readonly class MaterialSignCancelByOrderCanceled
         private MaterialSignProcessByOrderInterface $materialSignProcessByOrder,
         private DeduplicatorInterface $deduplicator,
     ) {}
-
 
     /**
      * Делаем отмену Честный знак на New «Новый» если статус заказа Canceled «Отменен»
@@ -90,21 +89,30 @@ final readonly class MaterialSignCancelByOrderCanceled
             return;
         }
 
-        $this->logger->info('Делаем поиск и отмену всех «Честных знаков» при отмене заказа:');
+        /**
+         * Делаем поиск и отмену всех «Честных знаков» и возвращаем в реализацию при условии:
+         * - при отмене заказа
+         * - при завершении заказа, но если найдены незакрытые ЧЗ (
+         * например если изменилось количество в заказе @see MaterialSignDoneByOrderCompleted у которого выше приоритетом
+         */
 
-        $MaterialSignEvents = $this->materialSignProcessByOrder->findByOrder($message->getId());
+        $this->logger->info('Делаем поиск и отмену «Честных знаков»:');
 
-        foreach($MaterialSignEvents as $event)
+        $events = $this->materialSignProcessByOrder
+            ->forOrder($message->getId())
+            ->findAllByOrder();
+
+        foreach($events as $MaterialSignEvent)
         {
-            $MaterialSignCancelDTO = new MaterialSignCancelDTO($event->getProfile());
-            $event->getDto($MaterialSignCancelDTO);
+            $MaterialSignCancelDTO = new MaterialSignCancelDTO($MaterialSignEvent->getProfile());
+            $MaterialSignEvent->getDto($MaterialSignCancelDTO);
             $this->materialSignStatusHandler->handle($MaterialSignCancelDTO);
 
             $this->logger->warning(
                 'Отменили «Честный знак» (возвращаем статус New «Новый»)',
                 [
                     self::class.':'.__LINE__,
-                    'MaterialSignUid' => $event->getMain()
+                    'MaterialSignUid' => $MaterialSignEvent->getMain()
                 ]
             );
         }

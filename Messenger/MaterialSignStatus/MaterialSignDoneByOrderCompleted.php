@@ -26,21 +26,23 @@ declare(strict_types=1);
 namespace BaksDev\Materials\Sign\Messenger\MaterialSignStatus;
 
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
-use BaksDev\Materials\Catalog\Repository\MaterialModificationConst\MaterialModificationConstInterface;
-use BaksDev\Materials\Catalog\Repository\MaterialOfferConst\MaterialOfferConstInterface;
-use BaksDev\Materials\Catalog\Repository\MaterialVariationConst\MaterialVariationConstInterface;
+use BaksDev\Materials\Catalog\Repository\CurrentMaterialIdentifier\CurrentIdentifierMaterialByValueInterface;
+use BaksDev\Materials\Catalog\Repository\CurrentMaterialIdentifier\CurrentMaterialDTO;
+use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
-use BaksDev\Materials\Sign\Repository\MaterialSignProcessByOrder\MaterialSignProcessByOrderInterface;
 use BaksDev\Materials\Sign\Repository\MaterialSignProcessByOrderMaterial\MaterialSignProcessByOrderProductInterface;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusDone;
-use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignCancelDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignDoneDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignStatusHandler;
+use BaksDev\Orders\Order\Entity\Event\OrderEvent;
 use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Messenger\OrderMessage;
 use BaksDev\Orders\Order\Repository\OrderEvent\OrderEventInterface;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\OrderStatusCompleted;
-use InvalidArgumentException;
+use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductDTO;
+use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierByConstInterface;
+use BaksDev\Products\Product\Repository\ProductMaterials\ProductMaterialsInterface;
+use BaksDev\Products\Product\Type\Material\MaterialUid;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -50,15 +52,17 @@ final readonly class MaterialSignDoneByOrderCompleted
 {
     public function __construct(
         #[Target('materialsSignLogger')] private LoggerInterface $logger,
-        private MaterialOfferConstInterface $materialOfferConst,
-        private MaterialVariationConstInterface $materialVariationConst,
-        private MaterialModificationConstInterface $materialModificationConst,
         private MaterialSignStatusHandler $materialSignStatusHandler,
-        private OrderEventInterface $orderEventRepository,
+        private OrderEventInterface $OrderEventRepository,
         private MaterialSignProcessByOrderProductInterface $materialSignProcessByOrderMaterial,
-        private MaterialSignProcessByOrderInterface $materialSignProcessByOrder,
+        private ProductMaterialsInterface $ProductMaterials,
+        private CurrentProductIdentifierByConstInterface $CurrentProductIdentifierByConst,
+        private CurrentIdentifierMaterialByValueInterface $CurrentIdentifierMaterialByValue,
         private DeduplicatorInterface $deduplicator,
-    ) {}
+    )
+    {
+        $this->deduplicator->namespace('materials-sign');
+    }
 
 
     /**
@@ -67,7 +71,6 @@ final readonly class MaterialSignDoneByOrderCompleted
     public function __invoke(OrderMessage $message): void
     {
         $Deduplicator = $this->deduplicator
-            ->namespace('materials-sign')
             ->deduplication([
                 (string) $message->getId(),
                 MaterialSignStatusDone::STATUS,
@@ -79,19 +82,12 @@ final readonly class MaterialSignDoneByOrderCompleted
             return;
         }
 
-        /** Log Data */
-        $dataLogs['OrderUid'] = (string) $message->getId();
-        $dataLogs['OrderEventUid'] = (string) $message->getEvent();
-        $dataLogs['LastOrderEventUid'] = (string) $message->getLast();
-
         /** Получаем событие заказа */
-        $OrderEvent = $this->orderEventRepository->find($message->getEvent());
+        $OrderEvent = $this->OrderEventRepository->find($message->getEvent());
 
-        if(false === $OrderEvent)
+        if(false === ($OrderEvent instanceof OrderEvent))
         {
-            $dataLogs[0] = self::class.':'.__LINE__;
-            $this->logger->critical('materials-sign: Не найдено событие Order', $dataLogs);
-
+            $this->logger->critical('materials-sign: Не найдено событие Order');
             return;
         }
 
@@ -108,79 +104,103 @@ final readonly class MaterialSignDoneByOrderCompleted
         /** @var OrderProduct $product */
         foreach($OrderEvent->getProduct() as $product)
         {
-            /**
-             * Получаем константы сырья по идентификаторам
-             */
-            $MaterialOfferUid = $product->getOffer() ? $this->materialOfferConst->getConst($product->getOffer()) : null;
-            $MaterialVariationUid = $product->getVariation() ? $this->materialVariationConst->getConst($product->getVariation()) : null;
-            $MaterialModificationUid = $product->getModification() ? $this->materialModificationConst->getConst($product->getModification()) : null;
+            /** Получаем идентификаторы продукции */
+            $CurrentProductIdentifier = $this->CurrentProductIdentifierByConst
+                ->forProduct($product->getProduct())
+                ->forOfferConst($product->getOffer())
+                ->forVariationConst($product->getVariation())
+                ->forModificationConst($product->getModification())
+                ->find();
 
-            /**
-             * Чекаем честный знак о выполнении
-             */
-            $total = $product->getTotal();
-
-            for($i = 1; $i <= $total; $i++)
+            if(false === ($CurrentProductIdentifier instanceof CurrentProductDTO))
             {
-                $MaterialSignEvent = $this->materialSignProcessByOrderMaterial
-                    ->forOrder($message->getId())
-                    ->forOfferConst($MaterialOfferUid)
-                    ->forVariationConst($MaterialVariationUid)
-                    ->forModificationConst($MaterialModificationUid)
+                continue;
+            }
+
+            /** Получаем список материалов продукции */
+
+            $ProductMaterials = $this->ProductMaterials
+                ->forEvent($CurrentProductIdentifier->getEvent())
+                ->findAll();
+
+            if(false === ($ProductMaterials || $ProductMaterials->valid()))
+            {
+                continue;
+            }
+
+            /** @var MaterialUid $ProductMaterial */
+            foreach($ProductMaterials as $ProductMaterial)
+            {
+                /** Получаем материал согласно торговому предложению (value) */
+                $CurrentMaterialDTO = $this->CurrentIdentifierMaterialByValue
+                    ->forMaterial($ProductMaterial)
+                    ->forOfferValue($CurrentProductIdentifier->getOfferValue())
+                    ->forVariationValue($CurrentProductIdentifier->getVariationValue())
+                    ->forModificationValue($CurrentProductIdentifier->getModificationValue())
                     ->find();
 
-                if($MaterialSignEvent)
+                if(false === ($CurrentMaterialDTO instanceof CurrentMaterialDTO))
                 {
+                    continue;
+                }
+
+                $total = $product->getTotal();
+
+                for($i = 1; $i <= $total; $i++)
+                {
+                    $MaterialSignEvent = $this->materialSignProcessByOrderMaterial
+                        ->forOrder($message->getId())
+                        ->forOfferConst($CurrentMaterialDTO->getOfferConst())
+                        ->forVariationConst($CurrentMaterialDTO->getVariationConst())
+                        ->forModificationConst($CurrentMaterialDTO->getModificationConst())
+                        ->find();
+
+                    if(false === ($MaterialSignEvent instanceof MaterialSignEvent))
+                    {
+                        $this->logger->warning(
+                            'Честный знак на сырьё не найден',
+                            [$message, $product, self::class.':'.__LINE__]
+                        );
+
+                        break;
+                    }
+
+                    /**
+                     * Обновляем «Честный знак» на статус Done «Выполнен»
+                     */
+
                     $MaterialSignDoneDTO = new MaterialSignDoneDTO();
                     $MaterialSignEvent->getDto($MaterialSignDoneDTO);
 
-                    $handle = $this->materialSignStatusHandler->handle($MaterialSignDoneDTO);
+                    $MaterialSign = $this->materialSignStatusHandler->handle($MaterialSignDoneDTO);
 
-                    if(!$handle instanceof MaterialSign)
+                    if(false === ($MaterialSign instanceof MaterialSign))
                     {
                         $this->logger->critical(
-                            sprintf('%s: Ошибка при обновлении статуса честного знака', $handle),
+                            sprintf('%s: Ошибка при обновлении статуса честного знака', $MaterialSign),
                             [
                                 self::class.':'.__LINE__,
                                 'MaterialSignEventUid' => $MaterialSignDoneDTO->getEvent()
                             ]
                         );
 
-                        throw new InvalidArgumentException('Ошибка при обновлении статуса честного знака');
+                        break;
                     }
 
                     $this->logger->info(
-                        'Отметили Честный знак Done «Выполнен»',
-                        [
-                            self::class.':'.__LINE__,
-                            'MaterialSignUid' => $MaterialSignEvent->getMain()
-                        ]
+                        'Отметили Честный знак на сырье в статус Done «Выполнен»',
+                        [$message, self::class.':'.__LINE__,]
                     );
                 }
             }
+
+            /**
+             * Все остальные незавершенные «Честные знаки» будут отменены при вызове MaterialSignCancelByOrderCanceled
+             * @see MaterialSignCancelByOrderCanceled
+             */
+
+            $Deduplicator->save();
+
         }
-
-        /**
-         * Если по заказу остались Честный знак в статусе Process «В процессе» - делаем отмену (присваиваем статус New «Новый»)
-         * @note ситуация если количество в заказе изменилось на меньшее количество
-         */
-
-        $MaterialSignEvents = $this->materialSignProcessByOrder->findByOrder($message->getId());
-
-        foreach($MaterialSignEvents as $event)
-        {
-            $MaterialSignCancelDTO = new MaterialSignCancelDTO($event->getProfile());
-            $event->getDto($MaterialSignCancelDTO);
-            $this->materialSignStatusHandler->handle($MaterialSignCancelDTO);
-
-            $this->logger->warning(
-                'Отменили Честный знак (возвращаем статус New «Новый»)',
-                [
-                    self::class.':'.__LINE__,
-                    'MaterialSignUid' => $event->getMain()
-                ]
-            );
-        }
-
     }
 }

@@ -217,7 +217,8 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
                             'Честный знак на сырьё не найдено',
                             [$ProductStockEvent, $product, self::class.':'.__LINE__]
                         );
-                        continue;
+
+                        break;
                     }
 
                     $MaterialSignProcessDTO = new MaterialSignProcessDTO($ProductStockEvent->getStocksProfile(), $ProductStockEvent->getOrder());

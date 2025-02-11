@@ -23,12 +23,16 @@
 
 namespace BaksDev\Materials\Sign\Repository\MaterialSignProcessByOrder;
 
+
+use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 
 interface MaterialSignProcessByOrderInterface
 {
+    public function forOrder(Order|OrderUid|string $order): self;
+
     /**
      * Метод возвращает события Честный знак по заказу со статусом Process «В процессе»
      */
-    public function findByOrder(OrderUid $order): ?array;
+    public function findAllByOrder(): ?array;
 }

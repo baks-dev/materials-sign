@@ -30,22 +30,45 @@ use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusProcess;
+use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use InvalidArgumentException;
 
 final class MaterialSignProcessByOrderRepository implements MaterialSignProcessByOrderInterface
 {
-    private ORMQueryBuilder $ORMQueryBuilder;
+    private OrderUid|false $order = false;
 
-    public function __construct(ORMQueryBuilder $ORMQueryBuilder)
+    public function __construct(private readonly ORMQueryBuilder $ORMQueryBuilder) {}
+
+    public function forOrder(Order|OrderUid|string $order): self
     {
-        $this->ORMQueryBuilder = $ORMQueryBuilder;
+        if(is_string($order))
+        {
+            $order = new OrderUid($order);
+        }
+
+        if($order instanceof Order)
+        {
+            $order = $order->getId();
+        }
+
+        $this->order = $order;
+
+        return $this;
     }
 
+
     /**
-     * Метод возвращает события Честный знак по заказу со статусом Process «В процессе»
+     * Метод возвращает события Честного знака по заказу со статусом Process «В процессе»
      */
-    public function findByOrder(OrderUid $order): ?array
+    public function findAllByOrder(): ?array
     {
+        if(false === ($this->order instanceof OrderUid))
+        {
+            throw new InvalidArgumentException('Invalid Argument Order');
+        }
+
+
         $orm = $this->ORMQueryBuilder->createQueryBuilder(self::class);
 
         $orm
@@ -54,10 +77,18 @@ final class MaterialSignProcessByOrderRepository implements MaterialSignProcessB
 
         $orm
             ->where('event.ord = :ord')
-            ->setParameter('ord', $order, OrderUid::TYPE);
+            ->setParameter(
+                key: 'ord',
+                value: $this->order,
+                type: OrderUid::TYPE
+            );
 
         $orm->andWhere('event.status = :status')
-            ->setParameter('status', new MaterialSignStatus(MaterialSignStatusProcess::class), MaterialSignStatus::TYPE);
+            ->setParameter(
+                key: 'status',
+                value: MaterialSignStatusProcess::class,
+                type: MaterialSignStatus::TYPE
+            );
 
         $orm->join(
             MaterialSign::class,
