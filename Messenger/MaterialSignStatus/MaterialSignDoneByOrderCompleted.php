@@ -41,6 +41,7 @@ use BaksDev\Orders\Order\Repository\OrderEvent\OrderEventInterface;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\OrderStatusCompleted;
 use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductDTO;
 use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierByConstInterface;
+use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierInterface;
 use BaksDev\Products\Product\Repository\ProductMaterials\ProductMaterialsInterface;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use Psr\Log\LoggerInterface;
@@ -56,7 +57,7 @@ final readonly class MaterialSignDoneByOrderCompleted
         private OrderEventInterface $OrderEventRepository,
         private MaterialSignProcessByOrderProductInterface $materialSignProcessByOrderMaterial,
         private ProductMaterialsInterface $ProductMaterials,
-        private CurrentProductIdentifierByConstInterface $CurrentProductIdentifierByConst,
+        private CurrentProductIdentifierInterface $CurrentProductIdentifier,
         private CurrentIdentifierMaterialByValueInterface $CurrentIdentifierMaterialByValue,
         private DeduplicatorInterface $deduplicator,
     )
@@ -105,11 +106,11 @@ final readonly class MaterialSignDoneByOrderCompleted
         foreach($OrderEvent->getProduct() as $product)
         {
             /** Получаем идентификаторы продукции */
-            $CurrentProductIdentifier = $this->CurrentProductIdentifierByConst
-                ->forProduct($product->getProduct())
-                ->forOfferConst($product->getOffer())
-                ->forVariationConst($product->getVariation())
-                ->forModificationConst($product->getModification())
+            $CurrentProductIdentifier = $this->CurrentProductIdentifier
+                ->forEvent($product->getProduct())
+                ->forOffer($product->getOffer())
+                ->forVariation($product->getVariation())
+                ->forModification($product->getModification())
                 ->find();
 
             if(false === ($CurrentProductIdentifier instanceof CurrentProductDTO))
