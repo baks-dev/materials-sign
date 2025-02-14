@@ -29,7 +29,6 @@ use BaksDev\Core\Doctrine\ORMQueryBuilder;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
-use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
@@ -45,11 +44,11 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
 
     private OrderUid $order;
 
-    private ?MaterialOfferConst $offer = null;
+    private MaterialOfferConst|false $offer = false;
 
-    private ?MaterialVariationConst $variation = null;
+    private MaterialVariationConst|false $variation = false;
 
-    private ?MaterialModificationConst $modification = null;
+    private MaterialModificationConst|false $modification = false;
 
     public function __construct(ORMQueryBuilder $ORMQueryBuilder)
     {
@@ -73,10 +72,11 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
         return $this;
     }
 
-    public function forOfferConst(MaterialOfferConst|string|null $offer): self
+    public function forOfferConst(MaterialOfferConst|string|null|false $offer): self
     {
         if($offer === null)
         {
+            $this->offer = false;
             return $this;
         }
 
@@ -90,10 +90,11 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
         return $this;
     }
 
-    public function forVariationConst(MaterialVariationConst|string|null $variation): self
+    public function forVariationConst(MaterialVariationConst|string|null|false $variation): self
     {
-        if($variation === null)
+        if(empty($variation))
         {
+            $this->variation = false;
             return $this;
         }
 
@@ -107,10 +108,11 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
         return $this;
     }
 
-    public function forModificationConst(MaterialModificationConst|string|null $modification): self
+    public function forModificationConst(MaterialModificationConst|string|null|false $modification): self
     {
-        if($modification === null)
+        if(empty($modification))
         {
+            $this->modification = false;
             return $this;
         }
 
@@ -187,7 +189,7 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
             $orm->andWhere('invariable.offer IS NULL');
         }
 
-        if($this->variation)
+        if($this->variation instanceof MaterialVariationConst)
         {
             $orm
                 ->andWhere('invariable.variation = :variation')
@@ -204,7 +206,7 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
         }
 
 
-        if($this->modification)
+        if($this->modification instanceof MaterialModificationConst)
         {
             $orm
                 ->andWhere('invariable.modification = :modification')
