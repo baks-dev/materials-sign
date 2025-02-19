@@ -37,8 +37,11 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler(priority: -10)]
-final readonly class MaterialSignCancelByOrderCanceled
+/**
+ * Делаем отмену Честный знак на сырье New «Новый» если статус заказа Canceled «Отменен»
+ */
+#[AsMessageHandler(priority: 80)]
+final readonly class MaterialSignCancelByOrderCanceledDispatcher
 {
     public function __construct(
         #[Target('materialsSignLogger')] private LoggerInterface $logger,
@@ -48,9 +51,6 @@ final readonly class MaterialSignCancelByOrderCanceled
         private DeduplicatorInterface $deduplicator,
     ) {}
 
-    /**
-     * Делаем отмену Честный знак на New «Новый» если статус заказа Canceled «Отменен»
-     */
     public function __invoke(OrderMessage $message): void
     {
         $Deduplicator = $this->deduplicator
@@ -93,7 +93,7 @@ final readonly class MaterialSignCancelByOrderCanceled
          * Делаем поиск и отмену всех «Честных знаков» и возвращаем в реализацию при условии:
          * - при отмене заказа
          * - при завершении заказа, но если найдены незакрытые ЧЗ (
-         * например если изменилось количество в заказе @see MaterialSignDoneByOrderCompleted у которого выше приоритетом
+         * например если изменилось количество в заказе @see MaterialSignDoneByOrderCompletedDispatcher у которого выше приоритетом
          */
 
         $this->logger->info('Делаем поиск и отмену «Честных знаков»:');

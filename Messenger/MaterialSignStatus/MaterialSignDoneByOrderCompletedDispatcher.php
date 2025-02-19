@@ -48,8 +48,11 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler(priority: -5)]
-final readonly class MaterialSignDoneByOrderCompleted
+/**
+ * Делаем отметку Честный знак на сырье Done «Выполнен» если статус заказа Completed «Выполнен»
+ */
+#[AsMessageHandler(priority: 10)]
+final readonly class MaterialSignDoneByOrderCompletedDispatcher
 {
     public function __construct(
         #[Target('materialsSignLogger')] private LoggerInterface $logger,
@@ -65,10 +68,6 @@ final readonly class MaterialSignDoneByOrderCompleted
         $this->deduplicator->namespace('materials-sign');
     }
 
-
-    /**
-     * Делаем отметку Честный знак Done «Выполнен» если статус заказа Completed «Выполнен»
-     */
     public function __invoke(OrderMessage $message): void
     {
         $Deduplicator = $this->deduplicator
@@ -197,7 +196,7 @@ final readonly class MaterialSignDoneByOrderCompleted
 
             /**
              * Все остальные незавершенные «Честные знаки» будут отменены при вызове MaterialSignCancelByOrderCanceled
-             * @see MaterialSignCancelByOrderCanceled
+             * @see MaterialSignCancelByOrderCanceledDispatcher
              */
 
             $Deduplicator->save();
