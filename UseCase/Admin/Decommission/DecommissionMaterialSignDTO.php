@@ -37,6 +37,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 final class DecommissionMaterialSignDTO
 {
+
+    /** Списать можно только честные знаки, принадлежащие профилю */
+
     #[Assert\NotBlank]
     #[Assert\Uuid]
     private UserUid $usr;
@@ -47,6 +50,7 @@ final class DecommissionMaterialSignDTO
     #[Assert\Uuid]
     #[Assert\NotBlank]
     private ?UserProfileUid $profile = null;
+
 
     /** Категория */
     #[Assert\NotBlank]

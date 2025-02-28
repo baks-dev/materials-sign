@@ -35,6 +35,7 @@ use BaksDev\Materials\Sign\Repository\MaterialSignNew\MaterialSignNewInterface;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusNew;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
@@ -76,7 +77,7 @@ class MaterialSignNewTest extends KernelTestCase
                 'invariable',
                 MaterialSignEvent::class,
                 'event',
-                'event.id = invariable.event AND status = :status AND profile IS NOT NULL'
+                'event.id = invariable.event AND status = :status'
             )
             ->setParameter('status', MaterialSignStatusNew::class, MaterialSignStatus::TYPE)
             ->setMaxResults(1)
@@ -107,9 +108,14 @@ class MaterialSignNewTest extends KernelTestCase
         // self::$variation = "01878a7a-aa00-77a6-9f90-4dc47498a632";
         // self::$modification = "01878a7a-a9ff-7e4f-8809-151e88674d80";
 
+        $profile = '018d3075-6e7b-7b5e-95f6-923243b1fa3d'; // admin
+        //$profile = '018d36b7-0d03-71a8-b1b0-e57b5c186ef9'; // moderator
+        //$profile = 'd4503fe5-e1f7-7025-b693-97bf5bb4f92d'; // admin
+        //$profile = '018d36b7-0d03-71a8-b1b0-e57b5c186ef9'; // random
+
         $MaterialSignEvent = $MaterialSignNewInterface
             ->forUser(self::$user)
-            ->forProfile(self::$profile)
+            ->forProfile(new UserProfileUid($profile))
             ->forMaterial(self::$material)
             ->forOfferConst(self::$offer)
             ->forVariationConst(self::$variation)
@@ -119,6 +125,4 @@ class MaterialSignNewTest extends KernelTestCase
         self::assertNotFalse($MaterialSignEvent);
 
     }
-
-
 }

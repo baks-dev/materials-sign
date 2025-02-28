@@ -58,11 +58,11 @@ final class MaterialSignDTO implements MaterialSignEventInterface
     private MaterialSignStatus $status;
 
 
-    /**
-     * Профиль пользователя
-     */
-    #[Assert\Uuid]
-    private ?UserProfileUid $profile = null;
+    //    /**
+    //     * Профиль пользователя
+    //     */
+    //    #[Assert\Uuid]
+    //    private ?UserProfileUid $profile = null;
 
 
     /**
@@ -155,8 +155,8 @@ final class MaterialSignDTO implements MaterialSignEventInterface
         return $this;
     }
 
-    public function getProfile(): ?UserProfileUid
-    {
-        return $this->profile;
-    }
+    //    public function getProfile(): ?UserProfileUid
+    //    {
+    //        return $this->profile;
+    //    }
 }

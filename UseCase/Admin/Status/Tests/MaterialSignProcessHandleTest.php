@@ -65,10 +65,10 @@ final class MaterialSignProcessHandleTest extends KernelTestCase
 
         $MaterialSignDTO = new MaterialSignProcessDTO($UserProfileUid = clone new UserProfileUid(), $OrderUid = new OrderUid());
         $MaterialSignEvent->getDto($MaterialSignDTO);
-        self::assertSame($UserProfileUid, $MaterialSignDTO->getProfile());
+
         self::assertSame($OrderUid, $MaterialSignDTO->getOrd());
         self::assertTrue($MaterialSignDTO->getStatus()->equals(MaterialSignStatusProcess::class));
-
+        self::assertSame($UserProfileUid, $MaterialSignDTO->getInvariable()->getSeller());
 
         /** @var MaterialSignStatusHandler $MaterialSignStatusHandler */
         $MaterialSignStatusHandler = self::getContainer()->get(MaterialSignStatusHandler::class);

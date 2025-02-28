@@ -30,6 +30,7 @@ use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\Materia
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -60,6 +61,18 @@ class MaterialSignInvariable extends EntityReadonly
     #[Assert\Uuid]
     #[ORM\Column(type: UserUid::TYPE)]
     private readonly UserUid $usr;
+
+    /**
+     * Владелец честного пользователя
+     */
+    #[ORM\Column(type: UserProfileUid::TYPE, nullable: true)]
+    private ?UserProfileUid $profile = null;
+
+    /**
+     * Продавец честного пользователя
+     */
+    #[ORM\Column(type: UserProfileUid::TYPE, nullable: true)]
+    private ?UserProfileUid $seller = null;
 
     /** Группа штрихкодов (для групповой отмены либо списания) */
     #[Assert\NotBlank]
@@ -103,6 +116,14 @@ class MaterialSignInvariable extends EntityReadonly
     public function getMain(): MaterialSignUid
     {
         return $this->main;
+    }
+
+    /**
+     * Profile
+     */
+    public function getProfile(): ?UserProfileUid
+    {
+        return $this->profile;
     }
 
     public function setEvent(MaterialSignEvent $event): self

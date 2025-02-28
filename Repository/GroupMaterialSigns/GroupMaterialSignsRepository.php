@@ -110,7 +110,6 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
         $dbal
             ->addSelect('COUNT(invariable.part) AS counter')
             ->addSelect('invariable.part AS sign_part')
-            //->addSelect('invariable.event AS sign_event')
             ->addSelect('invariable.number AS sign_number')
             ->from(
                 MaterialSignInvariable::class,
@@ -118,6 +117,13 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
             )
             ->andWhere('invariable.usr = :usr')
             ->setParameter('usr', $user, UserUid::TYPE);
+
+
+        if($this->filter->getAll() === false)
+        {
+            $dbal->andWhere('invariable.profile = :profile')
+                ->setParameter('profile', $profile, UserProfileUid::TYPE);
+        }
 
         $dbal
             ->leftJoin(
@@ -129,8 +135,6 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
 
 
         $dbal
-            //->addSelect('main.id AS sign_id')
-            //->addSelect('main.event AS sign_event')
             ->join(
                 'invariable',
                 MaterialSign::class,
@@ -155,13 +159,6 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
             $dbal
                 ->andWhere('event.status = :status')
                 ->setParameter('status', $this->status->getStatus(), MaterialSignStatus::TYPE);
-        }
-
-
-        if($this->filter->getAll() === false)
-        {
-            $dbal->andWhere('(event.profile IS NULL OR event.profile = :profile)')
-                ->setParameter('profile', $profile, UserProfileUid::TYPE);
         }
 
 
@@ -458,30 +455,22 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
             'category.id = material_event_category.category'
         );
 
-        //        $dbal
-        //            ->addSelect('category_info.url AS category_url')
-        //            ->leftJoin(
-        //                'category',
-        //                CategoryMaterialInfo::class,
-        //                'category_info',
-        //                'category_info.event = category.event'
-        //            );
 
-
-        /** Ответственное лицо */
+        /**
+         * Владелец
+         */
 
         $dbal
             ->leftJoin(
-                'event',
+                'invariable',
                 UserProfile::class,
                 'users_profile',
-                'users_profile.id = event.profile'
+                'users_profile.id = invariable.profile'
             );
 
 
         $dbal
             ->addSelect('users_profile_personal.username AS users_profile_username')
-            ->addSelect('users_profile_personal.location AS users_profile_location')
             ->leftJoin(
                 'users_profile',
                 UserProfilePersonal::class,
@@ -490,30 +479,28 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
             );
 
 
-        //        /**
-        //         * Фильтр по свойства сырья
-        //         */
-        //        if($this->filter->getProperty())
-        //        {
-        //            /** @var MaterialFilterPropertyDTO $property */
-        //            foreach($this->filter->getProperty() as $property)
-        //            {
-        //                if($property->getValue())
-        //                {
-        //                    $dbal->join(
-        //                        'material',
-        //                        MaterialProperty::class,
-        //                        'material_property_'.$property->getType(),
-        //                        'material_property_'.$property->getType().'.event = material.event AND
-        //                        material_property_'.$property->getType().'.field = :'.$property->getType().'_const AND
-        //                        material_property_'.$property->getType().'.value = :'.$property->getType().'_value'
-        //                    );
-        //
-        //                    $dbal->setParameter($property->getType().'_const', $property->getConst());
-        //                    $dbal->setParameter($property->getType().'_value', $property->getValue());
-        //                }
-        //            }
-        //        }
+        /**
+         * Продавец
+         */
+
+        $dbal
+            ->leftJoin(
+                'invariable',
+                UserProfile::class,
+                'users_profile_seller',
+                'users_profile_seller.id = invariable.seller'
+            );
+
+
+        $dbal
+            ->addSelect('users_profile_personal_seller.username AS seller_username')
+            ->leftJoin(
+                'users_profile_seller',
+                UserProfilePersonal::class,
+                'users_profile_personal_seller',
+                'users_profile_personal_seller.event = users_profile_seller.event'
+            );
+
 
         /* Поиск */
         if($this->search?->getQuery())

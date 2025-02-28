@@ -43,13 +43,6 @@ final readonly class MaterialSignCancelDTO implements MaterialSignEventInterface
     private MaterialSignEventUid $id;
 
     /**
-     * Профиль пользователя
-     */
-    #[Assert\NotBlank]
-    #[Assert\Uuid]
-    private UserProfileUid $profile;
-
-    /**
      * Статус
      */
     #[Assert\NotBlank]
@@ -62,15 +55,19 @@ final readonly class MaterialSignCancelDTO implements MaterialSignEventInterface
     private null $ord;
 
 
-    public function __construct(UserProfileUid $profile)
-    {
-        $this->profile = $profile;
+    #[Assert\Valid]
+    private Invariable\MaterialSignInvariableDTO $invariable;
 
+
+    public function __construct()
+    {
         /** В случае отмены всегда присваиваем статус New «Новый» и сбрасываем идентификтор сырья в заказе */
         $this->status = new MaterialSignStatus(MaterialSignStatusNew::class);
 
-        /** Всегда сбрасываем идентификатор заказа */
+        /** Всегда сбрасываем идентификатор заказа и продавца */
         $this->ord = null;
+        $this->invariable = new Invariable\MaterialSignInvariableDTO();
+        $this->invariable->setSeller(null);
     }
 
     /**
@@ -95,14 +92,6 @@ final readonly class MaterialSignCancelDTO implements MaterialSignEventInterface
     }
 
     /**
-     * Profile
-     */
-    public function getProfile(): UserProfileUid
-    {
-        return $this->profile;
-    }
-
-    /**
      * Ord
      */
     public function getOrd(): null
@@ -110,5 +99,12 @@ final readonly class MaterialSignCancelDTO implements MaterialSignEventInterface
         return $this->ord;
     }
 
+    /**
+     * Invariable
+     */
+    public function getInvariable(): Invariable\MaterialSignInvariableDTO
+    {
+        return $this->invariable;
+    }
 
 }

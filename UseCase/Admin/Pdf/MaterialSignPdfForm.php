@@ -119,8 +119,8 @@ final class MaterialSignPdfForm extends AbstractType
                 $user = $this->userProfileTokenStorage->getUser();
                 $data->setUsr($user);
 
-                $profile = $this->userProfileTokenStorage->getProfile();
-                $data->setProfile($profile);
+                //$profile = $this->userProfileTokenStorage->getProfile();
+                //$data->setProfile($profile);
 
                 $profiles = $this->userProfileChoice->getActiveUserProfile($data->getUsr());
 
@@ -135,7 +135,7 @@ final class MaterialSignPdfForm extends AbstractType
                         },
 
                         'label' => false,
-                        'required' => false,
+                        //'required' => false,
                     ]);
 
 

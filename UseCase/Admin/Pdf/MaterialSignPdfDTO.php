@@ -45,6 +45,7 @@ final class MaterialSignPdfDTO
      * Профиль пользователя (null - общий)
      */
     #[Assert\Uuid]
+    #[Assert\NotBlank]
     private ?UserProfileUid $profile = null;
 
     #[Assert\Valid]

@@ -30,7 +30,6 @@ use BaksDev\Materials\Catalog\Entity\Material;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
-use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
@@ -174,6 +173,8 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
 
     /**
      * Метод возвращает один Честный знак на указанную продукцию со статусом New «Новый»
+     * если у владельца имеется Честный знак - возвращает
+     * если нет у владельца - берет у партнера самый старый
      */
     public function getOneMaterialSign(): MaterialSignEvent|false
     {
@@ -265,14 +266,8 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
                 'WITH',
                 '
                 event.id = main.event AND 
-                (event.profile IS NULL OR event.profile = :profile) AND
                 event.status = :status
             ')
-            ->setParameter(
-                'profile',
-                $this->profile,
-                UserProfileUid::TYPE
-            )
             ->setParameter(
                 'status',
                 MaterialSignStatusNew::class,
@@ -287,9 +282,21 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
                 'modify.event = main.event'
             );
 
+        /**
+         *  Сортировка по профилю:
+         *  если у владельца имеется Честный знак - возвращает
+         *  если нет у владельца - берет у партнера
+         */
+
+        $orm
+            ->addOrderBy("CASE invariable.profile WHEN :profile THEN false ELSE true END")
+            ->setParameter(
+                'profile',
+                $this->profile,
+                UserProfileUid::TYPE
+            );
 
         /** Сортируем по дате, выбирая самый старый знак */
-        $orm->orderBy('event.profile');
         $orm->addOrderBy('modify.modDate');
 
         $orm->setMaxResults(1);

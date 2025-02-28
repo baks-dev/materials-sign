@@ -41,6 +41,8 @@ final class EditMaterialSignDTO implements MaterialSignInvariableInterface
     #[Assert\NotBlank]
     private ?string $number = null;
 
+    public function __construct() {}
+
 
     /**
      * Group

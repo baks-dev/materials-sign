@@ -29,7 +29,6 @@ use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Repository\CurrentEvent\MaterialSignCurrentEventInterface;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\Collection\MaterialSignStatusCollection;
-use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusCancel;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusNew;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignCancelDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignStatusHandler;
@@ -63,9 +62,10 @@ final class MaterialSignCancelHandleTest extends KernelTestCase
 
         /** @see MaterialSignCancelDTO */
 
-        $MaterialSignDTO = new MaterialSignCancelDTO($UserProfileUid = clone new UserProfileUid());
+        $MaterialSignDTO = new MaterialSignCancelDTO();
         $MaterialSignEvent->getDto($MaterialSignDTO);
-        self::assertSame($UserProfileUid, $MaterialSignDTO->getProfile());
+
+        self::assertNull($MaterialSignDTO->getInvariable()->getSeller());
 
         /** При отмене присваивается статус New «Новый» */
         self::assertTrue($MaterialSignDTO->getStatus()->equals(MaterialSignStatusNew::class));

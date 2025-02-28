@@ -30,8 +30,6 @@ use BaksDev\Materials\Sign\Type\Event\MaterialSignEventUid;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusProcess;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
-use BaksDev\Orders\Order\Type\Material\OrderMaterialUid;
-use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -44,13 +42,6 @@ final readonly class MaterialSignProcessDTO implements MaterialSignEventInterfac
     #[Assert\Uuid]
     #[Assert\NotBlank]
     private MaterialSignEventUid $id;
-
-    /**
-     * Профиль пользователя
-     */
-    #[Assert\NotBlank]
-    #[Assert\Uuid]
-    private UserProfileUid $profile;
 
     /**
      * Статус
@@ -70,12 +61,14 @@ final readonly class MaterialSignProcessDTO implements MaterialSignEventInterfac
 
     public function __construct(UserProfileUid $profile, OrderUid $ord)
     {
-        $this->profile = $profile;
         $this->ord = $ord;
 
         /** Статус Process «В процессе» */
         $this->status = new MaterialSignStatus(MaterialSignStatusProcess::class);
+
+        /** Присваиваем продавца  */
         $this->invariable = new Invariable\MaterialSignInvariableDTO();
+        $this->invariable->setSeller($profile);
 
     }
 
@@ -98,14 +91,6 @@ final readonly class MaterialSignProcessDTO implements MaterialSignEventInterfac
     public function getStatus(): MaterialSignStatus
     {
         return $this->status;
-    }
-
-    /**
-     * Профиль пользователя
-     */
-    public function getProfile(): UserProfileUid
-    {
-        return $this->profile;
     }
 
     /**

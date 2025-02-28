@@ -99,6 +99,7 @@ final class AllMaterialSignRepository implements AllMaterialSignInterface
     /** Метод возвращает пагинатор MaterialSign */
     public function findPaginator(): PaginatorInterface
     {
+
         $user = $this->userProfileTokenStorage->getUser();
 
         $profile = $this->userProfileTokenStorage->getProfile();
@@ -114,6 +115,13 @@ final class AllMaterialSignRepository implements AllMaterialSignInterface
             )
             ->andWhere('invariable.usr = :usr')
             ->setParameter('usr', $user, UserUid::TYPE);
+
+        if($this->filter->getAll() === false)
+        {
+            $dbal
+                ->andWhere('invariable.profile = :profile)')
+                ->setParameter('profile', $profile, UserProfileUid::TYPE);
+        }
 
 
         $dbal
@@ -158,13 +166,6 @@ final class AllMaterialSignRepository implements AllMaterialSignInterface
         }
 
 
-        if($this->filter->getAll() === false)
-        {
-            $dbal->andWhere('(event.profile IS NULL OR event.profile = :profile)')
-                ->setParameter('profile', $profile, UserProfileUid::TYPE);
-        }
-
-
         $dbal
             ->addSelect('modify.mod_date AS sign_date')
             ->leftJoin(
@@ -173,7 +174,6 @@ final class AllMaterialSignRepository implements AllMaterialSignInterface
                 'modify',
                 'modify.event = main.event'
             );
-
 
         if($this->status?->getFrom() && $this->status?->getTo())
         {
@@ -454,16 +454,15 @@ final class AllMaterialSignRepository implements AllMaterialSignInterface
         );
 
 
-        /** Ответственное лицо */
+        /** Владелец честного знака  */
 
         $dbal
             ->leftJoin(
                 'event',
                 UserProfile::class,
                 'users_profile',
-                'users_profile.id = event.profile'
+                'users_profile.id = invariable.profile'
             );
-
 
         $dbal
             ->addSelect('users_profile_personal.username AS users_profile_username')
@@ -517,7 +516,6 @@ final class AllMaterialSignRepository implements AllMaterialSignInterface
         $dbal->orderBy('modify.mod_date', 'DESC');
 
 
-        //dd(current($dbal->fetchAllAssociative()));
 
         return $this->paginator->fetchAllAssociative($dbal);
     }

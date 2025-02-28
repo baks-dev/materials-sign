@@ -31,6 +31,7 @@ use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\Materia
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariableInterface;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -41,6 +42,14 @@ final class MaterialSignInvariableDTO implements MaterialSignInvariableInterface
     #[Assert\NotBlank]
     #[Assert\Uuid]
     private UserUid $usr;
+
+    /**
+     * Владелец честного пользователя
+     */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private UserProfileUid $profile;
+
 
     /** Группа штрихкодов, для отмены  */
     #[Assert\NotBlank]
@@ -77,6 +86,20 @@ final class MaterialSignInvariableDTO implements MaterialSignInvariableInterface
     public function setUsr(UserUid $usr): self
     {
         $this->usr = $usr;
+        return $this;
+    }
+
+    /**
+     * Profile
+     */
+    public function getProfile(): UserProfileUid
+    {
+        return $this->profile;
+    }
+
+    public function setProfile(UserProfileUid $profile): self
+    {
+        $this->profile = $profile;
         return $this;
     }
 

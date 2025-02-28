@@ -90,6 +90,7 @@ class MaterialSignEvent extends EntityEvent
 
     /**
      * Профиль пользователя (null - общий)
+     * @deprecated переносится в MaterialSignInvariable
      */
     #[ORM\Column(type: UserProfileUid::TYPE, nullable: true)]
     private ?UserProfileUid $profile = null;
@@ -154,7 +155,7 @@ class MaterialSignEvent extends EntityEvent
      */
     public function getProfile(): UserProfileUid
     {
-        return $this->profile;
+        return $this->invariable->getProfile();
     }
 
     /**

@@ -66,22 +66,26 @@ final class IndexController extends AbstractController
         /**
          * Фильтр сырья по ТП
          */
-        $filter = new MaterialFilterDTO($request);
-        $filter->allVisible();
-
-        $filterForm = $this->createForm(MaterialFilterForm::class, $filter, [
-            'action' => $this->generateUrl('materials-sign:admin.index'),
-        ]);
-        $filterForm->handleRequest($request);
+        $filter = new MaterialFilterDTO()->allVisible();
+        $filterForm = $this
+            ->createForm(
+                type: MaterialFilterForm::class,
+                data: $filter,
+                options: ['action' => $this->generateUrl('materials-sign:admin.index'),]
+            )
+            ->handleRequest($request);
 
         /**
          * Фильтр статусам и даже
          */
         $filterSign = new MaterialSignFilterDTO();
-        $filterSignForm = $this->createForm(MaterialSignFilterForm::class, $filterSign, [
-            'action' => $this->generateUrl('materials-sign:admin.index'),
-        ]);
-        $filterSignForm->handleRequest($request);
+        $filterSignForm = $this
+            ->createForm(
+                type: MaterialSignFilterForm::class,
+                data: $filterSign,
+                options: ['action' => $this->generateUrl('materials-sign:admin.index'),]
+            )
+            ->handleRequest($request);
 
 
         // Получаем список

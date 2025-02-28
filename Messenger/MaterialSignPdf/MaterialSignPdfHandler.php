@@ -245,40 +245,17 @@ final readonly class MaterialSignPdfHandler
                  */
                 $this->filesystem->exists($fileMove) === true ? $this->filesystem->remove($fileTemp) : $this->filesystem->rename($fileTemp, $fileMove);
 
-                /**
-                 * Создаем для сохранения честный знак
-                 * в случае ошибки сканирования - присваивается статус с ошибкой
-                 */
-                $MaterialSignDTO = new MaterialSignDTO();
-                $MaterialSignDTO->setProfile($message->getProfile());
 
                 /** Сканируем честный знак */
                 $decode = $this->barcodeRead->decode($fileMove);
                 $code = $decode->getText();
 
-                //                if($decode->isError())
-                //                {
-                //                    /** Пробуем обрезать изображение по углу и просканировать повторно */
-                //                    $cropWidth = 450;
-                //                    $cropHeight = 500;
-                //
-                //                    $x = 55; // Позиция по оси X
-                //                    $y = 200; // Позиция по оси Y
-                //
-                //                    // Обрезаем изображение
-                //                    $Imagick->cropImage($cropWidth, $cropHeight, $x, $y);
-                //                    $Imagick->writeImage($fileMove);
-                //
-                //                    /** Пробуем считать честный знак с обрезанного файла */
-                //                    $decode = $this->barcodeRead->decode($fileMove);
-                //                    $code = $decode->getText();
-                //
-                //                    if($decode->isError())
-                //                    {
-                //                        $code = uniqid('error_', true);
-                //                        $MaterialSignDTO->setStatus(MaterialSignStatusError::class);
-                //                    }
-                //                }
+
+                /**
+                 * Создаем для сохранения честный знак
+                 * в случае ошибки сканирования - присваивается статус с ошибкой
+                 */
+                $MaterialSignDTO = new MaterialSignDTO();
 
                 if($decode->isError())
                 {
@@ -300,6 +277,7 @@ final readonly class MaterialSignPdfHandler
                 $MaterialSignInvariableDTO = $MaterialSignDTO->getInvariable();
                 $MaterialSignInvariableDTO->setPart($part);
                 $MaterialSignInvariableDTO->setUsr($message->getUsr());
+                $MaterialSignInvariableDTO->setProfile($message->getProfile());
                 $MaterialSignInvariableDTO->setMaterial($message->getMaterial());
                 $MaterialSignInvariableDTO->setOffer($message->getOffer());
                 $MaterialSignInvariableDTO->setVariation($message->getVariation());

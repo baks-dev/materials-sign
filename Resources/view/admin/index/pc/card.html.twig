@@ -54,7 +54,7 @@
         </div>
     </td>
 
-    <td>
+    <td class="w-25">
         {% if item.order_number %}
             <button data-href='{{ item.order_id ? path('orders-order:admin.detail', { id: item.order_id }) : '#' }}'
                     data-id='{{ item.order_id }}'
@@ -79,7 +79,7 @@
 
     </td>
 
-    <td class="text-center text-nowrap w-75">
+    <td class="text-center text-nowrap">
         {# {% if item.sign_status != 'new' %} #}
 
         {# {% endif %} #}
@@ -87,15 +87,30 @@
         {% if item.users_profile_username %}
             {{ item.users_profile_username }}
         {% else %}
-            <span class="badge badge-light text-dark">Общий</span>
+            <span class="badge text-bg-danger">Общий</span>
         {% endif %}
 
     </td>
 
+    <td class="text-center text-nowrap w-25">
+        {% if item.users_profile_username == item.seller_username %}
+            {{ item.seller_username }}
+        {% else %}
 
-    <td class="text-nowrap text-nowrap">
+            {% if item.sign_status == 'process' %}
+                <span class="badge text-bg-warning">{{ item.seller_username }}</span>
+            {% endif %}
+
+            {% if item.sign_status == 'done' %}
+                <span class="badge text-bg-danger">{{ item.seller_username }}</span>
+            {% endif %}
+
+        {% endif %}
+
+    </td>
+
+    <td class="text-nowrap text-nowrap w-25">
         <div class="d-flex gap-1">
-
 
             {% if (item.sign_status != 'new' and item.sign_status != 'error') and (is_granted('ROLE_MATERIAL_SIGN') or is_granted('ROLE_ADMIN')) %}
 
@@ -113,8 +128,6 @@
                         modification: item.material_modification_const
                     }) %}
                 {% endif %}
-
-
 
                 <a href="{{ print_path }}"
                    class="btn btn-sm btn-light disabled prnt"
@@ -214,7 +227,6 @@
 
 
             {% if item.sign_status == 'new' and (is_granted('ROLE_MATERIAL_SIGN_STATUS') or is_granted('ROLE_ADMIN')) %}
-
 
                 <button
                         data-href="{{ path('materials-sign:admin.decommission', {

@@ -48,24 +48,11 @@ final readonly class MaterialSignDecommissionDTO implements MaterialSignEventInt
     #[Assert\NotBlank]
     private MaterialSignStatus $status;
 
-    /**
-     * Профиль пользователя (null - общий)
-     */
-    #[Assert\Uuid]
-    #[Assert\NotBlank]
-    private UserProfileUid $profile;
 
-
-    #[Assert\Valid]
-    private Invariable\MaterialSignInvariableDTO $invariable;
-
-
-    public function __construct(UserProfileUid $profile)
+    public function __construct()
     {
         /** Статус Off «Списание» */
         $this->status = new MaterialSignStatus(MaterialSignStatusDecommission::class);
-        $this->invariable = new Invariable\MaterialSignInvariableDTO();
-        $this->profile = $profile;
     }
 
     /**
@@ -87,21 +74,5 @@ final readonly class MaterialSignDecommissionDTO implements MaterialSignEventInt
     public function getStatus(): MaterialSignStatus
     {
         return $this->status;
-    }
-
-    /**
-     * Invariable
-     */
-    public function getInvariable(): Invariable\MaterialSignInvariableDTO
-    {
-        return $this->invariable;
-    }
-
-    /**
-     * Profile
-     */
-    public function getProfile(): UserProfileUid
-    {
-        return $this->profile;
     }
 }

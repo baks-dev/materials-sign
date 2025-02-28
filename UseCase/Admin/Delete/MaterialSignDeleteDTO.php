@@ -50,23 +50,14 @@ final class MaterialSignDeleteDTO implements MaterialSignEventInterface
     private Modify\ModifyDTO $modify;
 
     /**
-     * Профиль пользователя
-     */
-    #[Assert\NotBlank]
-    #[Assert\Uuid]
-    private UserProfileUid $profile;
-
-    /**
      * Статус
      */
     #[Assert\NotBlank]
     private readonly MaterialSignStatus $status;
 
-    public function __construct(UserProfileUid $profile)
+    public function __construct()
     {
         $this->modify = new Modify\ModifyDTO();
-
-        $this->profile = $profile;
         $this->status = new MaterialSignStatus(MaterialSignStatusDelete::class);
     }
 
@@ -84,21 +75,12 @@ final class MaterialSignDeleteDTO implements MaterialSignEventInterface
         return $this;
     }
 
-
     /**
      * Modify
      */
     public function getModify(): Modify\ModifyDTO
     {
         return $this->modify;
-    }
-
-    /**
-     * Profile
-     */
-    public function getProfile(): UserProfileUid
-    {
-        return $this->profile;
     }
 
     /**
