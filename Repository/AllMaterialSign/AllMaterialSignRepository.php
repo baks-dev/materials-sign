@@ -119,7 +119,7 @@ final class AllMaterialSignRepository implements AllMaterialSignInterface
         if($this->filter->getAll() === false)
         {
             $dbal
-                ->andWhere('invariable.profile = :profile)')
+                ->andWhere('(invariable.profile = :profile OR invariable.seller = :profile)')
                 ->setParameter('profile', $profile, UserProfileUid::TYPE);
         }
 

@@ -121,7 +121,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
 
         if($this->filter->getAll() === false)
         {
-            $dbal->andWhere('invariable.profile = :profile')
+            $dbal->andWhere('(invariable.profile = :profile OR invariable.seller = :profile)')
                 ->setParameter('profile', $profile, UserProfileUid::TYPE);
         }
 
