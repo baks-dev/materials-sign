@@ -40,7 +40,6 @@ use BaksDev\Orders\Order\Messenger\OrderMessage;
 use BaksDev\Orders\Order\Repository\OrderEvent\OrderEventInterface;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\OrderStatusCompleted;
 use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductDTO;
-use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierByConstInterface;
 use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierInterface;
 use BaksDev\Products\Product\Repository\ProductMaterials\ProductMaterialsInterface;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
@@ -63,14 +62,12 @@ final readonly class MaterialSignDoneByOrderCompletedDispatcher
         private CurrentProductIdentifierInterface $CurrentProductIdentifier,
         private CurrentIdentifierMaterialByValueInterface $CurrentIdentifierMaterialByValue,
         private DeduplicatorInterface $deduplicator,
-    )
-    {
-        $this->deduplicator->namespace('materials-sign');
-    }
+    ) {}
 
     public function __invoke(OrderMessage $message): void
     {
         $Deduplicator = $this->deduplicator
+            ->namespace('materials-sign')
             ->deduplication([
                 (string) $message->getId(),
                 MaterialSignStatusDone::STATUS,
