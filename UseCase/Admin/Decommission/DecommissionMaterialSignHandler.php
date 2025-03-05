@@ -61,9 +61,12 @@ final class DecommissionMaterialSignHandler
             }
 
             /** Меняем статус и присваиваем идентификатор партии  */
-            $MaterialSignOffDTO = new MaterialSignDecommissionDTO($command->getProfile());
+            $MaterialSignOffDTO = new MaterialSignDecommissionDTO();
             $MaterialSignInvariableDTO = $MaterialSignOffDTO->getInvariable();
-            $MaterialSignInvariableDTO->setPart($MaterialSignUid);
+
+            $MaterialSignInvariableDTO
+                ->setSeller($command->getProfile())
+                ->setPart($MaterialSignUid);
 
             $MaterialSignEvent->getDto($MaterialSignOffDTO);
 

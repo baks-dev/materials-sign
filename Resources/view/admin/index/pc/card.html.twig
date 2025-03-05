@@ -101,8 +101,8 @@
                 <span class="badge text-bg-warning">{{ item.seller_username }}</span>
             {% endif %}
 
-            {% if item.sign_status == 'done' %}
-                <span class="badge text-bg-danger">{{ item.seller_username }}</span>
+            {% if item.sign_status == 'done' or item.sign_status == 'decommission' %}
+                <span class="badge text-bg-warning">{{ item.seller_username }}</span>
             {% endif %}
 
         {% endif %}
