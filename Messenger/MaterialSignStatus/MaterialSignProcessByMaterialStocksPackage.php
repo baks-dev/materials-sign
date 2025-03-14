@@ -88,6 +88,8 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
         if(!$ProductStockEvent)
         {
             $this->logger->critical('products-sign: Не найдено событие ProductStock', [$message, self::class.':'.__LINE__]);
+
+
             return;
         }
 
@@ -119,7 +121,6 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
 
         if(false === $User)
         {
-
             $this->logger
                 ->critical(
                     sprintf('products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ', $ProductStockEvent->getStocksProfile()),
@@ -215,7 +216,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
                     {
                         $this->logger->warning(
                             'Честный знак на сырьё не найдено',
-                            [$ProductStockEvent, $product, self::class.':'.__LINE__]
+                            [$ProductStockEvent, $CurrentMaterialDTO, self::class.':'.__LINE__]
                         );
 
                         break;
