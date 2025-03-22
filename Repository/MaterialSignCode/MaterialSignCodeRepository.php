@@ -28,34 +28,60 @@ namespace BaksDev\Materials\Sign\Repository\MaterialSignCode;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
+use InvalidArgumentException;
 
 final class MaterialSignCodeRepository implements MaterialSignCodeInterface
 {
-    private DBALQueryBuilder $DBALQueryBuilder;
+    private MaterialSignUid|false $sign = false;
 
-    public function __construct(
-        DBALQueryBuilder $DBALQueryBuilder,
-    )
+    public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder) {}
+
+    public function forMaterialSign(MaterialSignUid|string $sign): self
     {
-        $this->DBALQueryBuilder = $DBALQueryBuilder;
-    }
+        if(empty($sign))
+        {
+            $this->sign = false;
+            return $this;
+        }
 
+        if(is_string($sign))
+        {
+            $sign = new MaterialSignUid($sign);
+        }
+
+        $this->sign = $sign;
+
+        return $this;
+    }
 
     /**
      * Метод возвращает QR-код честного знака
      */
-    public function getCodeByMaterialSign(MaterialSignUid $sign): array|bool
+    public function find(): MaterialSignCodeResult|bool
     {
+        if(false === ($this->sign instanceof MaterialSignUid))
+        {
+            throw new InvalidArgumentException('Invalid Argument MaterialSign');
+        }
+
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
 
         $dbal
-            ->addSelect('code.code AS sign_code')
-            ->addSelect('code.qr AS sign_qr')
+            ->addSelect('code.main')
+            ->addSelect('code.code')
+            ->addSelect("'CONCAT( '/upload/".$dbal->table(MaterialSignCode::class)."' , '/', code.name)' AS name")
+            ->addSelect('code.ext')
+            ->addSelect('code.cdn')
             ->from(MaterialSignCode::class, 'code')
             ->where('code.main = :sign')
-            ->setParameter('sign', $sign, MaterialSignUid::TYPE);
+            ->setParameter(
+                key: 'sign',
+                value: $this->sign,
+                type: MaterialSignUid::TYPE
+            );
 
         return $dbal
-            ->fetchAssociative();
+            ->enableCache('materials-sign')
+            ->fetchHydrate(MaterialSignCodeResult::class);
     }
 }

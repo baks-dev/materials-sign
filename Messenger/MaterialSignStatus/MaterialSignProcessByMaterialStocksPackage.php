@@ -27,8 +27,10 @@ namespace BaksDev\Materials\Sign\Messenger\MaterialSignStatus;
 
 
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
+use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Materials\Catalog\Repository\CurrentMaterialIdentifier\CurrentIdentifierMaterialByValueInterface;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
+use BaksDev\Materials\Sign\Messenger\MaterialSignMatrixCode\MaterialSignMatrixCodeMessage;
 use BaksDev\Materials\Sign\Repository\MaterialSignNew\MaterialSignNewInterface;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignProcessDTO;
@@ -36,16 +38,12 @@ use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignStatusHandler;
 use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierByConstInterface;
 use BaksDev\Products\Product\Repository\ProductMaterials\ProductMaterialsInterface;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
-use BaksDev\Products\Stocks\Entity\Stock\Event\ProductStockEvent;
 use BaksDev\Products\Stocks\Entity\Stock\Products\ProductStockProduct;
 use BaksDev\Products\Stocks\Messenger\ProductStockMessage;
 use BaksDev\Products\Stocks\Repository\CurrentProductStocks\CurrentProductStocksInterface;
 use BaksDev\Products\Stocks\Repository\ProductStocksById\ProductStocksByIdInterface;
-use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusIncoming;
 use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusPackage;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -67,6 +65,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
         private CurrentIdentifierMaterialByValueInterface $CurrentIdentifierMaterialByValue,
         private MaterialSignNewInterface $MaterialSignNew,
         private MaterialSignStatusHandler $MaterialSignStatusHandler,
+        private MessageDispatchInterface $messageDispatch
     ) {}
 
     public function __invoke(ProductStockMessage $message): void
@@ -228,12 +227,12 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
 
                     $MaterialSignEvent->getDto($MaterialSignProcessDTO);
 
-                    $handle = $this->MaterialSignStatusHandler->handle($MaterialSignProcessDTO);
+                    $MaterialSign = $this->MaterialSignStatusHandler->handle($MaterialSignProcessDTO);
 
-                    if(false === ($handle instanceof MaterialSign))
+                    if(false === ($MaterialSign instanceof MaterialSign))
                     {
                         $this->logger->critical(
-                            sprintf('%s: Ошибка при обновлении статуса честного знака на сырье', $handle),
+                            sprintf('%s: Ошибка при обновлении статуса честного знака на сырье', $MaterialSign),
                             [$MaterialSignProcessDTO, self::class.':'.__LINE__]
                         );
 
@@ -244,6 +243,15 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
                         'Отметили Честный знак Process «В процессе» на сырье',
                         [$MaterialSignEvent, self::class.':'.__LINE__]
                     );
+
+                    /** Прогреваем кеш стикеров честных знаков заказа */
+                    $MaterialSignMatrixCodeMessage = new MaterialSignMatrixCodeMessage($MaterialSign);
+
+                    $this->messageDispatch->dispatch(
+                        message: $MaterialSignMatrixCodeMessage,
+                        transport: 'files-res'
+                    );
+
                 }
             }
         }

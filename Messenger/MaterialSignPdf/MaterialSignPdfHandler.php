@@ -257,7 +257,7 @@ final readonly class MaterialSignPdfHandler
                  */
                 $MaterialSignDTO = new MaterialSignDTO();
 
-                if($decode->isError())
+                if($decode->isError() || str_starts_with('(00)', $code))
                 {
                     $code = uniqid('error_', true);
                     $MaterialSignDTO->setStatus(MaterialSignStatusError::class);
