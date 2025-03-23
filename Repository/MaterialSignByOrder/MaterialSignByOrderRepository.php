@@ -145,7 +145,6 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
         return $this;
     }
 
-
     public function profile(UserProfileUid|string|UserProfile $profile): self
     {
         if(is_string($profile))
@@ -189,7 +188,6 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
         $this->status = new MaterialSignStatus(MaterialSignStatusDone::class);
         return $this;
     }
-
 
     /**
      * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
@@ -244,7 +242,9 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
                 ->setParameter('profile', $this->profile, UserProfileUid::TYPE);
         }
 
-        $dbal->join(
+        $dbal
+            ->addSelect('main.id')
+            ->join(
             'event',
             MaterialSign::class,
             'main',

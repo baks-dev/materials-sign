@@ -29,8 +29,10 @@ use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 
 interface MaterialSignCurrentEventInterface
 {
+    public function forMaterialSign(MaterialSign|MaterialSignUid|string $sign): self;
+
     /**
      * Возвращает активное событие
      */
-    public function findByMaterialSign(MaterialSign|MaterialSignUid|string $sign): ?MaterialSignEvent;
+    public function find(): MaterialSignEvent|false;
 }

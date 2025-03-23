@@ -29,40 +29,67 @@ use BaksDev\Core\Doctrine\ORMQueryBuilder;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
+use InvalidArgumentException;
 
 final class MaterialSignCurrentEventRepository implements MaterialSignCurrentEventInterface
 {
-    private ORMQueryBuilder $ORMQueryBuilder;
+    private MaterialSignUid|false $sign = false;
 
-    public function __construct(ORMQueryBuilder $ORMQueryBuilder)
+    public function __construct(private readonly ORMQueryBuilder $ORMQueryBuilder) {}
+
+    public function forMaterialSign(MaterialSign|MaterialSignUid|string $sign): self
     {
-        $this->ORMQueryBuilder = $ORMQueryBuilder;
+        if(empty($sign))
+        {
+            $this->sign = false;
+            return $this;
+        }
+
+        if(is_string($sign))
+        {
+            $sign = new MaterialSignUid($sign);
+        }
+
+        if($sign instanceof MaterialSign)
+        {
+            $sign = $sign->getId();
+        }
+
+        $this->sign = $sign;
+
+        return $this;
     }
 
     /**
      * Возвращает активное событие
      */
-    public function findByMaterialSign(MaterialSign|MaterialSignUid|string $sign): ?MaterialSignEvent
+    public function find(): MaterialSignEvent|false
     {
-        $sign = is_string($sign) ? new MaterialSignUid($sign) : $sign;
-        $sign = $sign instanceof MaterialSign ? $sign->getId() : $sign;
+        if(false === ($this->sign instanceof MaterialSignUid))
+        {
+            throw new InvalidArgumentException('Invalid Argument MaterialSign');
+        }
 
-        $qb = $this->ORMQueryBuilder->createQueryBuilder(self::class);
+        $orm = $this->ORMQueryBuilder->createQueryBuilder(self::class);
 
-        $qb->select('event');
-
-        $qb
+        $orm
             ->from(MaterialSign::class, 'main')
             ->where('main.id = :main')
-            ->setParameter('main', $sign, MaterialSignUid::TYPE);
+            ->setParameter(
+                key: 'main',
+                value: $this->sign,
+                type: MaterialSignUid::TYPE
+            );
 
-        $qb->join(
+        $orm
+            ->select('event')
+            ->join(
             MaterialSignEvent::class,
             'event',
             'WITH',
             'event.id = main.event'
         );
 
-        return $qb->getOneOrNullResult();
+        return $orm->getOneOrNullResult() ?: false;
     }
 }

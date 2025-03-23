@@ -57,7 +57,9 @@ final class MaterialSignProcessHandleTest extends KernelTestCase
 
         /** @var MaterialSignCurrentEventInterface $MaterialSignCurrentEvent */
         $MaterialSignCurrentEvent = self::getContainer()->get(MaterialSignCurrentEventInterface::class);
-        $MaterialSignEvent = $MaterialSignCurrentEvent->findByMaterialSign(MaterialSignUid::TEST);
+        $MaterialSignEvent = $MaterialSignCurrentEvent
+            ->forMaterialSign(MaterialSignUid::TEST)
+            ->find();
         self::assertNotNull($MaterialSignEvent);
 
 
