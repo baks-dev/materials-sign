@@ -30,10 +30,8 @@ use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Materials\Sign\Forms\MaterialSignReport\MaterialSignReportDTO;
 use BaksDev\Materials\Sign\Forms\MaterialSignReport\MaterialSignReportForm;
 use BaksDev\Materials\Sign\Repository\MaterialSignReport\MaterialSignReportInterface;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
@@ -63,7 +61,24 @@ final class ReportController extends AbstractController
         {
             $this->refreshTokenForm($form);
 
-            $data = $MaterialSignReport
+            //            $data = $MaterialSignReport
+            //                ->fromProfile($MaterialSignReportDTO->getProfile())
+            //                ->fromSeller($MaterialSignReportDTO->getSeller())
+            //                ->dateFrom($MaterialSignReportDTO->getFrom())
+            //                ->dateTo($MaterialSignReportDTO->getTo())
+            //                ->setMaterial($MaterialSignReportDTO->getMaterial())
+            //                ->setOffer($MaterialSignReportDTO->getOffer())
+            //                ->setVariation($MaterialSignReportDTO->getVariation())
+            //                ->setModification($MaterialSignReportDTO->getModification())
+            //                ->findAll();
+
+            //            if(empty($data))
+            //            {
+            //                return $this->redirectToRoute('materials-sign:admin.index');
+            //            }
+
+
+            $MaterialSignReport
                 ->fromProfile($MaterialSignReportDTO->getProfile())
                 ->fromSeller($MaterialSignReportDTO->getSeller())
                 ->dateFrom($MaterialSignReportDTO->getFrom())
@@ -71,27 +86,36 @@ final class ReportController extends AbstractController
                 ->setMaterial($MaterialSignReportDTO->getMaterial())
                 ->setOffer($MaterialSignReportDTO->getOffer())
                 ->setVariation($MaterialSignReportDTO->getVariation())
-                ->setModification($MaterialSignReportDTO->getModification())
-                ->findAll();
+                ->setModification($MaterialSignReportDTO->getModification());
 
-            if(empty($data))
+            /**
+             * Если передача кизов (т.е. владелец НЕ совпадает продавцом)
+             * получаем только в процессе либо выполненные и удаляем только круглые скобки
+             */
+            if(false === $MaterialSignReportDTO->getProfile()?->equals($MaterialSignReportDTO->getSeller()))
             {
-                return $this->redirectToRoute('materials-sign:admin.index');
-            }
+                $data = $MaterialSignReport
+                    ->onlyStatusProcessOrDone()
+                    ->findAll();
 
+                $codes = array_column($data, 'code');
 
-            $codes = array_column($data, 'code');
-
-            /** Если передача - удаляем только круглые скобки   */
-            if(true === $MaterialSignReportDTO->getProfile()?->equals($MaterialSignReportDTO->getSeller()))
-            {
                 $codes = array_map(function($item) {
                     return preg_replace('/((d+))/', '$1', $item);
                 }, $codes);
             }
 
-            if(false === $MaterialSignReportDTO->getProfile()?->equals($MaterialSignReportDTO->getSeller()))
+            /**
+             * Если списание кизов (профиль совпадает с продавцом) - получаем только в завершенные и возвращаем хвост кодировки
+             */
+            if(true === $MaterialSignReportDTO->getProfile()?->equals($MaterialSignReportDTO->getSeller()))
             {
+                $data = $MaterialSignReport
+                    ->onlyStatusDone()
+                    ->findAll();
+
+                $codes = array_column($data, 'code');
+
                 array_unshift($codes, "1", "КИЗ");
 
                 $codes = array_map(function($data) {
@@ -120,7 +144,6 @@ final class ReportController extends AbstractController
 
                 }, $codes);
 
-
             }
 
             $response = new StreamedResponse(function() use ($codes) {
@@ -130,7 +153,6 @@ final class ReportController extends AbstractController
                 fclose($handle);
 
             }, Response::HTTP_OK);
-
 
             $filename = $MaterialSignReportDTO->getProfile()?->getAttr().'-'.
                 $MaterialSignReportDTO->getSeller()?->getAttr().'('.

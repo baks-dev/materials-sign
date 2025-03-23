@@ -29,14 +29,16 @@ use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
-use BaksDev\Materials\Category\Type\Id\CategoryMaterialUid;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
 use BaksDev\Materials\Sign\Entity\Modify\MaterialSignModify;
+use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
+use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusDone;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use DateTimeImmutable;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Types\Types;
 use InvalidArgumentException;
 
@@ -57,6 +59,8 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
     private MaterialVariationConst|false $variation = false;
 
     private MaterialModificationConst|false $modification = false;
+
+    private ?array $status = null;
 
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder)
     {
@@ -103,11 +107,6 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
         return $this;
     }
 
-    public function setCategory(CategoryMaterialUid|string|null|false $category): self
-    {
-        $this->category = $category;
-        return $this;
-    }
 
     /**
      * Material
@@ -186,6 +185,21 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
         return $this;
     }
 
+    public function onlyStatusDone(): self
+    {
+        $this->status = [MaterialSignStatusDone::STATUS];
+
+        return $this;
+    }
+
+    public function onlyStatusProcessOrDone(): self
+    {
+        $this->status = [MaterialSignStatus\MaterialSignStatusProcess::STATUS, MaterialSignStatusDone::STATUS];
+
+        return $this;
+    }
+
+
     /**
      * Метод получает все реализованные честные знаки
      */
@@ -205,13 +219,20 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
         $dbal->from(MaterialSignInvariable::class, 'invariable');
 
-        $dbal
-            ->where('invariable.profile = :profile')
-            ->setParameter(
-                key: 'profile',
-                value: $this->profile,
-                type: UserProfileUid::TYPE
-            );
+        /**
+         * Если владелец не равен продавцу - применяем фильтр для передачи
+         * в противном случае запрос на списание
+         */
+        if(false === $this->profile->equals($this->seller))
+        {
+            $dbal
+                ->andWhere('invariable.profile = :profile')
+                ->setParameter(
+                    key: 'profile',
+                    value: $this->profile,
+                    type: UserProfileUid::TYPE
+                );
+        }
 
         $dbal
             ->andWhere('invariable.seller = :seller')
@@ -220,7 +241,6 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 value: $this->seller,
                 type: UserProfileUid::TYPE
             );
-
 
         if($this->material)
         {
@@ -270,8 +290,13 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             'invariable',
             MaterialSignEvent::class,
             'event',
-            'event.id = invariable.event'
-        );
+            'event.id = invariable.event AND event.status IN (:status)'
+        )
+            ->setParameter(
+                key: 'status',
+                value: $this->status ?: [MaterialSignStatusDone::STATUS],
+                type: ArrayParameterType::STRING
+            );
 
         $dbal->join(
             'invariable',

@@ -41,7 +41,7 @@ interface MaterialSignReportInterface
 
     public function dateTo(DateTimeImmutable $to): self;
 
-    public function setCategory(CategoryMaterialUid|string|null|false $category): self;
+    //public function setCategory(CategoryMaterialUid|string|null|false $category): self;
 
     /**
      * Material
@@ -54,6 +54,11 @@ interface MaterialSignReportInterface
     public function setVariation(MaterialVariationConst|string|null|false $variation): self;
 
     public function setModification(MaterialModificationConst|string|null|false $modification): self;
+
+
+    public function onlyStatusDone(): self;
+
+    public function onlyStatusProcessOrDone(): self;
 
     /**
      * Метод получает все реализованные честные знаки
