@@ -163,6 +163,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
 
 
         $dbal
+            ->addSelect("DATE(modify.mod_date) AS mod_date")
             ->leftJoin(
                 'main',
                 MaterialSignModify::class,
@@ -516,10 +517,10 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 ->addSearchLike('material_info.article');
         }
 
-        $dbal->orderBy('invariable.part', 'DESC');
+        $dbal->orderBy('DATE(modify.mod_date)', 'DESC');
+        $dbal->addOrderBy('invariable.part', 'DESC');
 
         $dbal->allGroupByExclude();
-
 
         return $this->paginator->fetchAllAssociative($dbal);
     }
