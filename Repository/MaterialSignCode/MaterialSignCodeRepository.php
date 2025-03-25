@@ -69,7 +69,7 @@ final class MaterialSignCodeRepository implements MaterialSignCodeInterface
         $dbal
             ->addSelect('code.main')
             ->addSelect('code.code')
-            ->addSelect("'CONCAT( '/upload/".$dbal->table(MaterialSignCode::class)."' , '/', code.name)' AS name")
+            ->addSelect("CONCAT('/upload/".$dbal->table(MaterialSignCode::class)."' , '/', code.name) AS name")
             ->addSelect('code.ext')
             ->addSelect('code.cdn')
             ->from(MaterialSignCode::class, 'code')
