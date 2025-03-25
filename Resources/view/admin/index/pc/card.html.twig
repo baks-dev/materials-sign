@@ -8,7 +8,8 @@
     </td>
 
     <td>
-        {{ item.sign_part|uuid_format_date('d.m.Y') }}
+        {# {{ item.sign_part|uuid_format_date('d.m.Y') }} #}
+        {{ item.mod_date|date('d.m.Y') }}
     </td>
 
     <td class="text-center">
