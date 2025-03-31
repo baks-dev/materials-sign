@@ -50,6 +50,11 @@ final class MaterialSignInvariableDTO implements MaterialSignInvariableInterface
     #[Assert\Uuid]
     private UserProfileUid $profile;
 
+    /**
+     * Продавец честного пользователя
+     */
+    private ?UserProfileUid $seller = null;
+
 
     /** Группа штрихкодов, для отмены  */
     #[Assert\NotBlank]
@@ -187,5 +192,18 @@ final class MaterialSignInvariableDTO implements MaterialSignInvariableInterface
         return $this;
     }
 
+    /**
+     * Seller
+     */
+    public function getSeller(): ?UserProfileUid
+    {
+        return $this->seller;
+    }
+
+    public function setSeller(?UserProfileUid $seller): self
+    {
+        $this->seller = $seller;
+        return $this;
+    }
 
 }

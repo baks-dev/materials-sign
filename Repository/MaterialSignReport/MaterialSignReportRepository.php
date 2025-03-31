@@ -26,9 +26,17 @@ declare(strict_types=1);
 namespace BaksDev\Materials\Sign\Repository\MaterialSignReport;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
+use BaksDev\Materials\Catalog\Entity\Material;
+use BaksDev\Materials\Catalog\Entity\Offers\MaterialOffer;
+use BaksDev\Materials\Catalog\Entity\Offers\Variation\MaterialVariation;
+use BaksDev\Materials\Catalog\Entity\Offers\Variation\Modification\MaterialModification;
+use BaksDev\Materials\Catalog\Entity\Trans\MaterialTrans;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
+use BaksDev\Materials\Category\Entity\Offers\CategoryMaterialOffers;
+use BaksDev\Materials\Category\Entity\Offers\Variation\CategoryMaterialVariation;
+use BaksDev\Materials\Category\Entity\Offers\Variation\Modification\CategoryMaterialModification;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
@@ -205,10 +213,10 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
      */
     public function findAll(): array|false
     {
-        if(false === ($this->profile instanceof UserProfileUid))
+        /*if(false === ($this->profile instanceof UserProfileUid))
         {
             throw new InvalidArgumentException('Invalid Argument UserProfile');
-        }
+        }*/
 
         if(false === ($this->seller instanceof UserProfileUid))
         {
@@ -219,11 +227,24 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
         $dbal->from(MaterialSignInvariable::class, 'invariable');
 
-        /**
-         * Если владелец не равен продавцу - применяем фильтр для передачи
-         * в противном случае запрос на списание
-         */
-        if(false === $this->profile->equals($this->seller))
+        //        /**
+        //         * Если владелец не равен продавцу - применяем фильтр для передачи
+        //         * в противном случае запрос на списание
+        //         */
+        //        if(false === $this->profile->equals($this->seller))
+        //        {
+        //            $dbal
+        //                ->andWhere('invariable.profile = :profile')
+        //                ->setParameter(
+        //                    key: 'profile',
+        //                    value: $this->profile,
+        //                    type: UserProfileUid::TYPE
+        //                );
+        //        }
+
+
+        /** Если передан Владелец - получаем КИЗЫ для передачи между юр лицам  */
+        if($this->profile instanceof UserProfileUid)
         {
             $dbal
                 ->andWhere('invariable.profile = :profile')
@@ -234,6 +255,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 );
         }
 
+        /** Всегда получаем КИЗЫ по продавцу */
         $dbal
             ->andWhere('invariable.seller = :seller')
             ->setParameter(
@@ -241,6 +263,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 value: $this->seller,
                 type: UserProfileUid::TYPE
             );
+
 
         if($this->material)
         {
@@ -298,6 +321,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 type: ArrayParameterType::STRING
             );
 
+
         $dbal->join(
             'invariable',
             MaterialSignModify::class,
@@ -314,6 +338,84 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 MaterialSignCode::class,
                 'code',
                 'code.main = invariable.main'
+            );
+
+
+        /** Сырье */
+
+        $dbal->join(
+            'invariable',
+            Material::class,
+            'material',
+            'material.id = invariable.material'
+        );
+
+        $dbal
+            ->addSelect('material_trans.name as material_name')
+            ->join(
+                'material',
+                MaterialTrans::class,
+                'material_trans',
+                'material_trans.event = material.event AND material_trans.local = :local'
+            );
+
+        /** Свойства торговых предложений */
+
+        $dbal
+            ->addSelect('material_offer.value as material_offer_value')
+            ->leftJoin(
+                'material',
+                MaterialOffer::class,
+                'material_offer',
+                'material_offer.event = material.event AND material_offer.const = invariable.offer'
+            );
+
+        $dbal
+            ->addSelect('material_variation.value as material_variation_value')
+            ->leftJoin(
+                'material_offer',
+                MaterialVariation::class,
+                'material_variation',
+                'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation'
+            );
+
+        $dbal
+            ->addSelect('material_modification.value as material_modification_value')
+            ->leftJoin(
+                'material_variation',
+                MaterialModification::class,
+                'material_modification',
+                'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification'
+            );
+
+
+        /** Настройки категорий */
+
+        $dbal
+            ->addSelect('category_offer.reference as material_offer_reference')
+            ->leftJoin(
+                'material_offer',
+                CategoryMaterialOffers::class,
+                'category_offer',
+                'category_offer.id = material_offer.category_offer'
+            );
+
+        $dbal
+            ->addSelect('category_variation.reference as material_variation_reference')
+            ->leftJoin(
+                'material_variation',
+                CategoryMaterialVariation::class,
+                'category_variation',
+                'category_variation.id = material_variation.category_variation'
+            );
+
+        $dbal
+            ->addSelect('category_offer_modification.reference as material_modification_reference')
+            ->leftJoin(
+                'material_modification',
+                CategoryMaterialModification::class,
+                'category_offer_modification',
+                'category_offer_modification.id = material_modification.category_modification'
             );
 
 

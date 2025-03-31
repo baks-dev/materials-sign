@@ -23,7 +23,7 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Materials\Sign\Forms\MaterialSignReport;
+namespace BaksDev\Materials\Sign\Forms\MaterialSignTransfer;
 
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
@@ -36,8 +36,16 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 
-final class MaterialSignReportDTO
+final class MaterialSignTransferDTO
 {
+    /**
+     * Владелец
+     */
+    #[Assert\Uuid]
+    #[Assert\NotBlank]
+    private ?UserProfileUid $profile = null;
+
+
     /**
      * Продавец
      */

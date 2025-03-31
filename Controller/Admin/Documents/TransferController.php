@@ -27,9 +27,11 @@ namespace BaksDev\Materials\Sign\Controller\Admin\Documents;
 
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
-use BaksDev\Materials\Sign\Forms\MaterialSignReport\MaterialSignReportDTO;
-use BaksDev\Materials\Sign\Forms\MaterialSignReport\MaterialSignReportForm;
+use BaksDev\Materials\Sign\Forms\MaterialSignTransfer\MaterialSignTransferDTO;
+use BaksDev\Materials\Sign\Forms\MaterialSignTransfer\MaterialSignTransferForm;
 use BaksDev\Materials\Sign\Repository\MaterialSignReport\MaterialSignReportInterface;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -38,27 +40,27 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
 #[RoleSecurity(['ROLE_ORDERS', 'ROLE_MATERIAL_SIGN'])]
-final class ReportController extends AbstractController
+final class TransferController extends AbstractController
 {
-    #[Route('/admin/material/sign/report', name: 'admin.report', methods: ['GET', 'POST'])]
+    #[Route('/admin/material/sign/transfer', name: 'admin.transfer', methods: ['GET', 'POST'])]
     public function off(
         Request $request,
         MaterialSignReportInterface $MaterialSignReport
     ): Response
     {
-        $MaterialSignReportDTO = new MaterialSignReportDTO()
-            ->setSeller($this->getProfileUid());
+        $MaterialSignReportDTO = new MaterialSignTransferDTO()
+            ->setProfile($this->getProfileUid());
 
         // Форма
         $form = $this
             ->createForm(
-                MaterialSignReportForm::class,
-                $MaterialSignReportDTO,
-                ['action' => $this->generateUrl('materials-sign:admin.report'),]
+                type: MaterialSignTransferForm::class,
+                data: $MaterialSignReportDTO,
+                options: ['action' => $this->generateUrl('materials-sign:admin.transfer'),]
             )
             ->handleRequest($request);
 
-        if($form->isSubmitted() && $form->isValid() && $form->has('material_sign_report'))
+        if($form->isSubmitted() && $form->isValid() && $form->has('material_sign_transfer'))
         {
             $this->refreshTokenForm($form);
 
@@ -78,9 +80,26 @@ final class ReportController extends AbstractController
             //                return $this->redirectToRoute('materials-sign:admin.index');
             //            }
 
+            // Создаем новый объект Spreadsheet
+            $spreadsheet = new Spreadsheet();
+
+
+            // Получаем текущий активный лист
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Заполняем данные в ячейках
+            $sheet->setCellValue('A1', 'Имя');
+            $sheet->setCellValue('B1', 'Возраст');
+            $sheet->setCellValue('A2', 'Иван');
+            $sheet->setCellValue('B2', 25);
+            $sheet->setCellValue('A3', 'Мария');
+            $sheet->setCellValue('B3', 30);
+
+            // Создаем объект Writer и сохраняем файл
+            $writer = new Xlsx($spreadsheet);
 
             $MaterialSignReport
-                //->fromProfile($MaterialSignReportDTO->getProfile())
+                ->fromProfile($MaterialSignReportDTO->getProfile())
                 ->fromSeller($MaterialSignReportDTO->getSeller())
                 ->dateFrom($MaterialSignReportDTO->getFrom())
                 ->dateTo($MaterialSignReportDTO->getTo())
@@ -89,61 +108,34 @@ final class ReportController extends AbstractController
                 ->setVariation($MaterialSignReportDTO->getVariation())
                 ->setModification($MaterialSignReportDTO->getModification());
 
-            /** Получаем только в завершенные и возвращаем хвост кодировки */
+            /** Получаем только в процессе либо выполненные и удаляем только круглые скобки */
             $data = $MaterialSignReport
-                ->onlyStatusDone()
+                ->onlyStatusProcessOrDone()
                 ->findAll();
 
             $codes = array_column($data, 'code');
 
-            $codes = array_map(static function($data) {
-
-                // Позиция для третьей группы
-                $thirdGroupPos = -1;
-
-                preg_match_all('/\((\d{2})\)/', $data, $matches, PREG_OFFSET_CAPTURE);
-
-                if(count($matches[0]) >= 3)
-                {
-                    $thirdGroupPos = $matches[0][2][1];
-                }
-
-                // Если находимся на третьей группе, обрезаем строку
-                if($thirdGroupPos !== -1)
-                {
-                    $markingcode = substr($data, 0, $thirdGroupPos);
-                    // Убираем круглые скобки
-                    $data = preg_replace('/\((\d{2})\)/', '$1', $markingcode);
-                }
-
-                str_replace('"', '""', $data);
-
-                return $data;
-
+            $codes = array_map(static function($item) {
+                return preg_replace('/((d+))/', '$1', $item);
             }, $codes);
 
-
-            $response = new StreamedResponse(function() use ($codes) {
-
-                $handle = fopen('php://output', 'w+');
-
-                foreach($codes as $code)
-                {
-                    fputcsv($handle, [$code]);
-                }
-
-                fclose($handle);
-
-            }, Response::HTTP_OK);
 
             $filename = $MaterialSignReportDTO->getProfile()?->getAttr().'-'.
                 $MaterialSignReportDTO->getSeller()?->getAttr().'('.
                 $MaterialSignReportDTO->getFrom()->format(('d.m.Y')).'-'.
-                $MaterialSignReportDTO->getTo()->format(('d.m.Y')).').csv';
+                $MaterialSignReportDTO->getTo()->format(('d.m.Y')).').xlsx';
 
+            $response = new StreamedResponse();
 
-            $response->headers->set('Content-Type', 'text/csv');
-            $response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+            $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $response->headers->set('Content-Disposition', 'attachment;filename="'.$filename.'"');
+            $response->setPrivate();
+            $response->headers->addCacheControlDirective('no-cache', true);
+            $response->headers->addCacheControlDirective('must-revalidate', true);
+
+            $response->setCallback(function() use ($writer) {
+                $writer->save('php://output');
+            });
 
             return $response;
         }

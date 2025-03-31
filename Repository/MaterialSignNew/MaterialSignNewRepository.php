@@ -204,10 +204,19 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
                 MaterialUid::TYPE
             );
 
+
+        $orm
+            ->andWhere('(invariable.seller IS NULL OR invariable.seller = :seller)')
+            ->setParameter(
+                'seller',
+                $this->profile,
+                UserProfileUid::TYPE
+            );
+
         if($this->offer instanceof MaterialOfferConst)
         {
             $orm
-                ->andWhere('invariable.offer = :offer OR invariable.offer IS NULL')
+                ->andWhere('invariable.offer = :offer')
                 ->setParameter(
                     'offer',
                     $this->offer,

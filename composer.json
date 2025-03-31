@@ -23,7 +23,8 @@
   "require": {
     "php": ">=8.4",
     "ext-imagick": "*",
-    "baks-dev/core": "^7.2"
+    "baks-dev/core": "^7.2",
+    "phpoffice/phpspreadsheet": "4.1.*"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest"

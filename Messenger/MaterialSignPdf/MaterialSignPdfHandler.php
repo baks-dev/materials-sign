@@ -257,7 +257,7 @@ final readonly class MaterialSignPdfHandler
                  */
                 $MaterialSignDTO = new MaterialSignDTO();
 
-                if($decode->isError() || str_starts_with('(00)', $code))
+                if($decode->isError() || str_starts_with($code, '(00)'))
                 {
                     $code = uniqid('error_', true);
                     $MaterialSignDTO->setStatus(MaterialSignStatusError::class);
@@ -277,7 +277,10 @@ final readonly class MaterialSignPdfHandler
                 $MaterialSignInvariableDTO = $MaterialSignDTO->getInvariable();
                 $MaterialSignInvariableDTO->setPart($part);
                 $MaterialSignInvariableDTO->setUsr($message->getUsr());
+
                 $MaterialSignInvariableDTO->setProfile($message->getProfile());
+                $MaterialSignInvariableDTO->setSeller($message->isShare() ? null : $message->getProfile());
+
                 $MaterialSignInvariableDTO->setMaterial($message->getMaterial());
                 $MaterialSignInvariableDTO->setOffer($message->getOffer());
                 $MaterialSignInvariableDTO->setVariation($message->getVariation());

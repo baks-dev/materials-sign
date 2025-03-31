@@ -62,8 +62,12 @@ final class MaterialSignPdfMessage
     /** Добавить лист закупки */
     private bool $purchase;
 
+    /** Доступен только владельцу */
+    private bool $share;
+
     /** Грузовая таможенная декларация (номер) */
     private ?string $number;
+
 
     public function __construct(
         UserUid $usr,
@@ -73,6 +77,7 @@ final class MaterialSignPdfMessage
         ?MaterialVariationConst $variation,
         ?MaterialModificationConst $modification,
         bool $purchase,
+        bool $share,
         ?string $number
     )
     {
@@ -85,6 +90,7 @@ final class MaterialSignPdfMessage
         $this->modification = $modification ? (string) $modification : null;
 
         $this->purchase = $purchase;
+        $this->share = $share;
         $this->number = $number;
     }
 
@@ -150,5 +156,13 @@ final class MaterialSignPdfMessage
     public function getNumber(): ?string
     {
         return $this->number;
+    }
+
+    /**
+     * Share
+     */
+    public function isShare(): bool
+    {
+        return $this->share;
     }
 }

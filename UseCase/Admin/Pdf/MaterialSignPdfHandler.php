@@ -47,9 +47,7 @@ final readonly class MaterialSignPdfHandler
 
 
     /** @see MaterialSign */
-    public function handle(
-        MaterialSignPdfDTO $command
-    ): string|bool
+    public function handle(MaterialSignPdfDTO $command): string|bool
     {
 
         $upload[] = $this->upload;
@@ -161,7 +159,8 @@ final readonly class MaterialSignPdfHandler
                 $command->getVariation(),
                 $command->getModification(),
                 $command->isPurchase(),
-                $command->getNumber()
+                $command->getShare(),
+                $command->getNumber(),
             ),
             transport: 'materials-sign'
         );

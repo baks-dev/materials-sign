@@ -23,7 +23,7 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Materials\Sign\Forms\MaterialSignReport;
+namespace BaksDev\Materials\Sign\Forms\MaterialSignTransfer;
 
 use BaksDev\Materials\Catalog\Repository\MaterialChoice\MaterialChoiceInterface;
 use BaksDev\Materials\Catalog\Repository\MaterialModificationChoice\MaterialModificationChoiceInterface;
@@ -52,7 +52,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-final class MaterialSignReportForm extends AbstractType
+final class MaterialSignTransferForm extends AbstractType
 {
     public function __construct(
         #[AutowireIterator('baks.reference.choice')] private readonly iterable $reference,
@@ -113,12 +113,26 @@ final class MaterialSignReportForm extends AbstractType
             FormEvents::PRE_SET_DATA,
             function(FormEvent $event): void {
 
-                /** @var MaterialSignReportDTO $data */
+                /** @var MaterialSignTransferDTO $data */
                 $data = $event->getData();
                 $form = $event->getForm();
 
                 $UserUid = $this->userProfileTokenStorage->getUser();
                 $profiles = $this->userProfileChoice->getActiveUserProfile($UserUid);
+
+                $form
+                    ->add('profile', ChoiceType::class, [
+                        'choices' => $profiles,
+                        'choice_value' => function(?UserProfileUid $profile) {
+                            return $profile?->getValue();
+                        },
+                        'choice_label' => function(UserProfileUid $profile) {
+                            return $profile->getAttr();
+                        },
+
+                        'label' => false
+                    ]);
+
 
                 $form
                     ->add('seller', ChoiceType::class, [
@@ -285,7 +299,7 @@ final class MaterialSignReportForm extends AbstractType
 
         /* Сохранить ******************************************************/
         $builder->add(
-            'material_sign_report',
+            'material_sign_transfer',
             SubmitType::class,
             ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']]
         );
@@ -508,7 +522,7 @@ final class MaterialSignReportForm extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => MaterialSignReportDTO::class,
+            'data_class' => MaterialSignTransferDTO::class,
             'method' => 'POST',
             'attr' => ['class' => 'w-100'],
         ]);

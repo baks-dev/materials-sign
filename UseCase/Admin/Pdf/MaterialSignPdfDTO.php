@@ -42,11 +42,16 @@ final class MaterialSignPdfDTO
     private UserUid $usr;
 
     /**
-     * Профиль пользователя (null - общий)
+     * Профиль пользователя (Владельца)
      */
     #[Assert\Uuid]
     #[Assert\NotBlank]
     private ?UserProfileUid $profile = null;
+
+    /**
+     * Признак, что честными знаками может делиться с другими
+     */
+    private bool $share = false;
 
     #[Assert\Valid]
     private ArrayCollection $files;
@@ -236,4 +241,17 @@ final class MaterialSignPdfDTO
         return $this;
     }
 
+    /**
+     * Share
+     */
+    public function getShare(): bool
+    {
+        return $this->share;
+    }
+
+    public function setShare(bool $share): self
+    {
+        $this->share = $share;
+        return $this;
+    }
 }

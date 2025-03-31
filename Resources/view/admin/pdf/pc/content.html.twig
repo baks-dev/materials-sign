@@ -47,17 +47,41 @@
 
 
             <div class="w-100">
-
-
-                {# {% if form.profile is defined %} #}
-
-
                 {{ form_row(form.profile, {
                     label: 'Владелец',
                     placeholder: 'Выберите владельца "Честного знака" из списка', attr: { 'data-select' : 'select2' }
-                    }) }}
+                }) }}
+            </div>
 
-                {# {% endif %} #}
+            <div class="clearfix mb-0 d-flex gap-3 align-items-center">
+                <div class="w-75">
+                    {{ form_row(form.number, {
+                        label: false, attr: { placeholder : 'Номер грузовой таможенной декларации (ГТД)' }
+                    }) }}
+                </div>
+                <div class="w-50">
+                    <div class="d-flex radio-buttons mb-3" data-buttons="true">
+                        <label class="btn p-0 border-dotted rounded-3 active">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                <span class="h6">
+                                    <div class="form-check px-3 d-flex align-items-start">
+                                        {{ form_widget(form.share, { label: false }) }}
+                                        <span style="margin-top: 2px;">
+                                            {# {{ 'admin.form.label.active'|trans }} #}
+                                            Доступен только владелцу
+                                        </span>
+                                    </div>
+                                </span>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    {# {{ form_row(form.share, {
+                        label: 'Доступен только владелцу',
+                    }) }} #}
+                </div>
             </div>
 
 
@@ -67,11 +91,6 @@
                     <hr class="m-0">
                 </div>
             </div>
-
-
-            {{ form_row(form.number, {
-                label: false, attr: { placeholder : 'Номер грузовой таможенной декларации (ГТД)' }
-            }) }}
 
 
             <div class="card-body pb-0" id='{{ form.files.vars.id }}-collection'>
@@ -185,13 +204,7 @@
 
         </div>
 
-
         <div class="modal-footer">
-
-            <div class="alert alert-warning w-100 py-2 small" role="alert">
-                Лист закупки можно создать при условии, если в списке выбран Склад (профиль пользователя)
-            </div>
-
             <div class="flex-grow-1">
                 <div class="d-flex radio-buttons" data-buttons="true">
                     <label class="btn p-3 border-dotted rounded-3 active">

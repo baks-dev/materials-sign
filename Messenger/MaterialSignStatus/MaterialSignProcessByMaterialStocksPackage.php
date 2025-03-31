@@ -35,13 +35,17 @@ use BaksDev\Materials\Sign\Repository\MaterialSignNew\MaterialSignNewInterface;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignProcessDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignStatusHandler;
+use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierByConstInterface;
 use BaksDev\Products\Product\Repository\ProductMaterials\ProductMaterialsInterface;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
+use BaksDev\Products\Stocks\Entity\Stock\Event\ProductStockEvent;
+use BaksDev\Products\Stocks\Entity\Stock\Event\ProductStockEventInterface;
 use BaksDev\Products\Stocks\Entity\Stock\Products\ProductStockProduct;
 use BaksDev\Products\Stocks\Messenger\ProductStockMessage;
 use BaksDev\Products\Stocks\Repository\CurrentProductStocks\CurrentProductStocksInterface;
 use BaksDev\Products\Stocks\Repository\ProductStocksById\ProductStocksByIdInterface;
+use BaksDev\Products\Stocks\Repository\ProductStocksEvent\ProductStocksEventInterface;
 use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusPackage;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use Psr\Log\LoggerInterface;
@@ -57,7 +61,11 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
     public function __construct(
         #[Target('materialsSignLogger')] private LoggerInterface $logger,
         private ProductStocksByIdInterface $ProductStocks,
-        private CurrentProductStocksInterface $currentProductStocks,
+
+        private ProductStocksEventInterface $ProductStocksEventRepository,
+        private CurrentProductStocksInterface $CurrentProductStocks,
+
+
         private UserByUserProfileInterface $userByUserProfile,
         private DeduplicatorInterface $deduplicator,
         private CurrentProductIdentifierByConstInterface $CurrentProductIdentifierByConst,
@@ -82,9 +90,12 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
             return;
         }
 
-        $ProductStockEvent = $this->currentProductStocks->getCurrentEvent($message->getId());
+        $ProductStockEvent = $this->ProductStocksEventRepository
+            ->forEvent($message->getEvent())
+            ->find();
 
-        if(!$ProductStockEvent)
+
+        if(false === ($ProductStockEvent instanceof ProductStockEvent))
         {
             $this->logger->critical('products-sign: Не найдено событие ProductStock', [$message, self::class.':'.__LINE__]);
 
@@ -102,7 +113,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
             return;
         }
 
-        if(!$ProductStockEvent->getOrder())
+        if(false === ($ProductStockEvent->getOrder() instanceof OrderUid))
         {
             $this->logger->notice(
                 'Не резервируем честный знак: упаковка без идентификатора заказа',
@@ -112,22 +123,39 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
             return;
         }
 
-        /** Определяем пользователя профилю в заявке */
+        /**
+         * Определяем пользователя профилю в заявке
+         */
+
+        $CurrentProductStockEvent = $this->CurrentProductStocks
+            ->getCurrentEvent($message->getId());
+
+        if(false === ($CurrentProductStockEvent instanceof ProductStockEvent))
+        {
+            return;
+        }
+
+        $UserProfileUid = $CurrentProductStockEvent->getStocksProfile();
+
         $User = $this
             ->userByUserProfile
-            ->forProfile($ProductStockEvent->getStocksProfile())
+            ->forProfile($UserProfileUid)
             ->find();
 
         if(false === $User)
         {
             $this->logger
                 ->critical(
-                    sprintf('products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ', $ProductStockEvent->getStocksProfile()),
+                    sprintf(
+                        'products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ',
+                        $UserProfileUid
+                    ),
                     [$message, self::class.':'.__LINE__]
                 );
 
             return;
         }
+
 
         // Получаем всю продукцию в ордере со статусом Package (УПАКОВКА)
         $products = $this->ProductStocks->getProductsPackageStocks($message->getId());
@@ -204,7 +232,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
                 {
                     $MaterialSignEvent = $this->MaterialSignNew
                         ->forUser($User)
-                        ->forProfile($ProductStockEvent->getStocksProfile())
+                        ->forProfile($UserProfileUid)
                         ->forMaterial($CurrentMaterialDTO->getMaterial())
                         ->forOfferConst($CurrentMaterialDTO->getOfferConst())
                         ->forVariationConst($CurrentMaterialDTO->getVariationConst())
@@ -221,7 +249,10 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
                         break;
                     }
 
-                    $MaterialSignProcessDTO = new MaterialSignProcessDTO($ProductStockEvent->getStocksProfile(), $ProductStockEvent->getOrder());
+                    $MaterialSignProcessDTO = new MaterialSignProcessDTO(
+                        $UserProfileUid,
+                        $ProductStockEvent->getOrder()
+                    );
                     $ProductSignInvariableDTO = $MaterialSignProcessDTO->getInvariable();
                     $ProductSignInvariableDTO->setPart($MaterialSignUid);
 
