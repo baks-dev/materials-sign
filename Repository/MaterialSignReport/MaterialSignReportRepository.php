@@ -41,12 +41,12 @@ use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
 use BaksDev\Materials\Sign\Entity\Modify\MaterialSignModify;
+use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusDone;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusProcess;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use DateTimeImmutable;
-use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Types\Types;
 use InvalidArgumentException;
 
@@ -68,7 +68,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
     private MaterialModificationConst|false $modification = false;
 
-    private ?array $status = null;
+    private string|false $status = false;
 
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder)
     {
@@ -195,14 +195,14 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
     public function onlyStatusDone(): self
     {
-        $this->status = [MaterialSignStatusDone::STATUS];
+        $this->status = MaterialSignStatusDone::STATUS;
 
         return $this;
     }
 
     public function onlyStatusProcessOrDone(): self
     {
-        $this->status = [MaterialSignStatusProcess::STATUS, MaterialSignStatusDone::STATUS];
+        $this->status = MaterialSignStatusProcess::class;
 
         return $this;
     }
@@ -213,14 +213,14 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
      */
     public function findAll(): array|false
     {
-        /*if(false === ($this->profile instanceof UserProfileUid))
-        {
-            throw new InvalidArgumentException('Invalid Argument UserProfile');
-        }*/
-
         if(false === ($this->seller instanceof UserProfileUid))
         {
             throw new InvalidArgumentException('Invalid Argument Seller');
+        }
+
+        if(false === $this->status)
+        {
+            throw new InvalidArgumentException('Invalid Argument Status');
         }
 
         $dbal = $this->DBALQueryBuilder
@@ -311,25 +311,27 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 );
         }
 
-        $dbal->join(
-            'invariable',
-            MaterialSignEvent::class,
-            'event',
-            'event.id = invariable.event AND event.status IN (:status)'
-        )
+        $dbal
+            ->join(
+                'invariable',
+                MaterialSignEvent::class,
+                'event',
+                'event.main = invariable.main AND event.status = :status'
+            )
             ->setParameter(
                 key: 'status',
-                value: $this->status ?: [MaterialSignStatusDone::STATUS],
-                type: ArrayParameterType::STRING
+                value: $this->status,
+                type: MaterialSignStatus::TYPE
             );
 
 
-        $dbal->join(
-            'invariable',
-            MaterialSignModify::class,
-            'modify',
-            'modify.event = invariable.event AND DATE(modify.mod_date) BETWEEN :date_from AND :date_to'
-        )
+        $dbal
+            ->join(
+                'invariable',
+                MaterialSignModify::class,
+                'modify',
+                'modify.event = event.id AND DATE(modify.mod_date) BETWEEN :date_from AND :date_to'
+            )
             ->setParameter('date_from', $this->from, Types::DATE_IMMUTABLE)
             ->setParameter('date_to', $this->to, Types::DATE_IMMUTABLE);
 
@@ -370,7 +372,8 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 MaterialOffer::class,
                 'material_offer',
                 'material_offer.event = material.event AND material_offer.const = invariable.offer'
-            );
+            )
+            ->addOrderBy('material_offer.value');
 
         $dbal
             ->addSelect('material_variation.value as material_variation_value')
@@ -379,7 +382,8 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 MaterialVariation::class,
                 'material_variation',
                 'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation'
-            );
+            )
+            ->addOrderBy('material_variation.value');
 
         $dbal
             ->addSelect('material_modification.value as material_modification_value')
@@ -388,7 +392,8 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 MaterialModification::class,
                 'material_modification',
                 'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification'
-            );
+            )
+            ->addOrderBy('material_modification.value');
 
 
         /** Настройки категорий */
@@ -420,6 +425,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 'category_offer_modification.id = material_modification.category_modification'
             );
 
+        $dbal->allGroupByExclude();
 
         return $dbal->fetchAllAssociative() ?: false;
     }

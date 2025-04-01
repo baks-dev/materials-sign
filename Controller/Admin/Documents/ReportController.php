@@ -30,11 +30,14 @@ use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Materials\Sign\Forms\MaterialSignReport\MaterialSignReportDTO;
 use BaksDev\Materials\Sign\Forms\MaterialSignReport\MaterialSignReportForm;
 use BaksDev\Materials\Sign\Repository\MaterialSignReport\MaterialSignReportInterface;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsController]
 #[RoleSecurity(['ROLE_ORDERS', 'ROLE_MATERIAL_SIGN'])]
@@ -43,7 +46,8 @@ final class ReportController extends AbstractController
     #[Route('/admin/material/sign/report', name: 'admin.report', methods: ['GET', 'POST'])]
     public function off(
         Request $request,
-        MaterialSignReportInterface $MaterialSignReport
+        MaterialSignReportInterface $MaterialSignReport,
+        TranslatorInterface $translator,
     ): Response
     {
         $MaterialSignReportDTO = new MaterialSignReportDTO()
@@ -63,14 +67,9 @@ final class ReportController extends AbstractController
             $this->refreshTokenForm($form);
 
             $MaterialSignReport
-                //->fromProfile($MaterialSignReportDTO->getProfile())
                 ->fromSeller($MaterialSignReportDTO->getSeller())
                 ->dateFrom($MaterialSignReportDTO->getFrom())
-                ->dateTo($MaterialSignReportDTO->getTo())
-                ->setMaterial($MaterialSignReportDTO->getMaterial())
-                ->setOffer($MaterialSignReportDTO->getOffer())
-                ->setVariation($MaterialSignReportDTO->getVariation())
-                ->setModification($MaterialSignReportDTO->getModification());
+                ->dateTo($MaterialSignReportDTO->getTo());
 
             /** Получаем только в завершенные и возвращаем хвост кодировки */
             $data = $MaterialSignReport
@@ -88,56 +87,72 @@ final class ReportController extends AbstractController
                 return $this->redirectToReferer();
             }
 
-            $codes = array_column($data, 'code');
+            // Создаем новый объект Spreadsheet
+            $spreadsheet = new Spreadsheet();
+            $writer = new Xlsx($spreadsheet);
 
-            $codes = array_map(static function($data) {
+            // Получаем текущий активный лист
+            $sheet = $spreadsheet->getActiveSheet();
 
-                // Позиция для третьей группы
-                $thirdGroupPos = -1;
+            foreach($data as $key => $code)
+            {
+                preg_match_all('/\((\d+)\)([^(]*)/', $code['code'], $matches, PREG_SET_ORDER);
 
-                preg_match_all('/\((\d{2})\)/', $data, $matches, PREG_OFFSET_CAPTURE);
+                $name = $code['material_name'];
 
-                if(count($matches[0]) >= 3)
-                {
-                    $thirdGroupPos = $matches[0][2][1];
-                }
+                $name = trim($name).' '.(isset($code['material_variation_reference']) ? $translator->trans($code['material_variation_value'], domain: $code['material_variation_reference']) : $code['material_variation_value']);
+                $name = trim($name).' '.(isset($code['material_modification_reference']) ? $translator->trans($code['material_modification_value'], domain: $code['material_modification_reference']) : $code['material_modification_value']);
+                $name = trim($name).' '.(isset($code['material_offer_reference']) ? $translator->trans($code['material_offer_value'], domain: $code['material_offer_reference']) : $code['material_offer_value']);
 
-                // Если находимся на третьей группе, обрезаем строку
-                if($thirdGroupPos !== -1)
-                {
-                    $markingcode = substr($data, 0, $thirdGroupPos);
-                    // Убираем круглые скобки
-                    $data = preg_replace('/\((\d{2})\)/', '$1', $markingcode);
-                }
+                $sheet->setCellValue('A'.$key, trim($name)); // Наименование товара
 
-                str_replace('"', '""', $data);
+                /**
+                 *
+                 * 0 => array:3 [
+                 *      0 => "(01)04603766681641"
+                 *      1 => "01"
+                 *      2 => "04603766681641"
+                 * ]
+                 *
+                 * 1 => array:3 [
+                 *      0 => "(21)5fcCjIHGk-GCd"
+                 *      1 => "21"
+                 *      2 => "5fcCjIHGk-GCd"
+                 * ]
+                 *
+                 * 2 => array:3 [
+                 *      0 => "(91)EE10"
+                 *      1 => "91"
+                 *      2 => "EE10"
+                 * ]
+                 *
+                 * 3 => array:3 [
+                 *      0 => "(92)KYSaBIDv2w0ziz777fykgv0N0/CystKMUp4uE0F6goU="
+                 *      1 => "92"
+                 *      2 => "KYSaBIDv2w0ziz777fykgv0N0/CystKMUp4uE0F6goU="
+                 * ]
+                 */
 
-                return $data;
+                $sheet->setCellValue('B'.$key, $matches[0][2] ?? 'GTIN не определен'); // GTIN
+                $sheet->setCellValue('C'.$key, $matches[0][1].$matches[0][2].$matches[1][1].$matches[1][2]); // Код маркировки/агрегата
 
-            }, $codes);
-
-
-            $response = new StreamedResponse(function() use ($codes) {
-
-                $handle = fopen('php://output', 'w+');
-
-                foreach($codes as $code)
-                {
-                    fputcsv($handle, [$code]);
-                }
-
-                fclose($handle);
-
-            }, Response::HTTP_OK);
+            }
 
             $filename =
                 $MaterialSignReportDTO->getSeller()?->getAttr().'('.
                 $MaterialSignReportDTO->getFrom()->format(('d.m.Y')).'-'.
-                $MaterialSignReportDTO->getTo()->format(('d.m.Y')).').csv';
+                $MaterialSignReportDTO->getTo()->format(('d.m.Y')).').xlsx';
+
+            $response = new StreamedResponse(function() use ($writer) {
+                $writer->save('php://output');
+            }, Response::HTTP_OK);
 
 
-            $response->headers->set('Content-Type', 'text/csv');
-            $response->headers->set('Content-Disposition', 'attachment; filename="'.str_replace('"', '', $filename).'"');
+            // Redirect output to a client’s web browser (Xls)
+            $response->headers->set('Content-Type', 'application/vnd.ms-excel');
+            $response->headers->set('Content-Disposition', 'attachment;filename="'.str_replace('"', '', $filename).'"');
+            $response->headers->set('Cache-Control', 'max-age=0');
+
 
             return $response;
         }

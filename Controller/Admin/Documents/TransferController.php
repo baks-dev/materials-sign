@@ -70,11 +70,7 @@ final class TransferController extends AbstractController
                 ->fromProfile($MaterialSignReportDTO->getProfile())
                 ->fromSeller($MaterialSignReportDTO->getSeller())
                 ->dateFrom($MaterialSignReportDTO->getFrom())
-                ->dateTo($MaterialSignReportDTO->getTo())
-                ->setMaterial($MaterialSignReportDTO->getMaterial())
-                ->setOffer($MaterialSignReportDTO->getOffer())
-                ->setVariation($MaterialSignReportDTO->getVariation())
-                ->setModification($MaterialSignReportDTO->getModification());
+                ->dateTo($MaterialSignReportDTO->getTo());
 
             /** Получаем только в процессе либо выполненные и удаляем только круглые скобки */
             $data = $MaterialSignReport

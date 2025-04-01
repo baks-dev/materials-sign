@@ -65,7 +65,6 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
         private ProductStocksEventInterface $ProductStocksEventRepository,
         private CurrentProductStocksInterface $CurrentProductStocks,
 
-
         private UserByUserProfileInterface $userByUserProfile,
         private DeduplicatorInterface $deduplicator,
         private CurrentProductIdentifierByConstInterface $CurrentProductIdentifierByConst,
@@ -97,7 +96,10 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
 
         if(false === ($ProductStockEvent instanceof ProductStockEvent))
         {
-            $this->logger->critical('products-sign: Не найдено событие ProductStock', [$message, self::class.':'.__LINE__]);
+            $this->logger->critical(
+                'products-sign: Не найдено событие ProductStock',
+                [self::class.':'.__LINE__, var_export($message, true)]
+            );
 
 
             return;
@@ -107,7 +109,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
         {
             $this->logger->notice(
                 'Не резервируем честный знак: Складская заявка не является Package «Упаковка»',
-                [$message, self::class.':'.__LINE__]
+                [self::class.':'.__LINE__, var_export($message, true)]
             );
 
             return;
@@ -117,7 +119,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
         {
             $this->logger->notice(
                 'Не резервируем честный знак: упаковка без идентификатора заказа',
-                [$message, self::class.':'.__LINE__]
+                [self::class.':'.__LINE__, var_export($message, true)]
             );
 
             return;

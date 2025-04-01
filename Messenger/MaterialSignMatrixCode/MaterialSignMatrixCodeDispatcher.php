@@ -35,12 +35,12 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Contracts\Cache\ItemInterface;
 
 #[AsMessageHandler(priority: 0)]
-final class MaterialSignMatrixCodeDispatcher
+final readonly class MaterialSignMatrixCodeDispatcher
 {
     public function __construct(
-        private readonly MaterialSignCodeInterface $MaterialSignCode,
-        private readonly AppCacheInterface $cache,
-        #[Autowire(env: 'CDN_HOST')] private readonly string $CDN_HOST,
+        private MaterialSignCodeInterface $MaterialSignCode,
+        private AppCacheInterface $cache,
+        #[Autowire(env: 'CDN_HOST')] private string $CDN_HOST,
     ) {}
 
     public function __invoke(MaterialSignMatrixCodeMessage $message): void

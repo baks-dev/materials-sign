@@ -45,7 +45,6 @@ final class MaterialSignTransferDTO
     #[Assert\NotBlank]
     private ?UserProfileUid $profile = null;
 
-
     /**
      * Продавец
      */
@@ -57,22 +56,6 @@ final class MaterialSignTransferDTO
     /** Категория */
     #[Assert\Uuid]
     private ?CategoryMaterialUid $category = null;
-
-    /** ID сырья */
-    #[Assert\Uuid]
-    private ?MaterialUid $material = null;
-
-    /** Постоянный уникальный идентификатор ТП */
-    #[Assert\Uuid]
-    private ?MaterialOfferConst $offer = null;
-
-    /** Постоянный уникальный идентификатор варианта */
-    #[Assert\Uuid]
-    private ?MaterialVariationConst $variation = null;
-
-    /** Постоянный уникальный идентификатор модификации */
-    #[Assert\Uuid]
-    private ?MaterialModificationConst $modification = null;
 
 
     private ?DateTimeImmutable $from = null;
@@ -90,62 +73,6 @@ final class MaterialSignTransferDTO
     public function setCategory(?CategoryMaterialUid $category): self
     {
         $this->category = $category;
-        return $this;
-    }
-
-    /**
-     * Material
-     */
-    public function getMaterial(): ?MaterialUid
-    {
-        return $this->material;
-    }
-
-    public function setMaterial(?MaterialUid $material): self
-    {
-        $this->material = $material;
-        return $this;
-    }
-
-    /**
-     * Offer
-     */
-    public function getOffer(): ?MaterialOfferConst
-    {
-        return $this->offer;
-    }
-
-    public function setOffer(?MaterialOfferConst $offer): self
-    {
-        $this->offer = $offer;
-        return $this;
-    }
-
-    /**
-     * Variation
-     */
-    public function getVariation(): ?MaterialVariationConst
-    {
-        return $this->variation;
-    }
-
-    public function setVariation(?MaterialVariationConst $variation): self
-    {
-        $this->variation = $variation;
-        return $this;
-    }
-
-    /**
-     * Modification
-     */
-    public function getModification(): ?MaterialModificationConst
-    {
-        return $this->modification;
-    }
-
-    public function setModification(?MaterialModificationConst $modification): self
-    {
-        $this->modification = $modification;
         return $this;
     }
 

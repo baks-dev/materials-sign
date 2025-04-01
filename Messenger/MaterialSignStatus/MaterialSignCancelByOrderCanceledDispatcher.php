@@ -46,7 +46,7 @@ final readonly class MaterialSignCancelByOrderCanceledDispatcher
     public function __construct(
         #[Target('materialsSignLogger')] private LoggerInterface $logger,
         private MaterialSignStatusHandler $materialSignStatusHandler,
-        private OrderEventInterface $orderEventRepository,
+        private OrderEventInterface $OrderEventRepository,
         private MaterialSignProcessByOrderInterface $materialSignProcessByOrder,
         private DeduplicatorInterface $deduplicator,
     ) {}
@@ -66,17 +66,15 @@ final readonly class MaterialSignCancelByOrderCanceledDispatcher
             return;
         }
 
-        /** Log Data */
-        $dataLogs['OrderUid'] = (string) $message->getId();
-        $dataLogs['OrderEventUid'] = (string) $message->getEvent();
-        $dataLogs['LastOrderEventUid'] = (string) $message->getLast();
-
-        $OrderEvent = $this->orderEventRepository->find($message->getEvent());
+        $OrderEvent = $this->OrderEventRepository->find($message->getEvent());
 
         if(false === $OrderEvent)
         {
             $dataLogs[0] = self::class.':'.__LINE__;
-            $this->logger->critical('materials-sign: Не найдено событие Order', $dataLogs);
+            $this->logger->critical(
+                'materials-sign: Не найдено событие Order',
+                [self::class.':'.__LINE__, var_export($message, true)]
+            );
 
             return;
         }
@@ -104,7 +102,7 @@ final readonly class MaterialSignCancelByOrderCanceledDispatcher
 
         foreach($events as $MaterialSignEvent)
         {
-            $MaterialSignCancelDTO = new MaterialSignCancelDTO($MaterialSignEvent->getProfile());
+            $MaterialSignCancelDTO = new MaterialSignCancelDTO();
             $MaterialSignEvent->getDto($MaterialSignCancelDTO);
             $this->materialSignStatusHandler->handle($MaterialSignCancelDTO);
 
