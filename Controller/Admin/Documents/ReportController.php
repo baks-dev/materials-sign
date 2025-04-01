@@ -62,23 +62,6 @@ final class ReportController extends AbstractController
         {
             $this->refreshTokenForm($form);
 
-            //            $data = $MaterialSignReport
-            //                ->fromProfile($MaterialSignReportDTO->getProfile())
-            //                ->fromSeller($MaterialSignReportDTO->getSeller())
-            //                ->dateFrom($MaterialSignReportDTO->getFrom())
-            //                ->dateTo($MaterialSignReportDTO->getTo())
-            //                ->setMaterial($MaterialSignReportDTO->getMaterial())
-            //                ->setOffer($MaterialSignReportDTO->getOffer())
-            //                ->setVariation($MaterialSignReportDTO->getVariation())
-            //                ->setModification($MaterialSignReportDTO->getModification())
-            //                ->findAll();
-
-            //            if(empty($data))
-            //            {
-            //                return $this->redirectToRoute('materials-sign:admin.index');
-            //            }
-
-
             $MaterialSignReport
                 //->fromProfile($MaterialSignReportDTO->getProfile())
                 ->fromSeller($MaterialSignReportDTO->getSeller())
@@ -93,6 +76,17 @@ final class ReportController extends AbstractController
             $data = $MaterialSignReport
                 ->onlyStatusDone()
                 ->findAll();
+
+            if(false === $data)
+            {
+                $this->addFlash(
+                    'Отчет о реализации честных знаков',
+                    'Отчета за указанный период не найдено',
+                    'materials-sign.admin'
+                );
+
+                return $this->redirectToReferer();
+            }
 
             $codes = array_column($data, 'code');
 
@@ -136,14 +130,14 @@ final class ReportController extends AbstractController
 
             }, Response::HTTP_OK);
 
-            $filename = $MaterialSignReportDTO->getProfile()?->getAttr().'-'.
+            $filename =
                 $MaterialSignReportDTO->getSeller()?->getAttr().'('.
                 $MaterialSignReportDTO->getFrom()->format(('d.m.Y')).'-'.
                 $MaterialSignReportDTO->getTo()->format(('d.m.Y')).').csv';
 
 
             $response->headers->set('Content-Type', 'text/csv');
-            $response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+            $response->headers->set('Content-Disposition', 'attachment; filename="'.str_replace('"', '', $filename).'"');
 
             return $response;
         }

@@ -41,8 +41,8 @@ use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
 use BaksDev\Materials\Sign\Entity\Modify\MaterialSignModify;
-use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusDone;
+use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusProcess;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use DateTimeImmutable;
@@ -202,7 +202,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
     public function onlyStatusProcessOrDone(): self
     {
-        $this->status = [MaterialSignStatus\MaterialSignStatusProcess::STATUS, MaterialSignStatusDone::STATUS];
+        $this->status = [MaterialSignStatusProcess::STATUS, MaterialSignStatusDone::STATUS];
 
         return $this;
     }
@@ -223,7 +223,9 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             throw new InvalidArgumentException('Invalid Argument Seller');
         }
 
-        $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
+        $dbal = $this->DBALQueryBuilder
+            ->createQueryBuilder(self::class)
+            ->bindLocal();
 
         $dbal->from(MaterialSignInvariable::class, 'invariable');
 
@@ -326,7 +328,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             'invariable',
             MaterialSignModify::class,
             'modify',
-            'modify.event = invariable.event AND modify.mod_date BETWEEN :date_from AND :date_to'
+            'modify.event = invariable.event AND DATE(modify.mod_date) BETWEEN :date_from AND :date_to'
         )
             ->setParameter('date_from', $this->from, Types::DATE_IMMUTABLE)
             ->setParameter('date_to', $this->to, Types::DATE_IMMUTABLE);
