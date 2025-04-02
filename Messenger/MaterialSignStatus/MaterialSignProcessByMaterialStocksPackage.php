@@ -48,6 +48,7 @@ use BaksDev\Products\Stocks\Repository\ProductStocksById\ProductStocksByIdInterf
 use BaksDev\Products\Stocks\Repository\ProductStocksEvent\ProductStocksEventInterface;
 use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusPackage;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -60,11 +61,8 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
 {
     public function __construct(
         #[Target('materialsSignLogger')] private LoggerInterface $logger,
-        private ProductStocksByIdInterface $ProductStocks,
-
         private ProductStocksEventInterface $ProductStocksEventRepository,
         private CurrentProductStocksInterface $CurrentProductStocks,
-
         private UserByUserProfileInterface $userByUserProfile,
         private DeduplicatorInterface $deduplicator,
         private CurrentProductIdentifierByConstInterface $CurrentProductIdentifierByConst,
@@ -125,22 +123,37 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
             return;
         }
 
+        // Получаем всю продукцию в ордере
+        $products = $ProductStockEvent->getProduct();
+
+        if($products->isEmpty())
+        {
+            $this->logger->warning(
+                'Заявка на упаковку не имеет продукции в коллекции',
+                [$message, self::class.':'.__LINE__]
+            );
+
+            return;
+        }
+
         /**
          * Определяем пользователя профилю в заявке
          */
 
-        $CurrentProductStockEvent = $this->CurrentProductStocks
-            ->getCurrentEvent($message->getId());
-
-        if(false === ($CurrentProductStockEvent instanceof ProductStockEvent))
+        if(false === ($ProductStockEvent->getStocksProfile() instanceof UserProfileUid))
         {
-            return;
+            $ProductStockEvent = $this->CurrentProductStocks
+                ->getCurrentEvent($message->getId());
+
+            if(false === ($ProductStockEvent instanceof ProductStockEvent))
+            {
+                return;
+            }
         }
 
-        $UserProfileUid = $CurrentProductStockEvent->getStocksProfile();
+        $UserProfileUid = $ProductStockEvent->getStocksProfile();
 
-        $User = $this
-            ->userByUserProfile
+        $User = $this->userByUserProfile
             ->forProfile($UserProfileUid)
             ->find();
 
@@ -158,19 +171,6 @@ final readonly class MaterialSignProcessByMaterialStocksPackage
             return;
         }
 
-
-        // Получаем всю продукцию в ордере со статусом Package (УПАКОВКА)
-        $products = $this->ProductStocks->getProductsPackageStocks($message->getId());
-
-        if(empty($products))
-        {
-            $this->logger->warning(
-                'Заявка на упаковку не имеет продукции в коллекции',
-                [$message, self::class.':'.__LINE__]
-            );
-
-            return;
-        }
 
         $this->logger->info('Добавляем резерв кода Честный знак статус Process «В процессе»:');
 
