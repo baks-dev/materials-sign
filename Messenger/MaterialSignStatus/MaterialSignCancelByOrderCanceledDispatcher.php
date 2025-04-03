@@ -66,11 +66,11 @@ final readonly class MaterialSignCancelByOrderCanceledDispatcher
             return;
         }
 
-        $OrderEvent = $this->OrderEventRepository->find($message->getEvent());
+        $OrderEvent = $this->OrderEventRepository
+            ->find($message->getEvent());
 
         if(false === $OrderEvent)
         {
-            $dataLogs[0] = self::class.':'.__LINE__;
             $this->logger->critical(
                 'materials-sign: Не найдено событие Order',
                 [self::class.':'.__LINE__, var_export($message, true)]

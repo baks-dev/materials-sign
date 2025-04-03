@@ -98,8 +98,7 @@ final class TransferController extends AbstractController
 
             foreach($data as $key => $code)
             {
-
-                preg_match_all('/\(([A-Za-z0-9]{2})\)((?:(?!\([A-Za-z0-9]{2}\)).)*)/', $code['code'], $matches, PREG_SET_ORDER);
+                preg_match_all('/\((\d{2})\)((?:(?!\(\d{2}\)).)*)/', $code['code'], $matches, PREG_SET_ORDER);
 
                 $name = $code['material_name'];
 

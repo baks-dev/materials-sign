@@ -39,8 +39,8 @@ use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Messenger\OrderMessage;
 use BaksDev\Orders\Order\Repository\OrderEvent\OrderEventInterface;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\OrderStatusCompleted;
-use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductDTO;
 use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierInterface;
+use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierResult;
 use BaksDev\Products\Product\Repository\ProductMaterials\ProductMaterialsInterface;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use Psr\Log\LoggerInterface;
@@ -80,7 +80,8 @@ final readonly class MaterialSignDoneByOrderCompletedDispatcher
         }
 
         /** Получаем событие заказа */
-        $OrderEvent = $this->OrderEventRepository->find($message->getEvent());
+        $OrderEvent = $this->OrderEventRepository
+            ->find($message->getEvent());
 
         if(false === ($OrderEvent instanceof OrderEvent))
         {
@@ -109,7 +110,7 @@ final readonly class MaterialSignDoneByOrderCompletedDispatcher
                 ->forModification($product->getModification())
                 ->find();
 
-            if(false === ($CurrentProductIdentifier instanceof CurrentProductDTO))
+            if(false === ($CurrentProductIdentifier instanceof CurrentProductIdentifierResult))
             {
                 continue;
             }
