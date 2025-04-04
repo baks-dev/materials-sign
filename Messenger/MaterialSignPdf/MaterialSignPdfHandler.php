@@ -173,8 +173,10 @@ final readonly class MaterialSignPdfHandler
 
                     $PurchaseMaterialStockDTO = new PurchaseMaterialStockDTO();
                     $PurchaseMaterialInvariableDTO = $PurchaseMaterialStockDTO->getInvariable();
-                    $PurchaseMaterialInvariableDTO->setUsr($User->getId());
-                    $PurchaseMaterialInvariableDTO->setNumber($PurchaseNumber);
+
+                    $PurchaseMaterialInvariableDTO
+                        ->setUsr($User->getId())
+                        ->setNumber($PurchaseNumber);
                 }
             }
 
@@ -314,7 +316,7 @@ final readonly class MaterialSignPdfHandler
                 }
 
                 /** Создаем закупку */
-                if($message->isPurchase() && $message->getProfile())
+                if(isset($PurchaseMaterialStockDTO) && $message->isPurchase() && $message->getProfile())
                 {
                     /** Ищем в массиве такое сырье */
                     $getPurchaseMaterial = $PurchaseMaterialStockDTO->getMaterial()
@@ -359,7 +361,7 @@ final readonly class MaterialSignPdfHandler
             }
 
             /** Сохраняем закупку */
-            if($message->isPurchase() && $message->getProfile() && !$PurchaseMaterialStockDTO->getMaterial()->isEmpty())
+            if($message->isPurchase() && $message->getProfile() && (isset($PurchaseMaterialStockDTO) && false === $PurchaseMaterialStockDTO->getMaterial()->isEmpty()))
             {
                 $this->purchaseMaterialStockHandler->handle($PurchaseMaterialStockDTO);
             }
