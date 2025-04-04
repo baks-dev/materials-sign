@@ -54,8 +54,6 @@ final readonly class UnCompressMaterialsCodeRepository implements UnCompressMate
                 'material_sign_code.main = material_sign.id AND material_sign_code.cdn IS FALSE'
             );
 
-        $dbal->addSelect("'".MaterialSignCode::class."' AS entity");
-
         $dbal->where('material_sign_code.name IS NOT NULL');
 
         return $dbal->fetchAllHydrate(UnCompressMaterialsCodeResult::class);

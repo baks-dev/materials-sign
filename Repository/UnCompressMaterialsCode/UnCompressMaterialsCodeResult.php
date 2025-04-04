@@ -25,12 +25,13 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Repository\UnCompressMaterialsCode;
 
+use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
+
 final readonly class UnCompressMaterialsCodeResult
 {
     public function __construct(
         private string $identifier,
-        private string $name,
-        private string $entity
+        private string $name
     ) {}
 
     /**
@@ -54,7 +55,7 @@ final readonly class UnCompressMaterialsCodeResult
      */
     public function getEntity(): string
     {
-        return $this->entity;
+        return MaterialSignCode::class;
     }
 
 }

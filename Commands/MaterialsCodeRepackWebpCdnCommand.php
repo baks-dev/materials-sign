@@ -38,6 +38,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
@@ -68,32 +69,78 @@ class MaterialsCodeRepackWebpCdnCommand extends Command
             return Command::SUCCESS;
         }
 
+
+        $helper = $this->getHelper('question');
+
+        /**
+         * Интерактивная форма списка профилей
+         */
+
+        $questions[] = 'Все';
+        $questions['+'] = 'Выполнить все асинхронно';
+        $questions['-'] = 'Выйти';
+
+        $question = new ChoiceQuestion(
+            question: 'Сжатие стикеров Честных знаков продукции (Ctrl+C чтобы выйти)',
+            choices: $questions,
+            default: '0'
+        );
+
+        $key = $helper->ask($input, $output, $question);
+
+        /**
+         * Выходим без выполненного запроса
+         */
+
+        if($key === '-' || $key === 'Выйти')
+        {
+            return Command::SUCCESS;
+        }
+
+
         $progressBar = new ProgressBar($output);
         $progressBar->start();
+
 
         /** @var UnCompressMaterialsCodeResult $UnCompressMaterialsCodeResult */
 
         foreach($images as $UnCompressMaterialsCodeResult)
         {
+            if(false === class_exists($UnCompressMaterialsCodeResult->getEntity()))
+            {
+                $io->writeln(sprintf(
+                    '<fg=red>Ошибка при сжатии изображения: класс %s не найден</>',
+                    $UnCompressMaterialsCodeResult->getEntity()
+                ));
+
+                return Command::FAILURE;
+            }
+
             $CDNUploadImageMessage = new CDNUploadImageMessage(
                 $UnCompressMaterialsCodeResult->getIdentifier(),
                 $UnCompressMaterialsCodeResult->getEntity(),
                 $UnCompressMaterialsCodeResult->getName()
             );
 
-            $this->MessageDispatch->dispatch(
-                $CDNUploadImageMessage,
-
-            );
-
-            $compress = ($this->CDNUploadImage)($CDNUploadImageMessage);
-
-            if($compress === false)
+            if($key === '0' || $key === 'Все')
             {
-                $io->writeln(sprintf(
-                        '<fg=red>Ошибка при сжатии изображения %s: %s</>',
-                        $UnCompressMaterialsCodeResult->getEntity(),
-                        $UnCompressMaterialsCodeResult->getIdentifier())
+                $compress = ($this->CDNUploadImage)($CDNUploadImageMessage);
+
+                if($compress === false)
+                {
+                    $io->writeln(sprintf(
+                            '<fg=red>Ошибка при сжатии изображения %s: %s</>',
+                            $UnCompressMaterialsCodeResult->getEntity(),
+                            $UnCompressMaterialsCodeResult->getIdentifier())
+                    );
+                }
+            }
+
+            if($key === '+' || $key === 'Выполнить все асинхронно')
+            {
+                $this->MessageDispatch->dispatch(
+                    message: $CDNUploadImageMessage,
+                    transport: 'files-res'
                 );
             }
 
