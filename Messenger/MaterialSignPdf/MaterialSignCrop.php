@@ -51,6 +51,7 @@ final readonly class MaterialSignCrop
         $upload[] = 'public';
         $upload[] = 'upload';
         $upload[] = 'barcode';
+        $upload[] = 'materials-sign';
 
         $upload[] = (string) $message->getUsr();
 
@@ -105,7 +106,7 @@ final readonly class MaterialSignCrop
                 continue;
             }
 
-            if(false === file_exists($info->getRealPath()))
+            if(false === $info->getRealPath() || false === file_exists($info->getRealPath()))
             {
                 continue;
             }

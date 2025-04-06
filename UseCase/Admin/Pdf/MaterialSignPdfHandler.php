@@ -54,6 +54,7 @@ final readonly class MaterialSignPdfHandler
         $upload[] = 'public';
         $upload[] = 'upload';
         $upload[] = 'barcode';
+        $upload[] = 'materials-sign';
 
         $upload[] = (string) $command->getUsr();
 

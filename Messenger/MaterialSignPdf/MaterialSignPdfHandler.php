@@ -39,6 +39,7 @@ use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\PurchaseMaterialStockDTO;
 use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\PurchaseMaterialStockHandler;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
+use DateTimeImmutable;
 use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
 use Imagick;
@@ -74,6 +75,7 @@ final readonly class MaterialSignPdfHandler
         $upload[] = 'public';
         $upload[] = 'upload';
         $upload[] = 'barcode';
+        $upload[] = 'materials-sign';
 
         $upload[] = (string) $message->getUsr();
 
@@ -131,8 +133,6 @@ final readonly class MaterialSignPdfHandler
         //        }
 
 
-        /** Генерируем идентификатор группы для отмены */
-        $part = new MaterialSignUid();
 
 
         /** Обрабатываем страницы */
@@ -149,11 +149,13 @@ final readonly class MaterialSignPdfHandler
                 continue;
             }
 
-            if(false === file_exists($SignFile->getRealPath()))
+            if(false === $SignFile->getRealPath() || false === file_exists($SignFile->getRealPath()))
             {
                 continue;
             }
 
+            /** Генерируем идентификатор группы для отмены */
+            $part = new MaterialSignUid()->md5($SignFile->getPath().(new DateTimeImmutable('now')->format('Ymd')));
 
             $counter = 0;
             $errors = 0;
