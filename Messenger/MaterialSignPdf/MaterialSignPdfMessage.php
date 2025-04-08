@@ -161,7 +161,7 @@ final class MaterialSignPdfMessage
     /**
      * Share
      */
-    public function isShare(): bool
+    public function isNotShare(): bool
     {
         return $this->share;
     }

@@ -254,4 +254,9 @@ final class MaterialSignPdfDTO
         $this->share = $share;
         return $this;
     }
+
+    public function isNotShare(): bool
+    {
+        return $this->share === true;
+    }
 }

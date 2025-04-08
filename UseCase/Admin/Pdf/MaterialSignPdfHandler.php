@@ -160,7 +160,7 @@ final readonly class MaterialSignPdfHandler
                 $command->getVariation(),
                 $command->getModification(),
                 $command->isPurchase(),
-                $command->getShare(),
+                $command->isNotShare(),
                 $command->getNumber(),
             ),
             transport: 'materials-sign'

@@ -283,7 +283,7 @@ final readonly class MaterialSignPdfHandler
                 $MaterialSignInvariableDTO->setUsr($message->getUsr());
 
                 $MaterialSignInvariableDTO->setProfile($message->getProfile());
-                $MaterialSignInvariableDTO->setSeller($message->isShare() ? null : $message->getProfile());
+                $MaterialSignInvariableDTO->setSeller($message->isNotShare() ? $message->getProfile() : null);
 
                 $MaterialSignInvariableDTO->setMaterial($message->getMaterial());
                 $MaterialSignInvariableDTO->setOffer($message->getOffer());
