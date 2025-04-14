@@ -313,7 +313,7 @@ final readonly class MaterialSignPdfHandler
                     /** Создаем комманду для отправки файла CDN */
                     $this->messageDispatch->dispatch(
                         new CDNUploadImageMessage($handle->getId(), MaterialSignCode::class, $md5),
-                        transport: 'files-res'
+                        transport: 'files-res-low'
                     );
                 }
 
