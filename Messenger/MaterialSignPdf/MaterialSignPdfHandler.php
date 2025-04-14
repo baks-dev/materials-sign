@@ -155,7 +155,7 @@ final readonly class MaterialSignPdfHandler
             }
 
             /** Генерируем идентификатор группы для отмены */
-            $part = new MaterialSignUid()->md5($SignFile->getPath().(new DateTimeImmutable('now')->format('Ymd')));
+            $part = new MaterialSignUid()->stringToUuid($SignFile->getPath().(new DateTimeImmutable('now')->format('Ymd')));
 
             $counter = 0;
             $errors = 0;

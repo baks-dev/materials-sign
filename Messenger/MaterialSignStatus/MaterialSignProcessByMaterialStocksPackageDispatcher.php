@@ -52,10 +52,10 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
- * При статусе складской заявки Package «Упаковка» - резервируем честный знак в статус Process «В процессе»
+ * При статусе складской заявки Package «Упаковка» - резервируем сырьевой честный знак в статус Process «В процессе»
  */
 #[AsMessageHandler(priority: -5)]
-final readonly class MaterialSignProcessByMaterialStocksPackage
+final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
 {
     public function __construct(
         #[Target('materialsSignLogger')] private LoggerInterface $logger,

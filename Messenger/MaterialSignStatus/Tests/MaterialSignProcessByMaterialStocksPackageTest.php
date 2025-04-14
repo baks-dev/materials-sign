@@ -25,10 +25,10 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Messenger\MaterialSignStatus\Tests;
 
-use BaksDev\Core\Doctrine\DBALQueryBuilder;
-use BaksDev\Materials\Sign\Messenger\MaterialSignStatus\MaterialSignProcessByMaterialStocksPackage;
+use BaksDev\Materials\Sign\Messenger\MaterialSignStatus\MaterialSignProcessByMaterialStocksPackageDispatcher;
 use BaksDev\Products\Stocks\Messenger\ProductStockMessage;
-use Doctrine\ORM\EntityManagerInterface;
+use BaksDev\Products\Stocks\Type\Event\ProductStockEventUid;
+use BaksDev\Products\Stocks\Type\Id\ProductStockUid;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
@@ -42,14 +42,17 @@ class MaterialSignProcessByMaterialStocksPackageTest extends KernelTestCase
 
     public function testUseCase(): void
     {
-        /** @var MaterialSignProcessByMaterialStocksPackage $MaterialSignProcessByMaterialStocksPackage */
-        $MaterialSignProcessByMaterialStocksPackage = self::getContainer()->get(MaterialSignProcessByMaterialStocksPackage::class);
+        /** @var MaterialSignProcessByMaterialStocksPackageDispatcher $MaterialSignProcessByMaterialStocksPackage */
+        $MaterialSignProcessByMaterialStocksPackage =
+            self::getContainer()->get(MaterialSignProcessByMaterialStocksPackageDispatcher::class);
 
-        $dispatcher = $MaterialSignProcessByMaterialStocksPackage(
+        $MaterialSignProcessByMaterialStocksPackage(
             new ProductStockMessage(
-                'a9e4dec4-d6f9-7814-8388-65f31a868f60',
-                '4232e5dd-fa31-74cb-80ff-5a83e60426f7'
+                new ProductStockUid('9900e5f5-5477-752b-b8c3-325b977bac92'),
+                new ProductStockEventUid('6d3617d3-7b3f-725f-8fc8-0a26014137d3')
             )
         );
+
+        self::assertTrue(true);
     }
 }

@@ -32,15 +32,13 @@ use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\Collection\MaterialSig
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusNew;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignCancelDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignStatusHandler;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
 /**
  * @group materials-sign
- *
- * @see     MaterialSignProcessHandleTest
  * @depends BaksDev\Materials\Sign\UseCase\Admin\Status\Tests\MaterialSignProcessHandleTest::class
+ * @see     MaterialSignProcessHandleTest
  */
 #[When(env: 'test')]
 final class MaterialSignCancelHandleTest extends KernelTestCase

@@ -25,34 +25,24 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Repository\MaterialSignProcessByOrderMaterial\Tests;
 
-use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
-use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
-use BaksDev\Materials\Sign\Repository\MaterialSignProcessByOrderMaterial\MaterialSignProcessByOrderMaterialInterface;
-use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusNew;
-use BaksDev\Orders\Order\Entity\Order;
+use BaksDev\Materials\Sign\Repository\MaterialSignProcessByOrderMaterial\MaterialSignProcessByOrderProductInterface;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Event\ConsoleCommandEvent;
-use Symfony\Component\Console\Input\StringInput;
-use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\DependencyInjection\Attribute\When;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @group material-sign
  */
 #[When(env: 'test')]
-class MaterialSignProcessByOrderMaterialTest extends KernelTestCase
+class MaterialSignProcessByOrderProductTest extends KernelTestCase
 {
     public function testUseCase(): void
     {
-        /** @var MaterialSignProcessByOrderMaterialInterface $MaterialSignProcessByOrderMaterialInterface */
-        $MaterialSignProcessByOrderMaterialInterface = self::getContainer()->get(MaterialSignProcessByOrderMaterialInterface::class);
+        /** @var MaterialSignProcessByOrderProductInterface $MaterialSignProcessByOrderMaterialInterface */
+        $MaterialSignProcessByOrderMaterialInterface = self::getContainer()->get(MaterialSignProcessByOrderProductInterface::class);
 
         $result = $MaterialSignProcessByOrderMaterialInterface
             ->forOrder(new OrderUid())

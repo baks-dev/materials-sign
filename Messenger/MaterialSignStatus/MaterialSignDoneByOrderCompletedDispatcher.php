@@ -27,7 +27,7 @@ namespace BaksDev\Materials\Sign\Messenger\MaterialSignStatus;
 
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Materials\Catalog\Repository\CurrentMaterialIdentifier\CurrentIdentifierMaterialByValueInterface;
-use BaksDev\Materials\Catalog\Repository\CurrentMaterialIdentifier\CurrentMaterialDTO;
+use BaksDev\Materials\Catalog\Repository\CurrentMaterialIdentifier\CurrentMaterialResult;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Repository\MaterialSignProcessByOrderMaterial\MaterialSignProcessByOrderProductInterface;
@@ -137,7 +137,7 @@ final readonly class MaterialSignDoneByOrderCompletedDispatcher
                     ->forModificationValue($CurrentProductIdentifier->getModificationValue())
                     ->find();
 
-                if(false === ($CurrentMaterialDTO instanceof CurrentMaterialDTO))
+                if(false === ($CurrentMaterialDTO instanceof CurrentMaterialResult))
                 {
                     continue;
                 }

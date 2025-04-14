@@ -139,15 +139,16 @@ final class ReportController extends AbstractController
 
             }
 
-            $filename =
-                $MaterialSignReportDTO->getSeller()?->getAttr().'('.
-                $MaterialSignReportDTO->getFrom()->format(('d.m.Y')).'-'.
-                $MaterialSignReportDTO->getTo()->format(('d.m.Y')).').xlsx';
 
             $response = new StreamedResponse(function() use ($writer) {
                 $writer->save('php://output');
             }, Response::HTTP_OK);
 
+
+            $filename =
+                $MaterialSignReportDTO->getSeller()?->getAttr().'('.
+                $MaterialSignReportDTO->getFrom()->format(('d.m.Y')).'-'.
+                $MaterialSignReportDTO->getTo()->format(('d.m.Y')).').xlsx';
 
             // Redirect output to a client’s web browser (Xls)
             $response->headers->set('Content-Type', 'application/vnd.ms-excel');

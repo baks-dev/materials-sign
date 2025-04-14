@@ -89,7 +89,7 @@ class ExistsMaterialSignCodeTest extends KernelTestCase
         }
         else
         {
-            echo "В базе отсутствует «Честный знак»! ".self::class.':'.__LINE__.PHP_EOL;
+            echo PHP_EOL."В базе отсутствует «Честный знак»! ".self::class.':'.__LINE__.PHP_EOL;
             self::assertTrue(true);
         }
     }

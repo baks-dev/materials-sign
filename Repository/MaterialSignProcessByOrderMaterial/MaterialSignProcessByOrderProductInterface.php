@@ -34,11 +34,11 @@ interface MaterialSignProcessByOrderProductInterface
 {
     public function forOrder(Order|OrderUid|string $order): self;
 
-    public function forOfferConst(MaterialOfferConst|string|null $offer): self;
+    public function forOfferConst(MaterialOfferConst|string|null|false $offer): self;
 
-    public function forVariationConst(MaterialVariationConst|string|null $variation): self;
+    public function forVariationConst(MaterialVariationConst|string|null|false $variation): self;
 
-    public function forModificationConst(MaterialModificationConst|string|null $modification): self;
+    public function forModificationConst(MaterialModificationConst|string|null|false $modification): self;
 
     /**
      * Метод возвращает Честный знак на продукцию по заказу со статусом Process «В процессе»

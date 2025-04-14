@@ -74,7 +74,7 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
 
     public function forOfferConst(MaterialOfferConst|string|null|false $offer): self
     {
-        if($offer === null)
+        if(empty($offer))
         {
             $this->offer = false;
             return $this;
