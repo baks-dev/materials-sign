@@ -122,6 +122,10 @@ class MaterialsCodeRepackWebpCdnCommand extends Command
                 $UnCompressMaterialsCodeResult->getName()
             );
 
+            /**
+             * Выполняем обработку синхронно
+             */
+
             if($key === '0' || $key === 'Все')
             {
                 $compress = ($this->CDNUploadImage)($CDNUploadImageMessage);
@@ -136,11 +140,15 @@ class MaterialsCodeRepackWebpCdnCommand extends Command
                 }
             }
 
+            /**
+             * Отправляем в очередь для асинхронной обработки
+             */
+
             if($key === '+' || $key === 'Выполнить все асинхронно')
             {
                 $this->MessageDispatch->dispatch(
                     message: $CDNUploadImageMessage,
-                    transport: 'files-res'
+                    transport: 'files-res-low'
                 );
             }
 
