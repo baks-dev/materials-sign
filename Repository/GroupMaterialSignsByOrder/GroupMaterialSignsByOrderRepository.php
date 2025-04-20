@@ -26,24 +26,24 @@ declare(strict_types=1);
 namespace BaksDev\Materials\Sign\Repository\GroupMaterialSignsByOrder;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
+use BaksDev\Materials\Catalog\Entity\Event\MaterialEvent;
+use BaksDev\Materials\Catalog\Entity\Info\MaterialInfo;
+use BaksDev\Materials\Catalog\Entity\Material;
+use BaksDev\Materials\Catalog\Entity\Offers\MaterialOffer;
+use BaksDev\Materials\Catalog\Entity\Offers\Variation\MaterialVariation;
+use BaksDev\Materials\Catalog\Entity\Offers\Variation\Modification\MaterialModification;
+use BaksDev\Materials\Catalog\Entity\Trans\MaterialTrans;
+use BaksDev\Materials\Category\Entity\Offers\CategoryMaterialOffers;
+use BaksDev\Materials\Category\Entity\Offers\Variation\CategoryMaterialVariation;
+use BaksDev\Materials\Category\Entity\Offers\Variation\Modification\CategoryMaterialModification;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
-use BaksDev\Materials\Sign\Entity\Modify\MaterialSignModify;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusProcess;
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
-use BaksDev\Products\Category\Entity\Offers\CategoryProductOffers;
-use BaksDev\Products\Category\Entity\Offers\Variation\CategoryProductVariation;
-use BaksDev\Products\Category\Entity\Offers\Variation\Modification\CategoryProductModification;
-use BaksDev\Products\Product\Entity\Event\ProductEvent;
-use BaksDev\Products\Product\Entity\Offers\ProductOffer;
-use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModification;
-use BaksDev\Products\Product\Entity\Offers\Variation\ProductVariation;
-use BaksDev\Products\Product\Entity\Product;
-use BaksDev\Products\Product\Entity\Trans\ProductTrans;
 use Generator;
 use InvalidArgumentException;
 
@@ -137,40 +137,40 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
             );
 
 
+        // Material
         $dbal
-            ->addSelect("DATE(modify.mod_date) AS mod_date")
-            ->leftJoin(
-                'main',
-                MaterialSignModify::class,
-                'modify',
-                'modify.event = main.event'
-            );
-
-        // Product
-        $dbal
-            ->addSelect('product.id as product_id')
-            ->addSelect('product.event as product_event')
+            ->addSelect('material.id as material_id')
+            ->addSelect('material.event as material_event')
             ->join(
                 'invariable',
-                Product::class,
-                'product',
-                'product.id = invariable.product'
+                Material::class,
+                'material',
+                'material.id = invariable.material'
             );
 
         $dbal->join(
-            'product',
-            ProductEvent::class,
-            'product_event',
-            'product_event.id = product.event'
+            'material',
+            MaterialEvent::class,
+            'material_event',
+            'material_event.id = material.event'
         );
 
         $dbal
-            ->addSelect('product_trans.name as product_name')
+            ->leftJoin(
+                'material',
+                MaterialInfo::class,
+                'material_info',
+                'material_info.material = material.id'
+            );
+
+
+        $dbal
+            ->addSelect('material_trans.name as material_name')
             ->join(
-                'product',
-                ProductTrans::class,
-                'product_trans',
-                'product_trans.event = product.event AND product_trans.local = :local'
+                'material',
+                MaterialTrans::class,
+                'material_trans',
+                'material_trans.event = material.event AND material_trans.local = :local'
             );
 
 
@@ -179,92 +179,86 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
          */
 
         $dbal
-            ->addSelect('product_offer.const as product_offer_const')
-            ->addSelect('product_offer.id as product_offer_uid')
-            ->addSelect('product_offer.value as product_offer_value')
-            ->addSelect('product_offer.postfix as product_offer_postfix')
+            ->addSelect('material_offer.const as material_offer_const')
+            ->addSelect('material_offer.id as material_offer_uid')
+            ->addSelect('material_offer.value as material_offer_value')
             ->leftJoin(
-                'product',
-                ProductOffer::class,
-                'product_offer',
-                'product_offer.event = product.event AND product_offer.const = invariable.offer'
+                'material',
+                MaterialOffer::class,
+                'material_offer',
+                'material_offer.event = material.event AND material_offer.const = invariable.offer'
             );
-
 
         // Получаем тип торгового предложения
         $dbal
-            ->addSelect('category_offer.reference as product_offer_reference')
+            ->addSelect('category_offer.reference as material_offer_reference')
             ->leftJoin(
-                'product_offer',
-                CategoryProductOffers::class,
+                'material_offer',
+                CategoryMaterialOffers::class,
                 'category_offer',
-                'category_offer.id = product_offer.category_offer'
+                'category_offer.id = material_offer.category_offer'
             );
 
         // Множественные варианты торгового предложения
 
         $dbal
-            ->addSelect('product_variation.const as product_variation_const')
-            ->addSelect('product_variation.id as product_variation_uid')
-            ->addSelect('product_variation.value as product_variation_value')
-            ->addSelect('product_variation.postfix as product_variation_postfix')
+            ->addSelect('material_variation.const as material_variation_const')
+            ->addSelect('material_variation.id as material_variation_uid')
+            ->addSelect('material_variation.value as material_variation_value')
             ->leftJoin(
-                'product_offer',
-                ProductVariation::class,
-                'product_variation',
-                'product_variation.offer = product_offer.id AND product_variation.const = invariable.variation'
+                'material_offer',
+                MaterialVariation::class,
+                'material_variation',
+                'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation'
             );
 
 
         // Получаем тип множественного варианта
         $dbal
-            ->addSelect('category_variation.reference as product_variation_reference')
+            ->addSelect('category_variation.reference as material_variation_reference')
             ->leftJoin(
-                'product_variation',
-                CategoryProductVariation::class,
+                'material_variation',
+                CategoryMaterialVariation::class,
                 'category_variation',
-                'category_variation.id = product_variation.category_variation'
+                'category_variation.id = material_variation.category_variation'
             );
 
 
         // Модификация множественного варианта торгового предложения
 
         $dbal
-            ->addSelect('product_modification.const as product_modification_const')
-            ->addSelect('product_modification.id as product_modification_uid')
-            ->addSelect('product_modification.value as product_modification_value')
-            ->addSelect('product_modification.postfix as product_modification_postfix')
+            ->addSelect('material_modification.const as material_modification_const')
+            ->addSelect('material_modification.id as material_modification_uid')
+            ->addSelect('material_modification.value as material_modification_value')
             ->leftJoin(
-                'product_variation',
-                ProductModification::class,
-                'product_modification',
-                'product_modification.variation = product_variation.id AND product_modification.const = invariable.modification'
+                'material_variation',
+                MaterialModification::class,
+                'material_modification',
+                'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification'
             );
 
 
         // Получаем тип модификации множественного варианта
         $dbal
-            ->addSelect('category_offer_modification.reference as product_modification_reference')
+            ->addSelect('category_offer_modification.reference as material_modification_reference')
             ->leftJoin(
-                'product_modification',
-                CategoryProductModification::class,
+                'material_modification',
+                CategoryMaterialModification::class,
                 'category_offer_modification',
-                'category_offer_modification.id = product_modification.category_modification'
+                'category_offer_modification.id = material_modification.category_modification'
             );
 
-        // Артикул продукта
+        // Артикул сырья
         $dbal->addSelect(
             '
             COALESCE(
-                product_modification.article,
-                product_variation.article,
-                product_offer.article,
-                product_info.article
-            ) AS product_article'
+                material_modification.article,
+                material_variation.article,
+                material_offer.article,
+                material_info.article
+            ) AS material_article'
         );
 
-
-        $dbal->orderBy('DATE(modify.mod_date)', 'DESC');
 
         $dbal->allGroupByExclude();
 
