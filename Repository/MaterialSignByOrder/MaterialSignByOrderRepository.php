@@ -245,11 +245,11 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
         $dbal
             ->addSelect('main.id')
             ->join(
-            'event',
-            MaterialSign::class,
-            'main',
-            'main.id = event.main'
-        );
+                'event',
+                MaterialSign::class,
+                'main',
+                'main.id = event.main'
+            );
 
 
         if($this->material)
@@ -285,15 +285,13 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
 
 
         $dbal
-            ->addSelect(
-                "
+            ->addSelect("
                 CASE
                    WHEN code.name IS NOT NULL 
-                   THEN CONCAT ( '/upload/".$dbal->table(MaterialSignCode::class)."' , '/', code.name)
+                   THEN CONCAT ('/upload/".$dbal->table(MaterialSignCode::class)."' , '/', code.name)
                    ELSE NULL
                 END AS code_image
-            "
-            )
+            ")
             ->addSelect("code.ext AS code_ext")
             ->addSelect("code.cdn AS code_cdn")
             ->addSelect("code.event AS code_event")
