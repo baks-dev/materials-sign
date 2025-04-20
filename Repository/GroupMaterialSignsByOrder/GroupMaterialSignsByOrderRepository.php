@@ -140,7 +140,6 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
         // Material
         $dbal
             ->addSelect('material.id as material_id')
-            ->addSelect('material.event as material_event')
             ->join(
                 'invariable',
                 Material::class,
@@ -180,7 +179,6 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
 
         $dbal
             ->addSelect('material_offer.const as material_offer_const')
-            ->addSelect('material_offer.id as material_offer_uid')
             ->addSelect('material_offer.value as material_offer_value')
             ->leftJoin(
                 'material',
@@ -203,7 +201,6 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
 
         $dbal
             ->addSelect('material_variation.const as material_variation_const')
-            ->addSelect('material_variation.id as material_variation_uid')
             ->addSelect('material_variation.value as material_variation_value')
             ->leftJoin(
                 'material_offer',
@@ -228,7 +225,6 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
 
         $dbal
             ->addSelect('material_modification.const as material_modification_const')
-            ->addSelect('material_modification.id as material_modification_uid')
             ->addSelect('material_modification.value as material_modification_value')
             ->leftJoin(
                 'material_variation',
