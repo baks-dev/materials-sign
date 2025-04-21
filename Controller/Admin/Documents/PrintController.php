@@ -55,9 +55,12 @@ final class PrintController extends AbstractController
     ): Response
     {
 
-
         $codes = $materialSignByOrder
             ->forOrder($order)
+            ->material($material)
+            ->offer($offer)
+            ->variation($variation)
+            ->modification($modification)
             ->findAll();
 
         return $this->render(
