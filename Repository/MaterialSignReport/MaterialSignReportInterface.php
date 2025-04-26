@@ -30,6 +30,7 @@ use BaksDev\Materials\Category\Type\Id\CategoryMaterialUid;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use DateTimeImmutable;
+use Generator;
 
 interface MaterialSignReportInterface
 {
@@ -58,10 +59,10 @@ interface MaterialSignReportInterface
 
     public function onlyStatusDone(): self;
 
-    public function onlyStatusProcessOrDone(): self;
+    public function onlyStatusProcess(): self;
 
     /**
      * Метод получает все реализованные честные знаки
      */
-    public function findAll(): array|false;
+    public function findAll(): Generator|false;
 }

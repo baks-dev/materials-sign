@@ -44,10 +44,15 @@ use BaksDev\Materials\Sign\Entity\Modify\MaterialSignModify;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusDone;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusProcess;
+use BaksDev\Orders\Order\Entity\Invariable\OrderInvariable;
+use BaksDev\Orders\Order\Entity\Order;
+use BaksDev\Orders\Order\Entity\Products\OrderProduct;
+use BaksDev\Orders\Order\Entity\Products\Price\OrderPrice;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
+use Generator;
 use InvalidArgumentException;
 
 final class MaterialSignReportRepository implements MaterialSignReportInterface
@@ -90,6 +95,12 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
     public function fromSeller(UserProfileUid|string $seller): self
     {
+        if(empty($seller))
+        {
+            $this->seller = false;
+            return $this;
+        }
+
         if(is_string($seller))
         {
             $seller = new UserProfileUid($seller);
@@ -200,23 +211,19 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
         return $this;
     }
 
-    public function onlyStatusProcessOrDone(): self
+    public function onlyStatusProcess(): self
     {
         $this->status = MaterialSignStatusProcess::class;
 
         return $this;
     }
 
-
     /**
      * Метод получает все реализованные честные знаки
+     * @return Generator|false
      */
-    public function findAll(): array|false
+    public function findAll(): Generator|false
     {
-        if(false === ($this->seller instanceof UserProfileUid))
-        {
-            throw new InvalidArgumentException('Invalid Argument Seller');
-        }
 
         if(false === $this->status)
         {
@@ -229,20 +236,24 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
         $dbal->from(MaterialSignInvariable::class, 'invariable');
 
-        //        /**
-        //         * Если владелец не равен продавцу - применяем фильтр для передачи
-        //         * в противном случае запрос на списание
-        //         */
-        //        if(false === $this->profile->equals($this->seller))
-        //        {
-        //            $dbal
-        //                ->andWhere('invariable.profile = :profile')
-        //                ->setParameter(
-        //                    key: 'profile',
-        //                    value: $this->profile,
-        //                    type: UserProfileUid::TYPE
-        //                );
-        //        }
+        /** Если не передан владелец - обязательно должен быть передан Seller для отчета о выводе из оборота (розничная продажа) */
+
+        if(false === ($this->profile instanceof UserProfileUid))
+        {
+            if(false === ($this->seller instanceof UserProfileUid))
+            {
+                throw new InvalidArgumentException('Invalid Argument Seller');
+            }
+
+            /** Всегда получаем КИЗЫ по продавцу если нет владельца */
+            $dbal
+                ->andWhere('invariable.seller = :seller')
+                ->setParameter(
+                    key: 'seller',
+                    value: $this->seller,
+                    type: UserProfileUid::TYPE
+                );
+        }
 
 
         /** Если передан Владелец - получаем КИЗЫ для передачи между юр лицам  */
@@ -255,16 +266,25 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                     value: $this->profile,
                     type: UserProfileUid::TYPE
                 );
-        }
 
-        /** Всегда получаем КИЗЫ по продавцу */
-        $dbal
-            ->andWhere('invariable.seller = :seller')
-            ->setParameter(
-                key: 'seller',
-                value: $this->seller,
-                type: UserProfileUid::TYPE
-            );
+            /** Получаем все КИЗЫ для передачи */
+            if(false === ($this->seller instanceof UserProfileUid))
+            {
+                $dbal->andWhere('invariable.profile != invariable.seller ');
+            }
+
+            /** Получаем КИЗЫ для передачи по продавцу */
+            else
+            {
+                $dbal
+                    ->andWhere('invariable.seller = :seller')
+                    ->setParameter(
+                        key: 'seller',
+                        value: $this->seller,
+                        type: UserProfileUid::TYPE
+                    );
+            }
+        }
 
 
         if($this->material)
@@ -311,6 +331,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 );
         }
 
+
         $dbal
             ->join(
                 'invariable',
@@ -326,6 +347,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
 
         $dbal
+            ->addSelect('modify.mod_date AS date')
             ->join(
                 'invariable',
                 MaterialSignModify::class,
@@ -336,7 +358,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             ->setParameter('date_to', $this->to, Types::DATE_IMMUTABLE);
 
         $dbal
-            ->addSelect('code.code')
+            //->addSelect('code.code')
             ->leftJoin(
                 'invariable',
                 MaterialSignCode::class,
@@ -425,8 +447,75 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 'category_offer_modification.id = material_modification.category_modification'
             );
 
+
+        /** Информация о заказе */
+
+        $dbal->leftJoin(
+            'event',
+            Order::class,
+            'ord',
+            'ord.id = event.ord'
+        );
+
+        $dbal->leftJoin(
+            'event',
+            Order::class,
+            'ord',
+            'ord.id = event.ord'
+        );
+
+
+        $dbal
+            ->addSelect('order_invariable.number')
+            ->join(
+                'event',
+                OrderInvariable::class,
+                'order_invariable',
+                'order_invariable.main = event.ord'
+            );
+
+        $dbal
+            ->leftJoin(
+                'order_invariable',
+                OrderProduct::class,
+                'order_product',
+                'order_product.event = order_invariable.event'
+            );
+
+
+        $dbal
+            ->addSelect('SUM(order_price.price) AS total')
+            ->leftJoin(
+                'order_product',
+                OrderPrice::class,
+                'order_price',
+                'order_price.product = order_product.id'
+            );
+
+        $dbal->addSelect(
+            "JSON_AGG
+                    ( DISTINCT
+        
+                            JSONB_BUILD_OBJECT
+                            (
+                                'article', COALESCE(
+                                    material_modification.article, 
+                                    material_variation.article, 
+                                    material_offer.article
+                                ),
+
+                                'price', order_price.price,
+                                'code', code.code
+                            )
+        
+                    ) AS products"
+        );
+
+
         $dbal->allGroupByExclude();
 
-        return $dbal->fetchAllAssociative() ?: false;
+        $result = $dbal->fetchAllHydrate(MaterialSignReportResult::class);
+
+        return $result->valid() ? $result : false;
     }
 }

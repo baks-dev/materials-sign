@@ -72,9 +72,9 @@ final class TransferController extends AbstractController
                 ->dateFrom($MaterialSignReportDTO->getFrom())
                 ->dateTo($MaterialSignReportDTO->getTo());
 
-            /** Получаем только в процессе либо выполненные и удаляем только круглые скобки */
+            /** Получаем только в процессе */
             $data = $MaterialSignReport
-                ->onlyStatusProcessOrDone()
+                ->onlyStatusProcess()
                 ->findAll();
 
             if(false === $data)
