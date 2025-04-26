@@ -36,7 +36,6 @@ use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Entity\Modify\MaterialSignModify;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusNew;
-use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
@@ -46,8 +45,6 @@ use InvalidArgumentException;
 
 final class MaterialSignNewRepository implements MaterialSignNewInterface
 {
-    private ORMQueryBuilder $ORMQueryBuilder;
-
     private UserUid $user;
 
     private UserProfileUid $profile;
@@ -60,10 +57,7 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
 
     private MaterialModificationConst|false $modification = false;
 
-    public function __construct(ORMQueryBuilder $ORMQueryBuilder)
-    {
-        $this->ORMQueryBuilder = $ORMQueryBuilder;
-    }
+    public function __construct(private readonly ORMQueryBuilder $ORMQueryBuilder) {}
 
     public function forUser(User|UserUid|string $user): self
     {
@@ -185,32 +179,31 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
 
         $orm = $this->ORMQueryBuilder->createQueryBuilder(self::class);
 
-        $orm
-            ->from(MaterialSignInvariable::class, 'invariable');
+        $orm->from(MaterialSignInvariable::class, 'invariable');
 
         $orm
             ->where('invariable.usr = :usr')
             ->setParameter(
-                'usr',
-                $this->user,
-                UserUid::TYPE
+                key: 'usr',
+                value: $this->user,
+                type: UserUid::TYPE
             );
 
         $orm
             ->andWhere('invariable.material = :material')
             ->setParameter(
-                'material',
-                $this->material,
-                MaterialUid::TYPE
+                key: 'material',
+                value: $this->material,
+                type: MaterialUid::TYPE
             );
 
 
         $orm
             ->andWhere('(invariable.seller IS NULL OR invariable.seller = :seller)')
             ->setParameter(
-                'seller',
-                $this->profile,
-                UserProfileUid::TYPE
+                key: 'seller',
+                value: $this->profile,
+                type: UserProfileUid::TYPE
             );
 
         if($this->offer instanceof MaterialOfferConst)
@@ -218,9 +211,9 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
             $orm
                 ->andWhere('invariable.offer = :offer')
                 ->setParameter(
-                    'offer',
-                    $this->offer,
-                    MaterialOfferConst::TYPE
+                    key: 'offer',
+                    value: $this->offer,
+                    type: MaterialOfferConst::TYPE
                 );
         }
         else
@@ -234,9 +227,9 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
             $orm
                 ->andWhere('invariable.variation = :variation')
                 ->setParameter(
-                    'variation',
-                    $this->variation,
-                    MaterialVariationConst::TYPE
+                    key: 'variation',
+                    value: $this->variation,
+                    type: MaterialVariationConst::TYPE
                 );
         }
         else
@@ -249,9 +242,9 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
             $orm
                 ->andWhere('invariable.modification = :modification')
                 ->setParameter(
-                    'modification',
-                    $this->modification,
-                    MaterialModificationConst::TYPE
+                    key: 'modification',
+                    value: $this->modification,
+                    type: MaterialModificationConst::TYPE
                 );
         }
         else
@@ -278,9 +271,9 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
                 event.status = :status
             ')
             ->setParameter(
-                'status',
-                MaterialSignStatusNew::class,
-                MaterialSignStatus::TYPE
+                key: 'status',
+                value: MaterialSignStatusNew::class,
+                type: MaterialSignStatus::TYPE
             );
 
         $orm
@@ -300,9 +293,9 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
         $orm
             ->addOrderBy("CASE invariable.profile WHEN :profile THEN false ELSE true END")
             ->setParameter(
-                'profile',
-                $this->profile,
-                UserProfileUid::TYPE
+                key: 'profile',
+                value: $this->profile,
+                type: UserProfileUid::TYPE
             );
 
         /** Сортируем по дате, выбирая самый старый знак */

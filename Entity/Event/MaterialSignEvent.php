@@ -67,19 +67,19 @@ class MaterialSignEvent extends EntityEvent
     /**
      * Код честного знака
      */
-    #[ORM\OneToOne(targetEntity: MaterialSignCode::class, mappedBy: 'event', cascade: ['all'])]
+    #[ORM\OneToOne(targetEntity: MaterialSignCode::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
     private ?MaterialSignCode $code = null;
 
     /**
      * Постоянная величина
      */
-    #[ORM\OneToOne(targetEntity: MaterialSignInvariable::class, mappedBy: 'event', cascade: ['all'])]
+    #[ORM\OneToOne(targetEntity: MaterialSignInvariable::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
     private ?MaterialSignInvariable $invariable = null;
 
     /**
      * Модификатор
      */
-    #[ORM\OneToOne(targetEntity: MaterialSignModify::class, mappedBy: 'event', cascade: ['all'])]
+    #[ORM\OneToOne(targetEntity: MaterialSignModify::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
     private MaterialSignModify $modify;
 
     /**

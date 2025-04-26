@@ -40,7 +40,6 @@ use InvalidArgumentException;
 
 final class MaterialSignProcessByOrderProductRepository implements MaterialSignProcessByOrderProductInterface
 {
-    private ORMQueryBuilder $ORMQueryBuilder;
 
     private OrderUid $order;
 
@@ -50,10 +49,7 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
 
     private MaterialModificationConst|false $modification = false;
 
-    public function __construct(ORMQueryBuilder $ORMQueryBuilder)
-    {
-        $this->ORMQueryBuilder = $ORMQueryBuilder;
-    }
+    public function __construct(private readonly ORMQueryBuilder $ORMQueryBuilder) {}
 
     public function forOrder(Order|OrderUid|string $order): self
     {
@@ -146,17 +142,17 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
         $orm
             ->where('event.ord = :ord')
             ->setParameter(
-                'ord',
-                $this->order,
-                OrderUid::TYPE
+                key: 'ord',
+                value: $this->order,
+                type: OrderUid::TYPE
             );
 
         $orm
             ->andWhere('event.status = :status')
             ->setParameter(
-                'status',
-                MaterialSignStatusProcess::class,
-                MaterialSignStatus::TYPE
+                key: 'status',
+                value: MaterialSignStatusProcess::class,
+                type: MaterialSignStatus::TYPE
             );
 
         $orm->join(
@@ -179,9 +175,9 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
             $orm
                 ->andWhere('invariable.offer = :offer')
                 ->setParameter(
-                    'offer',
-                    $this->offer,
-                    MaterialOfferConst::TYPE
+                    key: 'offer',
+                    value: $this->offer,
+                    type: MaterialOfferConst::TYPE
                 );
         }
         else
@@ -194,9 +190,9 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
             $orm
                 ->andWhere('invariable.variation = :variation')
                 ->setParameter(
-                    'variation',
-                    $this->variation,
-                    MaterialVariationConst::TYPE
+                    key: 'variation',
+                    value: $this->variation,
+                    type: MaterialVariationConst::TYPE
                 );
 
         }
@@ -211,9 +207,9 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
             $orm
                 ->andWhere('invariable.modification = :modification')
                 ->setParameter(
-                    'modification',
-                    $this->modification,
-                    MaterialModificationConst::TYPE
+                    key: 'modification',
+                    value: $this->modification,
+                    type: MaterialModificationConst::TYPE
                 );
 
         }
