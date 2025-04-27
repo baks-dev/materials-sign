@@ -28,13 +28,14 @@ use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationCon
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
 use BaksDev\Materials\Category\Type\Id\CategoryMaterialUid;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
+use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use DateTimeImmutable;
 use Generator;
 
 interface MaterialSignReportInterface
 {
-    public function fromProfile(UserProfileUid|string $profile): self;
+    public function fromProfile(UserProfile|UserProfileUid|string $profile): self;
 
     public function fromSeller(UserProfileUid|string $seller): self;
 
@@ -63,6 +64,7 @@ interface MaterialSignReportInterface
 
     /**
      * Метод получает все реализованные честные знаки
+     * @return Generator{int, MaterialSignReportResult}|false
      */
     public function findAll(): Generator|false;
 }

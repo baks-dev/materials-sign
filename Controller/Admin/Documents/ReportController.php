@@ -94,51 +94,54 @@ final class ReportController extends AbstractController
             // Получаем текущий активный лист
             $sheet = $spreadsheet->getActiveSheet();
 
-            foreach($data as $key => $code)
+
+            $key = 1;
+
+            foreach($data as $item)
             {
-                //preg_match_all('/\(([A-Za-z0-9]{2})\)((?:(?!\([A-Za-z0-9]{2}\)).)*)/', $code['code'], $matches, PREG_SET_ORDER);
-                preg_match_all('/\((\d{2})\)((?:(?!\(\d{2}\)).)*)/', $code['code'], $matches, PREG_SET_ORDER);
+                if(false === $item->getProducts() || false === $item->getProducts()->valid())
+                {
+                    continue;
+                }
 
-                $name = $code['material_name'];
+                foreach($item->getProducts() as $product)
+                {
+                    $name = $product->getName();
 
-                $name = trim($name).' '.(isset($code['material_variation_reference']) ? $translator->trans($code['material_variation_value'], domain: $code['material_variation_reference']) : $code['material_variation_value']);
-                $name = trim($name).' '.(isset($code['material_modification_reference']) ? $translator->trans($code['material_modification_value'], domain: $code['material_modification_reference']) : $code['material_modification_value']);
-                $name = trim($name).' '.(isset($code['material_offer_reference']) ? $translator->trans($code['material_offer_value'], domain: $code['material_offer_reference']) : $code['material_offer_value']);
+                    if($product->getVariationValue())
+                    {
+                        $name = trim($name).' '.(
+                            $product->getVariationReference() ?
+                                $translator->trans(id: $product->getVariationValue(), domain: $product->getVariationReference()) :
+                                $product->getVariationValue()
+                            );
+                    }
 
-                $sheet->setCellValue('A'.$key, trim($name)); // Наименование товара
+                    if($product->getModificationValue())
+                    {
+                        $name = trim($name).' '.(
+                            $product->getModificationReference() ?
+                                $translator->trans(id: $product->getModificationValue(), domain: $product->getModificationReference()) :
+                                $product->getVariationValue()
+                            );
+                    }
 
-                /**
-                 *
-                 * 0 => array:3 [
-                 *      0 => "(01)04603766681641"
-                 *      1 => "01"
-                 *      2 => "04603766681641"
-                 * ]
-                 *
-                 * 1 => array:3 [
-                 *      0 => "(21)5fcCjIHGk-GCd"
-                 *      1 => "21"
-                 *      2 => "5fcCjIHGk-GCd"
-                 * ]
-                 *
-                 * 2 => array:3 [
-                 *      0 => "(91)EE10"
-                 *      1 => "91"
-                 *      2 => "EE10"
-                 * ]
-                 *
-                 * 3 => array:3 [
-                 *      0 => "(92)KYSaBIDv2w0ziz777fykgv0N0/CystKMUp4uE0F6goU="
-                 *      1 => "92"
-                 *      2 => "KYSaBIDv2w0ziz777fykgv0N0/CystKMUp4uE0F6goU="
-                 * ]
-                 */
+                    if($product->getOfferValue())
+                    {
+                        $name = trim($name).' '.(
+                            $product->getOfferReference() ?
+                                $translator->trans(id: $product->getOfferValue(), domain: $product->getOfferReference()) :
+                                $product->getOfferValue()
+                            );
+                    }
 
-                $sheet->setCellValue('B'.$key, $matches[0][2] ?? 'GTIN не определен'); // GTIN
-                $sheet->setCellValue('C'.$key, $matches[0][1].$matches[0][2].$matches[1][1].$matches[1][2]); // Код маркировки/агрегата
+                    $sheet->setCellValue('A'.$key, trim($name)); // Наименование товара
+                    $sheet->setCellValue('B'.$key, $product->getGtin()); // GTIN
+                    $sheet->setCellValue('C'.$key, $product->codeSmallFormat()); // Код маркировки/агрегата
 
+                    $key++;
+                }
             }
-
 
             $response = new StreamedResponse(function() use ($writer) {
                 $writer->save('php://output');

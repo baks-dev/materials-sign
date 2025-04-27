@@ -25,26 +25,25 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Repository\MaterialSignReport;
 
+use BaksDev\Reference\Money\Type\Money;
 use DateTimeImmutable;
+use Generator;
+use JsonException;
 
-final readonly class MaterialSignReportResult
+final class MaterialSignReportResult
 {
+    private array $items;
+
     public function __construct(
 
-        private string $date,
+        private readonly string $number,
+        private readonly string $date,
+        private readonly string $seller,
 
-        private string $code,
-        private string $total,
-        private string $material_name,
+        private readonly string $total,
 
-        private ?string $material_offer_value,
-        private ?string $material_offer_reference,
+        private readonly string $products,
 
-        private ?string $material_variation_value,
-        private ?string $material_variation_reference,
-
-        private ?string $material_modification_value,
-        private ?string $material_modification_reference,
 
     ) {}
 
@@ -53,69 +52,71 @@ final readonly class MaterialSignReportResult
         return new DateTimeImmutable($this->date);
     }
 
-
-    public function getCode(): string
+    public function getNumber(): string
     {
-        return $this->code;
+        return $this->number;
     }
 
-    public function getMaterialName(): string
-    {
-        return $this->material_name;
-    }
 
     /**
-     * Offer
+     * @return Generator{ int, MaterialSignReportProductDTO }|false
+     * @throws JsonException
      */
-
-    public function getMaterialOfferValue(): ?string
+    public function getProducts(): Generator|false
     {
-        return $this->material_offer_value;
+        if(false === json_validate($this->products))
+        {
+            return false;
+        }
+
+        $items = json_decode($this->products, true, 512, JSON_THROW_ON_ERROR);
+
+        foreach($items as $item)
+        {
+            yield new MaterialSignReportProductDTO(...$item);
+        }
     }
 
-    public function getMaterialOfferReference(): ?string
+    public function getTotalPrice(): Money
     {
-        return $this->material_offer_reference;
-    }
-
-    /**
-     * Variation
-     */
-
-    public function getMaterialVariationValue(): ?string
-    {
-        return $this->material_variation_value;
-    }
-
-    public function getMaterialVariationReference(): ?string
-    {
-        return $this->material_variation_reference;
-    }
-
-    /**
-     * Modification
-     */
-
-    public function getMaterialModificationValue(): ?string
-    {
-        return $this->material_modification_value;
-    }
-
-    public function getMaterialModificationReference(): ?string
-    {
-        return $this->material_modification_reference;
+        return new Money($this->total, true);
     }
 
 
     public function getInn(): int
     {
-        return 5047263117;
+        /* TODO: взять из настроек профиля Юр. Лица !!! */
+
+        // Turkish Shop
+        if($this->seller === '01951022-1ba3-7bcc-8583-654b2e001c67')
+        {
+            return 5047154781;
+        }
+
+        // Оникс
+        if($this->seller === '01951024-5f14-72a6-9106-79cc62138b47')
+        {
+            return 5047263117;
+        }
+
+        return 100000000;
     }
 
     public function getKpp(): int
     {
-        return 504701001;
+        // Turkish Shop
+        if($this->seller === '01951022-1ba3-7bcc-8583-654b2e001c67')
+        {
+            return 504701001;
+        }
+
+        // Оникс
+        if($this->seller === '01951024-5f14-72a6-9106-79cc62138b47')
+        {
+            return 504701001;
+        }
+
+
+        return 1000000000;
     }
-
-
 }

@@ -27,12 +27,10 @@ namespace BaksDev\Materials\Sign\Controller\Public;
 
 
 use BaksDev\Core\Controller\AbstractController;
-use BaksDev\Core\Form\Search\SearchDTO;
-use BaksDev\Core\Form\Search\SearchForm;
-use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Materials\Sign\Repository\MaterialSignReport\MaterialSignReportInterface;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use DateTimeImmutable;
+use DateTimeInterface;
 use InvalidArgumentException;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -86,12 +84,52 @@ final class ExportTransferController extends AbstractController
         /** Получаем только со статусом в процессе за указанный период */
 
         $data = $MaterialSignReport
-            ->fromProfile($profile)
+            ->fromProfile($profile->getId())
             ->onlyStatusProcess()
             ->dateFrom($from)
             ->dateTo($to)
             ->findAll();
 
-        return new JsonResponse([]);
+        if(false === $data || false === $data->valid())
+        {
+            return new JsonResponse([
+                'status' => 404,
+                'message' => 'За указанный период честных знаков не найдено'
+            ], status: 404);
+        }
+
+        $rows = null;
+
+        foreach($data as $key => $item)
+        {
+            /** Номер заказа */
+            $rows[$key]['number'] = $item->getNumber();
+
+            /** Дата доставки в формате ISO8601 */
+            $rows[$key]['date'] = $item->getDate()->format(DateTimeInterface::ATOM);
+
+            $rows[$key]['clientinn'] = $item->getInn();
+
+            $rows[$key]['clientKPP'] = $item->getKpp();
+
+            /** Полная стоимость заказа */
+            $rows[$key]['documentamount'] = $item->getTotalPrice()->getValue();
+
+            if(false === $item->getProducts() || false === $item->getProducts()->valid())
+            {
+                continue;
+            }
+
+            foreach($item->getProducts() as $i => $MaterialSignReportProductDTO)
+            {
+                $rows[$key]['goods'][$i]['good'] = $MaterialSignReportProductDTO->getArticle(); // артикул
+                $rows[$key]['goods'][$i]['count'] = $MaterialSignReportProductDTO->getCount(); // количество
+                $rows[$key]['goods'][$i]['price'] = $MaterialSignReportProductDTO->getPrice()->getValue(); // цена товара
+                $rows[$key]['goods'][$i]['amount'] = $MaterialSignReportProductDTO->getAmount()->getValue(); // стоимость с учетом количества
+                $rows[$key]['goods'][$i]['markingcode'] = $MaterialSignReportProductDTO->codeSmallFormat(); // короткий код
+            }
+        }
+
+        return new JsonResponse($rows);
     }
 }

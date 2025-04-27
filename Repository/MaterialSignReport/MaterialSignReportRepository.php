@@ -49,6 +49,7 @@ use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Entity\Products\Price\OrderPrice;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
+use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
@@ -81,11 +82,22 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
         $this->to = new DateTimeImmutable('now');
     }
 
-    public function fromProfile(UserProfileUid|string $profile): self
+    public function fromProfile(UserProfile|UserProfileUid|string $profile): self
     {
+        if(empty($profile))
+        {
+            $this->profile = false;
+            return $this;
+        }
+
         if(is_string($profile))
         {
             $profile = new UserProfileUid($profile);
+        }
+
+        if($profile instanceof UserProfile)
+        {
+            $profile = $profile->getId();
         }
 
         $this->profile = $profile;
@@ -220,7 +232,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
     /**
      * Метод получает все реализованные честные знаки
-     * @return Generator|false
+     * @return Generator{int, MaterialSignReportResult}|false
      */
     public function findAll(): Generator|false
     {
@@ -285,6 +297,8 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                     );
             }
         }
+
+        $dbal->addSelect('invariable.seller');
 
 
         if($this->material)
@@ -377,7 +391,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
         );
 
         $dbal
-            ->addSelect('material_trans.name as material_name')
+            //->addSelect('material_trans.name as material_name')
             ->join(
                 'material',
                 MaterialTrans::class,
@@ -388,40 +402,40 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
         /** Свойства торговых предложений */
 
         $dbal
-            ->addSelect('material_offer.value as material_offer_value')
+            //->addSelect('material_offer.value as material_offer_value')
             ->leftJoin(
                 'material',
                 MaterialOffer::class,
                 'material_offer',
                 'material_offer.event = material.event AND material_offer.const = invariable.offer'
-            )
-            ->addOrderBy('material_offer.value');
+            );
+        //->addOrderBy('material_offer.value');
 
         $dbal
-            ->addSelect('material_variation.value as material_variation_value')
+            //->addSelect('material_variation.value as material_variation_value')
             ->leftJoin(
                 'material_offer',
                 MaterialVariation::class,
                 'material_variation',
                 'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation'
-            )
-            ->addOrderBy('material_variation.value');
+            );
+        //->addOrderBy('material_variation.value');
 
         $dbal
-            ->addSelect('material_modification.value as material_modification_value')
+            //->addSelect('material_modification.value as material_modification_value')
             ->leftJoin(
                 'material_variation',
                 MaterialModification::class,
                 'material_modification',
                 'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification'
-            )
-            ->addOrderBy('material_modification.value');
+            );
+        //->addOrderBy('material_modification.value');
 
 
         /** Настройки категорий */
 
         $dbal
-            ->addSelect('category_offer.reference as material_offer_reference')
+            //->addSelect('category_offer.reference as material_offer_reference')
             ->leftJoin(
                 'material_offer',
                 CategoryMaterialOffers::class,
@@ -430,7 +444,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             );
 
         $dbal
-            ->addSelect('category_variation.reference as material_variation_reference')
+            ///->addSelect('category_variation.reference as material_variation_reference')
             ->leftJoin(
                 'material_variation',
                 CategoryMaterialVariation::class,
@@ -439,23 +453,16 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             );
 
         $dbal
-            ->addSelect('category_offer_modification.reference as material_modification_reference')
+            //->addSelect('category_offer_modification.reference as material_modification_reference')
             ->leftJoin(
                 'material_modification',
                 CategoryMaterialModification::class,
-                'category_offer_modification',
-                'category_offer_modification.id = material_modification.category_modification'
+                'category_modification',
+                'category_modification.id = material_modification.category_modification'
             );
 
 
         /** Информация о заказе */
-
-        $dbal->leftJoin(
-            'event',
-            Order::class,
-            'ord',
-            'ord.id = event.ord'
-        );
 
         $dbal->leftJoin(
             'event',
@@ -498,6 +505,17 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
         
                             JSONB_BUILD_OBJECT
                             (
+                                'name', material_trans.name,
+                                
+                                'offer_value', material_offer.value,
+                                'offer_reference', category_offer.reference,
+                                
+                                'variation_value', material_variation.value,
+                                'variation_reference', category_variation.reference,
+                                
+                                'modification_value', material_modification.value,
+                                'modification_reference', category_modification.reference,
+                                
                                 'article', COALESCE(
                                     material_modification.article, 
                                     material_variation.article, 
@@ -505,11 +523,16 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                                 ),
 
                                 'price', order_price.price,
+                                'count', order_price.total,
                                 'code', code.code
                             )
         
                     ) AS products"
         );
+
+        /**
+         * Информация о продавце
+         */
 
 
         $dbal->allGroupByExclude();
