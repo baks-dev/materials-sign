@@ -60,7 +60,6 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
     public function __construct(
         #[Target('materialsSignLogger')] private LoggerInterface $logger,
         private ProductStocksEventInterface $ProductStocksEventRepository,
-        private CurrentProductStocksInterface $CurrentProductStocks,
         private UserByUserProfileInterface $userByUserProfile,
         private DeduplicatorInterface $deduplicator,
         private CurrentProductIdentifierByConstInterface $CurrentProductIdentifierByConst,
@@ -97,7 +96,6 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
                 [self::class.':'.__LINE__, var_export($message, true)]
             );
 
-
             return;
         }
 
@@ -121,6 +119,16 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
             return;
         }
 
+        if(false === $ProductStockEvent->isInvariable())
+        {
+            $this->logger->warning(
+                'Заявка на упаковку не может определить ProductStocksInvariable',
+                [self::class.':'.__LINE__, var_export($message, true)]
+            );
+
+            return;
+        }
+
         // Получаем всю продукцию в ордере
         $products = $ProductStockEvent->getProduct();
 
@@ -128,28 +136,17 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
         {
             $this->logger->warning(
                 'Заявка на упаковку не имеет продукции в коллекции',
-                [$message, self::class.':'.__LINE__]
+                [self::class.':'.__LINE__, var_export($message, true)]
             );
 
             return;
         }
 
+
         /**
-         * Определяем пользователя профилю в заявке
+         * Определяем пользователя по профилю в заявке
          */
-
-        if(false === ($ProductStockEvent->getStocksProfile() instanceof UserProfileUid))
-        {
-            $ProductStockEvent = $this->CurrentProductStocks
-                ->getCurrentEvent($message->getId());
-
-            if(false === ($ProductStockEvent instanceof ProductStockEvent))
-            {
-                return;
-            }
-        }
-
-        $UserProfileUid = $ProductStockEvent->getStocksProfile();
+        $UserProfileUid = $ProductStockEvent->getInvariable()?->getProfile();
 
         $User = $this->userByUserProfile
             ->forProfile($UserProfileUid)
@@ -163,7 +160,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
                         'products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ',
                         $UserProfileUid
                     ),
-                    [$message, self::class.':'.__LINE__]
+                    [self::class.':'.__LINE__, var_export($message, true)]
                 );
 
             return;

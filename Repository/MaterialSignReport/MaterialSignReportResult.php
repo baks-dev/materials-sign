@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Repository\MaterialSignReport;
 
+use BaksDev\Field\Pack\Inn\Type\InnField;
+use BaksDev\Field\Pack\Kpp\Type\KppField;
 use BaksDev\Reference\Money\Type\Money;
 use DateTimeImmutable;
 use Generator;
@@ -44,6 +46,7 @@ final class MaterialSignReportResult
 
         private readonly string $products,
 
+        private readonly ?string $profile_value = null,
 
     ) {}
 
@@ -83,40 +86,101 @@ final class MaterialSignReportResult
     }
 
 
+    /**
+     * @throws JsonException
+     */
     public function getInn(): int
     {
-        /* TODO: взять из настроек профиля Юр. Лица !!! */
+        $default = 100000000;
 
-        // Turkish Shop
-        if($this->seller === '01951022-1ba3-7bcc-8583-654b2e001c67')
+        if(is_null($this->profile_value))
         {
-            return 5047154781;
+            return $default;
         }
 
-        // Оникс
-        if($this->seller === '01951024-5f14-72a6-9106-79cc62138b47')
+        if(false === json_validate($this->profile_value))
         {
-            return 5047263117;
+            return $default;
         }
 
-        return 100000000;
+        $values = array_filter(
+            json_decode($this->profile_value, false, 512, JSON_THROW_ON_ERROR),
+            static fn($n) => $n->type === InnField::TYPE
+        );
+
+        $value = current($values);
+
+        if(false === $value)
+        {
+            return $default;
+        }
+
+        return $value;
+
+
+        //        /* TODO: взять из настроек профиля Юр. Лица !!! */
+        //
+        //        // Turkish Shop
+        //        if($this->seller === '01951022-1ba3-7bcc-8583-654b2e001c67')
+        //        {
+        //            return 5047154781;
+        //        }
+        //
+        //        // Оникс
+        //        if($this->seller === '01951024-5f14-72a6-9106-79cc62138b47')
+        //        {
+        //            return 5047263117;
+        //        }
+        //
+        //        return 100000000;
     }
 
+    /**
+     * @throws JsonException
+     */
     public function getKpp(): int
     {
-        // Turkish Shop
-        if($this->seller === '01951022-1ba3-7bcc-8583-654b2e001c67')
+
+        $default = 100000000;
+
+        if(is_null($this->profile_value))
         {
-            return 504701001;
+            return $default;
         }
 
-        // Оникс
-        if($this->seller === '01951024-5f14-72a6-9106-79cc62138b47')
+        if(false === json_validate($this->profile_value))
         {
-            return 504701001;
+            return $default;
         }
 
+        $values = array_filter(
+            json_decode($this->profile_value, false, 512, JSON_THROW_ON_ERROR),
+            static fn($n) => $n->type === KppField::TYPE
+        );
 
-        return 1000000000;
+        $value = current($values);
+
+        if(false === $value)
+        {
+            return $default;
+        }
+
+        return $value;
+
+
+        //        // Turkish Shop
+        //        if($this->seller === '01951022-1ba3-7bcc-8583-654b2e001c67')
+        //        {
+        //            return 504701001;
+        //        }
+        //
+        //        // Оникс
+        //        if($this->seller === '01951024-5f14-72a6-9106-79cc62138b47')
+        //        {
+        //            return 504701001;
+        //        }
+        //
+        //
+        //        return 1000000000;
     }
 }

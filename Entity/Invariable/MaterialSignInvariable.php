@@ -84,6 +84,10 @@ class MaterialSignInvariable extends EntityReadonly
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $number = null;
 
+    /**
+     * Сырье
+     */
+
     /** ID сырья */
     #[Assert\NotBlank]
     #[Assert\Uuid]

@@ -49,7 +49,9 @@ use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Entity\Products\Price\OrderPrice;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
+use BaksDev\Users\Profile\TypeProfile\Entity\Section\Fields\TypeProfileSectionField;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
+use BaksDev\Users\Profile\UserProfile\Entity\Value\UserProfileValue;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
@@ -371,14 +373,12 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             ->setParameter('date_from', $this->from, Types::DATE_IMMUTABLE)
             ->setParameter('date_to', $this->to, Types::DATE_IMMUTABLE);
 
-        $dbal
-            //->addSelect('code.code')
-            ->leftJoin(
-                'invariable',
-                MaterialSignCode::class,
-                'code',
-                'code.main = invariable.main'
-            );
+        $dbal->leftJoin(
+            'invariable',
+            MaterialSignCode::class,
+            'code',
+            'code.main = invariable.main'
+        );
 
 
         /** Сырье */
@@ -390,76 +390,60 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             'material.id = invariable.material'
         );
 
-        $dbal
-            //->addSelect('material_trans.name as material_name')
-            ->join(
-                'material',
-                MaterialTrans::class,
-                'material_trans',
-                'material_trans.event = material.event AND material_trans.local = :local'
-            );
+        $dbal->join(
+            'material',
+            MaterialTrans::class,
+            'material_trans',
+            'material_trans.event = material.event AND material_trans.local = :local'
+        );
 
         /** Свойства торговых предложений */
 
-        $dbal
-            //->addSelect('material_offer.value as material_offer_value')
-            ->leftJoin(
-                'material',
-                MaterialOffer::class,
-                'material_offer',
-                'material_offer.event = material.event AND material_offer.const = invariable.offer'
-            );
-        //->addOrderBy('material_offer.value');
+        $dbal->leftJoin(
+            'material',
+            MaterialOffer::class,
+            'material_offer',
+            'material_offer.event = material.event AND material_offer.const = invariable.offer'
+        );
 
         $dbal
-            //->addSelect('material_variation.value as material_variation_value')
             ->leftJoin(
                 'material_offer',
                 MaterialVariation::class,
                 'material_variation',
                 'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation'
             );
-        //->addOrderBy('material_variation.value');
 
-        $dbal
-            //->addSelect('material_modification.value as material_modification_value')
-            ->leftJoin(
-                'material_variation',
-                MaterialModification::class,
-                'material_modification',
-                'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification'
-            );
-        //->addOrderBy('material_modification.value');
+        $dbal->leftJoin(
+            'material_variation',
+            MaterialModification::class,
+            'material_modification',
+            'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification'
+        );
 
 
         /** Настройки категорий */
 
-        $dbal
-            //->addSelect('category_offer.reference as material_offer_reference')
-            ->leftJoin(
-                'material_offer',
-                CategoryMaterialOffers::class,
-                'category_offer',
-                'category_offer.id = material_offer.category_offer'
-            );
+        $dbal->leftJoin(
+            'material_offer',
+            CategoryMaterialOffers::class,
+            'category_offer',
+            'category_offer.id = material_offer.category_offer'
+        );
 
-        $dbal
-            ///->addSelect('category_variation.reference as material_variation_reference')
-            ->leftJoin(
-                'material_variation',
-                CategoryMaterialVariation::class,
-                'category_variation',
-                'category_variation.id = material_variation.category_variation'
-            );
+        $dbal->leftJoin(
+            'material_variation',
+            CategoryMaterialVariation::class,
+            'category_variation',
+            'category_variation.id = material_variation.category_variation'
+        );
 
-        $dbal
-            //->addSelect('category_offer_modification.reference as material_modification_reference')
-            ->leftJoin(
-                'material_modification',
-                CategoryMaterialModification::class,
-                'category_modification',
-                'category_modification.id = material_modification.category_modification'
-            );
+        $dbal->leftJoin(
+            'material_modification',
+            CategoryMaterialModification::class,
+            'category_modification',
+            'category_modification.id = material_modification.category_modification'
+        );
 
 
         /** Информация о заказе */
@@ -530,9 +514,43 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                     ) AS products"
         );
 
+
         /**
          * Информация о продавце
          */
+
+        $dbal->leftJoin(
+            'invariable',
+            UserProfile::class,
+            'profile',
+            'profile.id = invariable.seller'
+        );
+
+        $dbal->leftJoin(
+            'profile',
+            UserProfileValue::class,
+            'profile_value',
+            'profile_value.event = profile.event'
+        );
+
+        $dbal->leftJoin(
+            'profile_value',
+            TypeProfileSectionField::class,
+            'profile_field',
+            'profile_field.id = profile_value.field'
+        );
+
+        $dbal->addSelect(
+            "JSON_AGG ( DISTINCT
+
+                JSONB_BUILD_OBJECT
+                (
+                    'value', material_offer.value,
+                    'type', profile_field.type,
+                )
+
+            ) AS profile_value"
+        );
 
 
         $dbal->allGroupByExclude();

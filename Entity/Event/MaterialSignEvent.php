@@ -91,6 +91,7 @@ class MaterialSignEvent extends EntityEvent
     /**
      * Профиль пользователя (null - общий)
      * @deprecated переносится в MaterialSignInvariable
+     * @see MaterialSignInvariable
      */
     #[ORM\Column(type: UserProfileUid::TYPE, nullable: true)]
     private ?UserProfileUid $profile = null;
