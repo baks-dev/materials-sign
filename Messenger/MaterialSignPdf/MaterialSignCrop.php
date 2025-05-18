@@ -26,9 +26,11 @@ declare(strict_types=1);
 namespace BaksDev\Materials\Sign\Messenger\MaterialSignPdf;
 
 use BaksDev\Barcode\Reader\BarcodeRead;
+use Psr\Log\LoggerInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Process\Process;
@@ -37,9 +39,9 @@ use Symfony\Component\Process\Process;
 final readonly class MaterialSignCrop
 {
     public function __construct(
+        #[Target('materialsSignLogger')] private LoggerInterface $logger,
         #[Autowire('%kernel.project_dir%')] private string $upload,
         private Filesystem $filesystem,
-        private BarcodeRead $barcodeRead,
     ) {}
 
     /**
@@ -108,6 +110,21 @@ final readonly class MaterialSignCrop
 
             if(false === $info->getRealPath() || false === file_exists($info->getRealPath()))
             {
+                continue;
+            }
+
+            /**
+             * Проверяем размер файла (пропускаем пустые страницы переименовав в error.txt)
+             */
+            if($info->getSize() < 100)
+            {
+                $this->filesystem->rename($info->getRealPath(), $info->getRealPath().'.error.txt');
+
+                $this->logger->critical(
+                    'Ошибка при удалении неразмеченной пустой области в файле PDF',
+                    [$info->getRealPath(), self::class.':'.__LINE__],
+                );
+
                 continue;
             }
 
