@@ -42,10 +42,10 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'baks:materials:code:repack:webp:cdn',
+    name: 'baks:materials-sign:repack:code-images-webp-cdn',
     description: 'Сжатие стикеров сырья которые не пережаты'
 )]
-class MaterialsCodeRepackWebpCdnCommand extends Command
+class MaterialsCodeRepackImagesWebpCdnCommand extends Command
 {
     public function __construct(
         private readonly UnCompressMaterialsCodeInterface $UnCompressMaterialsCode,
@@ -62,6 +62,7 @@ class MaterialsCodeRepackWebpCdnCommand extends Command
 
         /** Получаем все изображения продукта без сжатия */
         $images = $this->UnCompressMaterialsCode->findAll();
+
 
         if(false === $images || false === $images->valid())
         {
@@ -83,7 +84,7 @@ class MaterialsCodeRepackWebpCdnCommand extends Command
         $question = new ChoiceQuestion(
             question: 'Сжатие стикеров Честных знаков продукции (Ctrl+C чтобы выйти)',
             choices: $questions,
-            default: '0'
+            default: '0',
         );
 
         $key = $helper->ask($input, $output, $question);
@@ -110,7 +111,7 @@ class MaterialsCodeRepackWebpCdnCommand extends Command
             {
                 $io->writeln(sprintf(
                     '<fg=red>Ошибка при сжатии изображения: класс %s не найден</>',
-                    $UnCompressMaterialsCodeResult->getEntity()
+                    $UnCompressMaterialsCodeResult->getEntity(),
                 ));
 
                 return Command::FAILURE;
@@ -119,7 +120,7 @@ class MaterialsCodeRepackWebpCdnCommand extends Command
             $CDNUploadImageMessage = new CDNUploadImageMessage(
                 $UnCompressMaterialsCodeResult->getIdentifier(),
                 $UnCompressMaterialsCodeResult->getEntity(),
-                $UnCompressMaterialsCodeResult->getName()
+                $UnCompressMaterialsCodeResult->getName(),
             );
 
             /**
@@ -135,7 +136,7 @@ class MaterialsCodeRepackWebpCdnCommand extends Command
                     $io->writeln(sprintf(
                             '<fg=red>Ошибка при сжатии изображения %s: %s</>',
                             $UnCompressMaterialsCodeResult->getEntity(),
-                            $UnCompressMaterialsCodeResult->getIdentifier())
+                            $UnCompressMaterialsCodeResult->getIdentifier()),
                     );
                 }
             }
@@ -148,12 +149,13 @@ class MaterialsCodeRepackWebpCdnCommand extends Command
             {
                 $this->MessageDispatch->dispatch(
                     message: $CDNUploadImageMessage,
-                    transport: 'files-res-low'
+                    transport: 'files-res-low',
                 );
             }
 
             $progressBar->advance();
         }
+
 
         $progressBar->finish();
         $io->success('Изображения успешно сжаты');
