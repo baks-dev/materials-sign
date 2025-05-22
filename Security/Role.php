@@ -37,6 +37,8 @@ final class Role implements RoleInterface, MenuAdminInterface
 {
     public const string ROLE = 'ROLE_MATERIAL_SIGN';
 
+    public const string KEY = 'zDRKMwJ';
+
     public function getRole(): string
     {
         return self::ROLE;
@@ -51,6 +53,14 @@ final class Role implements RoleInterface, MenuAdminInterface
     public function getPath(): string
     {
         return 'materials-sign:admin.index';
+    }
+
+    /**
+     * Метод возвращает ключ раздела (для меню телеграм)
+     */
+    public function getPathKey(): string
+    {
+        return self::KEY;
     }
 
     /** Метод возвращает секцию, в которую помещается ссылка на раздел */
