@@ -33,10 +33,8 @@ use BaksDev\Files\Resources\Upload\UploadEntityInterface;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Repository\MaterialSignCodeByDigest\MaterialSignCodeByDigestInterface;
 use BaksDev\Products\Product\Repository\UnCompressProductsImages\UnCompressProductsImagesResult;
-use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
 use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use ReflectionAttribute;
 use ReflectionClass;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -68,7 +66,6 @@ class MaterialsCodeRepackDirectoryWebpCdnCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-
 
         $helper = $this->getHelper('question');
 
@@ -102,10 +99,12 @@ class MaterialsCodeRepackDirectoryWebpCdnCommand extends Command
 
         /** Выделяем из сущности название таблицы для директории файлов */
         $ref = new ReflectionClass(MaterialSignCode::class);
+
         /** @var ReflectionAttribute $current */
         $current = current($ref->getAttributes(Table::class));
         $TABLE = $current->getArguments()['name'] ?? 'images';
 
+        $upload = null;
         $upload[] = $this->upload;
         $upload[] = 'public';
         $upload[] = 'upload';
@@ -114,11 +113,9 @@ class MaterialsCodeRepackDirectoryWebpCdnCommand extends Command
         $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
 
         $directory = new RecursiveDirectoryIterator($uploadDir);
-        $iterator = new RecursiveIteratorIterator($directory);
 
-
-        /** @var DirectoryIterator $info */
-        foreach($iterator as $info)
+        /** @var RecursiveDirectoryIterator $info */
+        foreach($directory as $info)
         {
             if(false === $info->isDir())
             {
@@ -134,7 +131,6 @@ class MaterialsCodeRepackDirectoryWebpCdnCommand extends Command
                 $io->warning(sprintf('Честный знак %s не найден в базе данных', $info->getFilename()));
                 continue;
             }
-
 
             $CDNUploadImageMessage = new CDNUploadImageMessage(
                 $MaterialSignCodeByDigest->getIdentifier(),
@@ -153,8 +149,8 @@ class MaterialsCodeRepackDirectoryWebpCdnCommand extends Command
                 if($compress === false)
                 {
                     $io->writeln(sprintf(
-                            '<fg=red>Ошибка при сжатии изображения: %s</>',
-                            $MaterialSignCodeByDigest->getIdentifier()),
+                        '<fg=red>Ошибка при сжатии изображения: %s</>',
+                        $MaterialSignCodeByDigest->getIdentifier()),
                     );
                 }
             }
