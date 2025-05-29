@@ -546,7 +546,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 JSONB_BUILD_OBJECT
                 (
                     'value', material_offer.value,
-                    'type', profile_field.type,
+                    'type', profile_field.type
                 )
 
             ) AS profile_value"
