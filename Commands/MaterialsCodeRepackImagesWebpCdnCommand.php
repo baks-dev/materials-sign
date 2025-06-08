@@ -43,7 +43,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'baks:materials-sign:repack:code-images-webp-cdn',
-    description: 'Сжатие стикеров сырья которые не пережаты'
+    description: 'Сжатие стикеров сырья которые не пережаты в базе данных'
 )]
 class MaterialsCodeRepackImagesWebpCdnCommand extends Command
 {
