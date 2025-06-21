@@ -82,25 +82,41 @@ final class TxtController extends AbstractController
             {
                 /** Обрезаем честный знак до длины */
 
-                // Позиция для третьей группы
-                $thirdGroupPos = -1;
+                $code = explode('(91)EE10(92)', $data['code_string']);
 
-                preg_match_all('/\((\d{2})\)/', $data['code_string'], $matches, PREG_OFFSET_CAPTURE);
+                // Преобразуем строку в массив символов
+                $chars = str_split(current($code));
 
-                if(count($matches[0]) >= 3)
+                // Удаляем символы по указанным позициям (индексы начинаются с 0)
+
+                // 1 символ (индекс 0)
+                if($chars[0] === '(')
                 {
-                    $thirdGroupPos = $matches[0][2][1];
+                    unset($chars[0]);
                 }
 
-                // Если находимся на третьей группе, обрезаем строку
-                if($thirdGroupPos !== -1)
+                // 4 символ (индекс 3)
+                if($chars[3] === ')')
                 {
-                    $markingcode = substr($data['code_string'], 0, $thirdGroupPos);
-                    // Убираем круглые скобки
-                    $data['code_string'] = preg_replace('/\((\d{2})\)/', '$1', $markingcode);
+                    unset($chars[3]);
                 }
 
-                fwrite($handle, $data['code_string'].PHP_EOL);
+                // 19 символ (индекс 18)
+                if($chars[18] === '(')
+                {
+                    unset($chars[18]);
+                }
+
+                // 22 символ (индекс 21)
+                if($chars[21] === ')')
+                {
+                    unset($chars[21]);
+                }
+
+                // Собираем строку обратно
+                $result = implode('', $chars);
+
+                fwrite($handle, $result.PHP_EOL);
             }
 
             fclose($handle);
@@ -143,27 +159,41 @@ final class TxtController extends AbstractController
             {
                 /** Обрезаем честный знак до длины */
 
-                // Позиция для третьей группы
-                $thirdGroupPos = -1;
+                $code = explode('(91)EE10(92)', $data['code_string']);
 
-                preg_match_all('/\((\d{2})\)/', $data['code_string'], $matches, PREG_OFFSET_CAPTURE);
+                // Преобразуем строку в массив символов
+                $chars = str_split(current($code));
 
-                if(count($matches[0]) >= 3)
+                // Удаляем символы по указанным позициям (индексы начинаются с 0)
+
+                // 1 символ (индекс 0)
+                if($chars[0] === '(')
                 {
-                    $thirdGroupPos = $matches[0][2][1];
+                    unset($chars[0]);
                 }
 
-                // Если находимся на третьей группе, обрезаем строку
-                if($thirdGroupPos !== -1)
+                // 4 символ (индекс 3)
+                if($chars[3] === ')')
                 {
-                    $markingcode = substr($data['code_string'], 0, $thirdGroupPos);
-
-                    // Убираем круглые скобки
-                    $data['code_string'] = preg_replace('/\((\d{2})\)/', '$1', $markingcode);
+                    unset($chars[3]);
                 }
 
-                fwrite($handle, $data['code_string'].PHP_EOL);
+                // 19 символ (индекс 18)
+                if($chars[18] === '(')
+                {
+                    unset($chars[18]);
+                }
 
+                // 22 символ (индекс 21)
+                if($chars[21] === ')')
+                {
+                    unset($chars[21]);
+                }
+
+                // Собираем строку обратно
+                $result = implode('', $chars);
+
+                fwrite($handle, $result.PHP_EOL);
             }
 
             fclose($handle);
