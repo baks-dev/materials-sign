@@ -81,16 +81,11 @@
     </td>
 
     <td class="text-center text-nowrap">
-        {# {% if item.sign_status != 'new' %} #}
-
-        {# {% endif %} #}
-
         {% if item.users_profile_username %}
             {{ item.users_profile_username }}
         {% else %}
             <span class="badge text-bg-danger">Общий</span>
         {% endif %}
-
     </td>
 
     <td class="text-center text-nowrap w-25">
