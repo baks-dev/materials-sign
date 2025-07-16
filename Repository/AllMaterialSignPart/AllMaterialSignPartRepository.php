@@ -53,7 +53,7 @@ use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Entity\Modify\MaterialSignModify;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
-use BaksDev\Users\Profile\UserProfile\Entity\Personal\UserProfilePersonal;
+use BaksDev\Users\Profile\UserProfile\Entity\Event\Personal\UserProfilePersonal;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\User\Repository\UserTokenStorage\UserTokenStorageInterface;
 use BaksDev\Users\User\Type\Id\UserUid;

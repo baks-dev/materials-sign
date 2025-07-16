@@ -57,7 +57,7 @@ use BaksDev\Materials\Sign\Entity\Modify\MaterialSignModify;
 use BaksDev\Materials\Sign\Forms\MaterialSignFilter\MaterialSignFilterDTO;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Orders\Order\Entity\Order;
-use BaksDev\Users\Profile\UserProfile\Entity\Personal\UserProfilePersonal;
+use BaksDev\Users\Profile\UserProfile\Entity\Event\Personal\UserProfilePersonal;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
