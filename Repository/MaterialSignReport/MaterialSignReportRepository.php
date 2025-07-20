@@ -234,7 +234,8 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
     /**
      * Метод получает все реализованные честные знаки
-     * @return Generator{int, MaterialSignReportResult}|false
+     *
+     * @return Generator<int, MaterialSignReportResult>|false
      */
     public function findAll(): Generator|false
     {

@@ -30,7 +30,7 @@ interface MaterialSignCodeByDigestInterface
     /**
      * Метод возвращает идентификатор файла изображения честного знака в директории
      *
-     * @return Generator{int, MaterialSignCodeByDigestResult}|false
+     * @return Generator<int, MaterialSignCodeByDigestResult>|false
      */
     public function find(string $name): MaterialSignCodeByDigestResult|false;
 }

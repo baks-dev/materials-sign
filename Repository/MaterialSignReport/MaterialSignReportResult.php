@@ -62,7 +62,7 @@ final class MaterialSignReportResult
 
 
     /**
-     * @return Generator{ int, MaterialSignReportProductDTO }|false
+     * @return Generator<int, MaterialSignReportProductDTO>|false
      * @throws JsonException
      */
     public function getProducts(): Generator|false
