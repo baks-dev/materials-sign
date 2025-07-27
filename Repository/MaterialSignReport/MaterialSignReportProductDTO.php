@@ -35,8 +35,8 @@ final class MaterialSignReportProductDTO
     public function __construct(
 
         private readonly string $name,
-        private readonly int $price,
-        private readonly int $count,
+        private readonly ?int $price,
+        private readonly ?int $count,
         private readonly string $article,
 
         private readonly ?string $offer_value,
@@ -79,7 +79,7 @@ final class MaterialSignReportProductDTO
 
     public function getCount(): int
     {
-        return $this->count;
+        return empty($this->count) ? 0 : $this->count;
     }
 
     public function getAmount(): Money

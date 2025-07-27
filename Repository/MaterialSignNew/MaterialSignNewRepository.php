@@ -300,6 +300,7 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
 
         /** Сортируем по дате, выбирая самый старый знак */
         $orm->addOrderBy('modify.modDate');
+        $orm->addOrderBy('modify.modDate');
 
         $orm->setMaxResults(1);
 

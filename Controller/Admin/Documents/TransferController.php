@@ -96,6 +96,10 @@ final class TransferController extends AbstractController
             // Получаем текущий активный лист
             $sheet = $spreadsheet->getActiveSheet();
 
+            $sheet->getColumnDimension('A')->setAutoSize(true);
+            $sheet->getColumnDimension('B')->setAutoSize(true);
+            $sheet->getColumnDimension('C')->setAutoSize(true);
+
 
             $key = 1;
 

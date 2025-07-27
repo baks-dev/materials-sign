@@ -38,11 +38,11 @@ final class MaterialSignReportResult
 
     public function __construct(
 
-        private readonly string $number,
+        private readonly ?string $number,
         private readonly string $date,
         private readonly string $seller,
 
-        private readonly string $total,
+        private readonly ?string $total,
 
         private readonly string $products,
 
@@ -57,7 +57,7 @@ final class MaterialSignReportResult
 
     public function getNumber(): string
     {
-        return $this->number;
+        return $this->number ?: 'Не указан';
     }
 
 

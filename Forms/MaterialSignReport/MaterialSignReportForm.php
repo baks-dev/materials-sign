@@ -51,14 +51,16 @@ final class MaterialSignReportForm extends AbstractType
     {
 
         $builder->add('category', ChoiceType::class, [
-            'choices' => $this->categoryChoice->findAll(),
+            'choices' => $this->categoryChoice->findAll(), // все категории, включая неактивные
             'choice_value' => function(?CategoryMaterialUid $category) {
                 return $category?->getValue();
             },
             'choice_label' => function(CategoryMaterialUid $category) {
-                return $category->getOptions();
+                return (is_int($category->getAttr()) ? str_repeat(' - ', $category->getAttr() - 1) : '').$category->getOptions();
             },
             'label' => false,
+            'expanded' => false,
+            'multiple' => false,
             //'required' => false,
         ]);
 

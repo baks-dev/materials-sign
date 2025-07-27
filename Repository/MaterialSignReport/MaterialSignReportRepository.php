@@ -41,7 +41,7 @@ use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
 use BaksDev\Materials\Sign\Entity\Modify\MaterialSignModify;
-use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
+use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusDecommission;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusDone;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusProcess;
 use BaksDev\Orders\Order\Entity\Invariable\OrderInvariable;
@@ -54,6 +54,7 @@ use BaksDev\Users\Profile\UserProfile\Entity\Event\Value\UserProfileValue;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use DateTimeImmutable;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Types\Types;
 use Generator;
 use InvalidArgumentException;
@@ -76,7 +77,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
     private MaterialModificationConst|false $modification = false;
 
-    private string|false $status = false;
+    private array|false $status = false;
 
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder)
     {
@@ -220,14 +221,14 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
     public function onlyStatusDone(): self
     {
-        $this->status = MaterialSignStatusDone::STATUS;
+        $this->status = [MaterialSignStatusDone::STATUS];
 
         return $this;
     }
 
     public function onlyStatusProcess(): self
     {
-        $this->status = MaterialSignStatusProcess::class;
+        $this->status = [MaterialSignStatusProcess::STATUS, MaterialSignStatusDecommission::STATUS,];
 
         return $this;
     }
@@ -348,18 +349,17 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 );
         }
 
-
         $dbal
             ->join(
                 'invariable',
                 MaterialSignEvent::class,
                 'event',
-                'event.main = invariable.main AND event.status = :status'
+                'event.main = invariable.main AND event.status IN (:status)',
             )
             ->setParameter(
                 key: 'status',
                 value: $this->status,
-                type: MaterialSignStatus::TYPE
+                type: ArrayParameterType::STRING,
             );
 
 
@@ -459,7 +459,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
         $dbal
             ->addSelect('order_invariable.number')
-            ->join(
+            ->leftJoin(
                 'event',
                 OrderInvariable::class,
                 'order_invariable',
@@ -473,7 +473,6 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 'order_product',
                 'order_product.event = order_invariable.event'
             );
-
 
         $dbal
             ->addSelect('SUM(order_price.price) AS total')

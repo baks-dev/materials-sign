@@ -74,9 +74,11 @@ final class MaterialSignTransferForm extends AbstractType
                 return $category?->getValue();
             },
             'choice_label' => function(CategoryMaterialUid $category) {
-                return $category->getOptions();
+                return (is_int($category->getAttr()) ? str_repeat(' - ', $category->getAttr() - 1) : '').$category->getOptions();
             },
             'label' => false,
+            'expanded' => false,
+            'multiple' => false,
             //'required' => false,
         ]);
 
