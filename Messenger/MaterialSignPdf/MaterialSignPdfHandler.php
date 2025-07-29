@@ -235,6 +235,7 @@ final readonly class MaterialSignPdfHandler
 
 
                 /** Рассчитываем дайджест файла для перемещения */
+
                 $md5 = md5_file($fileTemp);
                 $dirMove = $dirCode.$md5.DIRECTORY_SEPARATOR;
                 $fileMove = $dirMove.'image.png';
@@ -269,13 +270,31 @@ final readonly class MaterialSignPdfHandler
 
                 $decode->isError() ? ++$errors : ++$counter;
 
-                //$cleanedString = preg_replace('/\((\d+)\)/', '$1', $code);
+
+                /**
+                 * Переименовываем директорию по коду честного знака (для уникальности)
+                 */
+
+                $scanDirName = md5($code);
+                $renameDir = $dirCode.$scanDirName.DIRECTORY_SEPARATOR;
+
+                if($this->filesystem->exists($renameDir) === true)
+                {
+                    // Удаляем директорию если уже имеется
+                    $this->filesystem->remove($dirMove);
+                }
+                else
+                {
+                    // переименовываем директорию если не существует
+                    $this->filesystem->rename($dirMove, $renameDir);
+                }
+
 
                 /** Присваиваем результат сканера */
 
                 $MaterialSignCodeDTO = $MaterialSignDTO->getCode();
                 $MaterialSignCodeDTO->setCode($code);
-                $MaterialSignCodeDTO->setName($md5);
+                $MaterialSignCodeDTO->setName($scanDirName);
                 $MaterialSignCodeDTO->setExt('png');
 
                 $MaterialSignInvariableDTO = $MaterialSignDTO->getInvariable();
