@@ -27,6 +27,7 @@ namespace BaksDev\Materials\Sign\UseCase\Admin\Status;
 
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEventInterface;
 use BaksDev\Materials\Sign\Type\Event\MaterialSignEventUid;
+use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusNew;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
@@ -67,7 +68,9 @@ final readonly class MaterialSignCancelDTO implements MaterialSignEventInterface
         /** Всегда сбрасываем идентификатор заказа и продавца */
         $this->ord = null;
         $this->invariable = new Invariable\MaterialSignInvariableDTO();
-        $this->invariable->setSeller(null);
+        $this->invariable
+            ->setSeller(null)
+            ->setPart(new MaterialSignUid());
     }
 
     /**

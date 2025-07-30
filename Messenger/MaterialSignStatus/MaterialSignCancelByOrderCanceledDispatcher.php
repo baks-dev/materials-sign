@@ -58,7 +58,7 @@ final readonly class MaterialSignCancelByOrderCanceledDispatcher
             ->deduplication([
                 (string) $message->getId(),
                 MaterialSignStatusCancel::STATUS,
-                self::class
+                self::class,
             ]);
 
         if($Deduplicator->isExecuted())
@@ -73,7 +73,7 @@ final readonly class MaterialSignCancelByOrderCanceledDispatcher
         {
             $this->logger->critical(
                 'materials-sign: Не найдено событие Order',
-                [self::class.':'.__LINE__, var_export($message, true)]
+                [self::class.':'.__LINE__, var_export($message, true)],
             );
 
             return;
@@ -94,7 +94,10 @@ final readonly class MaterialSignCancelByOrderCanceledDispatcher
          * например если изменилось количество в заказе @see MaterialSignDoneByOrderCompletedDispatcher у которого выше приоритетом
          */
 
-        $this->logger->info('Делаем поиск и отмену «Честных знаков»:');
+        $this->logger->info(
+            'Делаем поиск и отмену «Честных знаков»:',
+            [self::class.':'.__LINE__, var_export($message, true)],
+        );
 
         $events = $this->materialSignProcessByOrder
             ->forOrder($message->getId())
@@ -110,8 +113,8 @@ final readonly class MaterialSignCancelByOrderCanceledDispatcher
                 'Отменили «Честный знак» (возвращаем статус New «Новый»)',
                 [
                     self::class.':'.__LINE__,
-                    'MaterialSignUid' => $MaterialSignEvent->getMain()
-                ]
+                    'MaterialSignUid' => $MaterialSignEvent->getMain(),
+                ],
             );
         }
 
