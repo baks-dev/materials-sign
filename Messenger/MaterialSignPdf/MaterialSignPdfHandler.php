@@ -248,7 +248,9 @@ final readonly class MaterialSignPdfHandler
                  * Перемещаем в указанную директорию если файла не существует
                  * Если в перемещаемой директории файл существует - удаляем временный файл
                  */
-                $this->filesystem->exists($fileMove) === true ? $this->filesystem->remove($fileTemp) : $this->filesystem->rename($fileTemp, $fileMove);
+                $this->filesystem->exists($fileMove) === true
+                    ? $this->filesystem->remove($fileTemp)
+                    : $this->filesystem->rename($fileTemp, $fileMove);
 
 
                 /** Сканируем честный знак */
