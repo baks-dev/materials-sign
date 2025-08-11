@@ -506,15 +506,54 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
         /* Поиск */
         if($this->search?->getQuery())
         {
-            $dbal
-                ->createSearchQueryBuilder($this->search)
-                ->addSearchLike('code.code')
-                ->addSearchLike('invariable.number')
-                ->addSearchLike('orders.number')
-                ->addSearchLike('material_modification.article')
-                ->addSearchLike('material_variation.article')
-                ->addSearchLike('material_offer.article')
-                ->addSearchLike('material_info.article');
+
+            if(str_starts_with($this->search->getQuery(), '(00)'))
+            {
+                $dbal
+                    ->createSearchQueryBuilder($this->search)
+                    ->addSearchLike('invariable.part');
+            }
+
+            elseif(str_starts_with($this->search->getQuery(), '(01)') || str_starts_with($this->search->getQuery(), '01'))
+            {
+                $dbal
+                    ->createSearchQueryBuilder($this->search)
+                    ->addSearchLike('code.code');
+            }
+
+            elseif(
+                preg_match('/^\d{3}\.\d{3}\.\d{3}\.\d{3}$/', $this->search->getQuery())
+                || str_starts_with($this->search->getQuery(), 'o-')
+                || str_starts_with($this->search->getQuery(), 'y-')
+                || str_starts_with($this->search->getQuery(), 'w-')
+            )
+            {
+
+                $dbal
+                    ->createSearchQueryBuilder($this->search)
+                    ->addSearchLike('orders.number');
+            }
+
+            // поиск по номеру ГТД формата 10702070/190725/5247456
+            elseif(preg_match('/^\d{8}\/\d{6}\/\d{7}$/', $this->search->getQuery()))
+            {
+                $dbal
+                    ->createSearchQueryBuilder($this->search)
+                    ->addSearchLike('invariable.number');
+            }
+
+            else
+            {
+                $dbal
+                    ->createSearchQueryBuilder($this->search)
+                    ->addSearchLike('code.code')
+                    ->addSearchLike('invariable.number')
+                    ->addSearchLike('orders.number')
+                    ->addSearchLike('product_modification.article')
+                    ->addSearchLike('product_variation.article')
+                    ->addSearchLike('product_offer.article')
+                    ->addSearchLike('product_info.article');
+            }
         }
 
         $dbal->orderBy('DATE(modify.mod_date)', 'DESC');
