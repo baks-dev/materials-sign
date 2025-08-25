@@ -43,7 +43,6 @@ use DateTimeImmutable;
 use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
 use Imagick;
-use ImagickPixel;
 use Psr\Log\LoggerInterface;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -133,8 +132,6 @@ final readonly class MaterialSignPdfHandler
         //        }
 
 
-
-
         /** Обрабатываем страницы */
 
         foreach(new DirectoryIterator($uploadDir) as $SignFile)
@@ -192,7 +189,7 @@ final readonly class MaterialSignPdfHandler
             {
                 $this->logger->critical(
                     sprintf('Невозможно определить название таблицы из класса сущности %s ', MaterialSignCode::class),
-                    [self::class.':'.__LINE__]
+                    [self::class.':'.__LINE__],
                 );
             }
 
@@ -230,7 +227,7 @@ final readonly class MaterialSignPdfHandler
                 /** Преобразуем PDF страницу в PNG и сохраняем временно для расчета дайджеста md5 */
                 $Imagick->setIteratorIndex($number);
                 $Imagick->setImageFormat('png');
-                $Imagick->borderImage(new ImagickPixel("white"), 5, 5);
+                $Imagick->borderImage('white', 5, 5);
                 $Imagick->writeImage($fileTemp);
 
 
@@ -328,13 +325,13 @@ final readonly class MaterialSignPdfHandler
                 {
                     $this->logger->info(
                         sprintf('%s: %s', $handle->getId(), $code),
-                        [self::class.':'.__LINE__]
+                        [self::class.':'.__LINE__],
                     );
 
                     /** Создаем комманду для отправки файла CDN */
                     $this->messageDispatch->dispatch(
                         new CDNUploadImageMessage($handle->getId(), MaterialSignCode::class, $md5),
-                        transport: 'files-res-low'
+                        transport: 'files-res-low',
                     );
                 }
 
