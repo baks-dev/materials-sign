@@ -24,7 +24,7 @@
     "php": ">=8.4",
     "ext-imagick": "*",
     "baks-dev/core": "^7.2",
-    "phpoffice/phpspreadsheet": "4.1.*"
+    "phpoffice/phpspreadsheet": "*"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest"
