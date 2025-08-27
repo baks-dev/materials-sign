@@ -10,6 +10,7 @@
 
 ``` bash
 composer require \
+phpoffice/phpspreadsheet
 baks-dev/barcode
 baks-dev/materials-sign
 ```
