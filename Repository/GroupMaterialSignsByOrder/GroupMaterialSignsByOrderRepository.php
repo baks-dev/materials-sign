@@ -76,7 +76,11 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
         return $this;
     }
 
-    /** Метод возвращает список группы честных знаков заказа для скачивания */
+    /**
+     * Метод возвращает список группы честных знаков заказа для скачивания
+     *
+     * @return Generator<GroupMaterialSignsByOrderResult>|false
+     */
     public function findAll(): Generator|false
     {
         if(false === ($this->order instanceof OrderUid))

@@ -31,6 +31,10 @@ interface GroupMaterialSignsByOrderInterface
 {
     public function forOrder(Order|OrderUid|string $order): self;
 
-    /** Метод возвращает список группы честных знаков заказа для скачивания */
+    /**
+     * Метод возвращает список группы честных знаков заказа для скачивания
+     *
+     * @return Generator<GroupMaterialSignsByOrderResult>|false
+     */
     public function findAll(): Generator|false;
 }
