@@ -44,9 +44,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
-/**
- * @group materials-sign
- */
 #[When(env: 'test')]
 final class MaterialSignNewHandleTest extends KernelTestCase
 {

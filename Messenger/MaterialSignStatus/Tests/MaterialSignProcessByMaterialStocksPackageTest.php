@@ -29,14 +29,12 @@ use BaksDev\Materials\Sign\Messenger\MaterialSignStatus\MaterialSignProcessByMat
 use BaksDev\Products\Stocks\Messenger\ProductStockMessage;
 use BaksDev\Products\Stocks\Type\Event\ProductStockEventUid;
 use BaksDev\Products\Stocks\Type\Id\ProductStockUid;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
-
-/**
- * @group material-sign
- */
 #[When(env: 'test')]
+#[Group('material-sign')]
 class MaterialSignProcessByMaterialStocksPackageTest extends KernelTestCase
 {
 

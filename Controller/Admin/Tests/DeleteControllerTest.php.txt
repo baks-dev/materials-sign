@@ -25,10 +25,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
-/**
- * @group materials-sign
- * @depends BaksDev\Materials\Sign\UseCase\Admin\New\Tests\MaterialSignNewHandleTest::class
- */
+
 #[When(env: 'test')]
 final class DeleteControllerTest extends WebTestCase
 {

@@ -42,10 +42,6 @@ use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
-/**
- * @group materials-sign
- * @depends BaksDev\Materials\Sign\UseCase\Admin\New\Tests\MaterialSignNewHandleTest::class
- */
 #[When(env: 'test')]
 final class MaterialSignEditHandleTest extends KernelTestCase
 {

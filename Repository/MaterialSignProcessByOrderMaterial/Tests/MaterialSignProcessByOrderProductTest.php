@@ -30,13 +30,12 @@ use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationCon
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
 use BaksDev\Materials\Sign\Repository\MaterialSignProcessByOrderMaterial\MaterialSignProcessByOrderProductInterface;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
-/**
- * @group material-sign
- */
 #[When(env: 'test')]
+#[Group('material-sign')]
 class MaterialSignProcessByOrderProductTest extends KernelTestCase
 {
     public function testUseCase(): void

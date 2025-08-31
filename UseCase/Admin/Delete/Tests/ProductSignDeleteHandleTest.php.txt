@@ -41,13 +41,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
-/**
- * @group @group materials-sign
- *
- * @depends BaksDev\Materials\Sign\UseCase\Admin\Cancel\Tests\MaterialSignCancelHandleTest::class
- * @depends BaksDev\Materials\Sign\Controller\Admin\Tests\DeleteControllerTest::class
- *
- */
+
 #[When(env: 'test')]
 final class MaterialSignDeleteHandleTest extends KernelTestCase
 {

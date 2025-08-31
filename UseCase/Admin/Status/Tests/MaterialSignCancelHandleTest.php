@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\UseCase\Admin\Status\Tests;
 
+use BaksDev\Materials\Category\UseCase\Admin\NewEdit\Tests\CategoryMaterialNewTest;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Repository\CurrentEvent\MaterialSignCurrentEventInterface;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
@@ -32,17 +33,16 @@ use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\Collection\MaterialSig
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusNew;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignCancelDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignStatusHandler;
+use PHPUnit\Framework\Attributes\DependsOnClass;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
-/**
- * @group materials-sign
- * @depends BaksDev\Materials\Sign\UseCase\Admin\Status\Tests\MaterialSignProcessHandleTest::class
- * @see     MaterialSignProcessHandleTest
- */
 #[When(env: 'test')]
+#[Group('material-sign')]
 final class MaterialSignCancelHandleTest extends KernelTestCase
 {
+    #[DependsOnClass(MaterialSignProcessHandleTest::class)]
     public function testUseCase(): void
     {
         /**

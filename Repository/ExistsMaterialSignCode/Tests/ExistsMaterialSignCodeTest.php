@@ -31,13 +31,12 @@ use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Repository\ExistsMaterialSignCode\ExistsMaterialSignCodeInterface;
 use BaksDev\Users\User\Type\Id\UserUid;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
-/**
- * @group materials-sign
- */
 #[When(env: 'test')]
+#[Group('material-sign')]
 class ExistsMaterialSignCodeTest extends KernelTestCase
 {
     private static UserUid|false $usr = false;
