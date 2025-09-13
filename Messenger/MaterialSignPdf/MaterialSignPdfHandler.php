@@ -105,6 +105,7 @@ final readonly class MaterialSignPdfHandler
 
         $totalPurchase = 0;
 
+        Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
 
         foreach(new DirectoryIterator($uploadDir) as $SignFile)
         {
