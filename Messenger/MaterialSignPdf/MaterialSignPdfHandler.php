@@ -28,12 +28,10 @@ namespace BaksDev\Materials\Sign\Messenger\MaterialSignPdf;
 use BaksDev\Barcode\Reader\BarcodeRead;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
-use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
-use BaksDev\Materials\Sign\Entity\MaterialSign;
+use BaksDev\Materials\Sign\Messenger\MaterialSignPdf\MaterialSignScaner\MaterialSignScannerMessage;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
-use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusError;
-use BaksDev\Materials\Sign\UseCase\Admin\New\MaterialSignDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\New\MaterialSignHandler;
+use BaksDev\Materials\Stocks\Entity\Stock\MaterialStock;
 use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\Materials\MaterialStockDTO;
 use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\PurchaseMaterialStockDTO;
 use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\PurchaseMaterialStockHandler;
@@ -44,8 +42,6 @@ use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
 use Imagick;
 use Psr\Log\LoggerInterface;
-use ReflectionAttribute;
-use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Filesystem;
@@ -105,34 +101,10 @@ final readonly class MaterialSignPdfHandler
         // Директория загрузки файла PDF
         $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
 
-
-        //        /**
-        //         * Сохраняем все листы PDF в отдельные файлы на случай, если есть непреобразованные
-        //         */
-        //
-        //        /** @var DirectoryIterator $SignPdfFile */
-        //        foreach(new DirectoryIterator($uploadDir) as $SignPdfFile)
-        //        {
-        //            if($SignPdfFile->getExtension() !== 'pdf')
-        //            {
-        //                continue;
-        //            }
-        //
-        //            /** Пропускаем файлы, которые уже разбиты на страницы */
-        //            if(str_starts_with($SignPdfFile->getFilename(), 'page') === true)
-        //            {
-        //                continue;
-        //            }
-        //
-        //            $process = new Process(['pdftk', $SignPdfFile->getRealPath(), 'burst', 'output', $SignPdfFile->getPath().DIRECTORY_SEPARATOR.uniqid('page_', true).'.%d.pdf']);
-        //            $process->mustRun();
-        //
-        //            /** Удаляем после обработки основной файл PDF */
-        //            $this->filesystem->remove($SignPdfFile->getRealPath());
-        //        }
-
-
         /** Обрабатываем страницы */
+
+        $totalPurchase = 0;
+
 
         foreach(new DirectoryIterator($uploadDir) as $SignFile)
         {
@@ -154,240 +126,89 @@ final readonly class MaterialSignPdfHandler
             /** Генерируем идентификатор группы для отмены */
             $part = new MaterialSignUid()->stringToUuid($SignFile->getPath().(new DateTimeImmutable('now')->format('Ymd')));
 
-            $counter = 0;
-            $errors = 0;
 
-            /** Создаем предварительно закупку для заполнения сырья */
-            if($message->isPurchase() && $message->getProfile())
+            $MaterialSignScannerMessage = new MaterialSignScannerMessage(
+                path: $SignFile->getRealPath(),
+                part: $part,
+
+                usr: $message->getUsr(),
+                profile: $message->getProfile(),
+                material: $message->getMaterial(),
+                offer: $message->getOffer(),
+                variation: $message->getVariation(),
+                modification: $message->getModification(),
+
+                share: $message->isNotShare(),
+                number: $message->getNumber(),
+            );
+
+            $this->messageDispatch->dispatch(
+                message: $MaterialSignScannerMessage,
+                transport: 'barcode',
+            );
+
+            /** Пропускаем, если не требуется создавать закупочный лист */
+            if(false === $message->isPurchase())
             {
-                // Получаем идентификатор пользователя по профилю
-
-                $User = $this->UserByUserProfileInterface
-                    ->forProfile($message->getProfile())
-                    ->find();
-
-                if($User)
-                {
-                    $PurchaseNumber = number_format(microtime(true) * 100, 0, '.', '.');
-
-                    $PurchaseMaterialStockDTO = new PurchaseMaterialStockDTO();
-                    $PurchaseMaterialInvariableDTO = $PurchaseMaterialStockDTO->getInvariable();
-
-                    $PurchaseMaterialInvariableDTO
-                        ->setUsr($User->getId())
-                        ->setNumber($PurchaseNumber);
-                }
+                continue;
             }
-
-            /** Директория загрузки файла с кодом */
-
-            $ref = new ReflectionClass(MaterialSignCode::class);
-            /** @var ReflectionAttribute $current */
-            $current = current($ref->getAttributes(Table::class));
-
-            if(!isset($current->getArguments()['name']))
-            {
-                $this->logger->critical(
-                    sprintf('Невозможно определить название таблицы из класса сущности %s ', MaterialSignCode::class),
-                    [self::class.':'.__LINE__],
-                );
-            }
-
-            /** Создаем полный путь для сохранения файла с кодом относительно директории сущности */
-            $pathCode = null;
-            $pathCode[] = $this->upload;
-            $pathCode[] = 'public';
-            $pathCode[] = 'upload';
-            $pathCode[] = $current->getArguments()['name'];
-            $pathCode[] = '';
-
-            $dirCode = implode(DIRECTORY_SEPARATOR, $pathCode);
-
-            /** Если директория загрузки не найдена - создаем с правами 0700 */
-            $this->filesystem->exists($dirCode) ?: $this->filesystem->mkdir($dirCode);
-
 
             /**
-             * Открываем PDF для подсчета страниц на случай если их несколько
+             * Подсчет количества страниц для создания закупки
              */
+
             $pdfPath = $SignFile->getRealPath();
+
             $Imagick = new Imagick();
-            $Imagick->setResolution(500, 500);
+            $Imagick->setResolution(50, 50); // устанавливаем малое разрешение
             $Imagick->readImage($pdfPath);
-            $pages = $Imagick->getNumberImages(); // количество страниц в файле
 
-            /** Удаляем после обработки файл PDF */
-            $this->filesystem->remove($pdfPath);
-
-
-            for($number = 0; $number < $pages; $number++)
-            {
-                $fileTemp = $dirCode.uniqid('', true).'.png';
-
-                /** Преобразуем PDF страницу в PNG и сохраняем временно для расчета дайджеста md5 */
-                $Imagick->setIteratorIndex($number);
-                $Imagick->setImageFormat('png');
-                $Imagick->borderImage('white', 5, 5);
-                $Imagick->writeImage($fileTemp);
-
-
-                /** Рассчитываем дайджест файла для перемещения */
-
-                $md5 = md5_file($fileTemp);
-                $dirMove = $dirCode.$md5.DIRECTORY_SEPARATOR;
-                $fileMove = $dirMove.'image.png';
-
-
-                /** Если директория для перемещения не найдена - создаем  */
-                $this->filesystem->exists($dirMove) ?: $this->filesystem->mkdir($dirMove);
-
-                /**
-                 * Перемещаем в указанную директорию если файла не существует
-                 * Если в перемещаемой директории файл существует - удаляем временный файл
-                 */
-                $this->filesystem->exists($fileMove) === true
-                    ? $this->filesystem->remove($fileTemp)
-                    : $this->filesystem->rename($fileTemp, $fileMove);
-
-
-                /** Сканируем честный знак */
-                $decode = $this->barcodeRead->decode($fileMove);
-                $code = $decode->getText();
-
-
-                /**
-                 * Создаем для сохранения честный знак
-                 * в случае ошибки сканирования - присваивается статус с ошибкой
-                 */
-                $MaterialSignDTO = new MaterialSignDTO();
-
-                if($decode->isError() || str_starts_with($code, '(00)'))
-                {
-                    $code = uniqid('error_', true);
-                    $MaterialSignDTO->setStatus(MaterialSignStatusError::class);
-                }
-
-                $decode->isError() ? ++$errors : ++$counter;
-
-
-                /**
-                 * Переименовываем директорию по коду честного знака (для уникальности)
-                 */
-
-                $scanDirName = md5($code);
-                $renameDir = $dirCode.$scanDirName.DIRECTORY_SEPARATOR;
-
-                if($this->filesystem->exists($renameDir) === true)
-                {
-                    // Удаляем директорию если уже имеется
-                    $this->filesystem->remove($dirMove);
-                }
-                else
-                {
-                    // переименовываем директорию если не существует
-                    $this->filesystem->rename($dirMove, $renameDir);
-                }
-
-
-                /** Присваиваем результат сканера */
-
-                $MaterialSignCodeDTO = $MaterialSignDTO->getCode();
-                $MaterialSignCodeDTO->setCode($code);
-                $MaterialSignCodeDTO->setName($scanDirName);
-                $MaterialSignCodeDTO->setExt('png');
-
-                $MaterialSignInvariableDTO = $MaterialSignDTO->getInvariable();
-                $MaterialSignInvariableDTO->setPart($part);
-                $MaterialSignInvariableDTO->setUsr($message->getUsr());
-
-                $MaterialSignInvariableDTO->setProfile($message->getProfile());
-                $MaterialSignInvariableDTO->setSeller($message->isNotShare() ? $message->getProfile() : null);
-
-                $MaterialSignInvariableDTO->setMaterial($message->getMaterial());
-                $MaterialSignInvariableDTO->setOffer($message->getOffer());
-                $MaterialSignInvariableDTO->setVariation($message->getVariation());
-                $MaterialSignInvariableDTO->setModification($message->getModification());
-                $MaterialSignInvariableDTO->setNumber($message->getNumber());
-
-                $handle = $this->materialSignHandler->handle($MaterialSignDTO);
-
-                if(!$handle instanceof MaterialSign)
-                {
-                    if($handle === false)
-                    {
-                        $this->logger->warning(sprintf('Дубликат честного знака %s: ', $code));
-                        continue;
-                    }
-
-                    $this->logger->critical(sprintf('materials-sign: Ошибка %s при сканировании: ', $handle));
-                }
-                else
-                {
-                    $this->logger->info(
-                        sprintf('%s: %s', $handle->getId(), $code),
-                        [self::class.':'.__LINE__],
-                    );
-
-                    /** Создаем комманду для отправки файла CDN */
-                    $this->messageDispatch->dispatch(
-                        new CDNUploadImageMessage($handle->getId(), MaterialSignCode::class, $md5),
-                        transport: 'files-res-low',
-                    );
-                }
-
-                /** Создаем закупку */
-                if(isset($PurchaseMaterialStockDTO) && $message->isPurchase() && $message->getProfile())
-                {
-                    /** Ищем в массиве такое сырье */
-                    $getPurchaseMaterial = $PurchaseMaterialStockDTO->getMaterial()
-                        ->filter(function(MaterialStockDTO $element) use ($message) {
-                            return
-                                $message->getMaterial()->equals($element->getMaterial()) &&
-                                (
-                                    ($message->getOffer() === null && $element->getOffer() === null) ||
-                                    $message->getOffer()->equals($element->getOffer())
-                                ) &&
-
-                                (
-                                    ($message->getVariation() === null && $element->getVariation() === null) ||
-                                    $message->getVariation()->equals($element->getVariation())
-                                ) &&
-
-                                (
-                                    ($message->getModification() === null && $element->getModification() === null) ||
-                                    $message->getModification()->equals($element->getModification())
-                                );
-
-                        });
-
-                    $MaterialStockDTO = $getPurchaseMaterial->current();
-
-                    /* если сырья еще нет - добавляем */
-                    if(!$MaterialStockDTO)
-                    {
-                        $MaterialStockDTO = new MaterialStockDTO();
-                        $MaterialStockDTO->setMaterial($message->getMaterial());
-                        $MaterialStockDTO->setOffer($message->getOffer());
-                        $MaterialStockDTO->setVariation($message->getVariation());
-                        $MaterialStockDTO->setModification($message->getModification());
-                        $MaterialStockDTO->setTotal(0);
-
-                        $PurchaseMaterialStockDTO->addMaterial($MaterialStockDTO);
-                    }
-
-                    $MaterialStockTotal = $MaterialStockDTO->getTotal() + 1;
-                    $MaterialStockDTO->setTotal($MaterialStockTotal);
-                }
-            }
-
-            /** Сохраняем закупку */
-            if($message->isPurchase() && $message->getProfile() && (isset($PurchaseMaterialStockDTO) && false === $PurchaseMaterialStockDTO->getMaterial()->isEmpty()))
-            {
-                $this->purchaseMaterialStockHandler->handle($PurchaseMaterialStockDTO);
-            }
+            $totalPurchase += $Imagick->getNumberImages(); // количество страниц в файле
 
             $Imagick->clear();
-            $Imagick->destroy();
+
+        }
+
+
+        /** Сохраняем закупку на подгружаемый профиль */
+        if($message->isPurchase())
+        {
+            // Получаем идентификатор пользователя по профилю
+            $User = $this->UserByUserProfileInterface
+                ->forProfile($message->getProfile())
+                ->find();
+
+            if($User)
+            {
+                $PurchaseNumber = number_format(microtime(true) * 100, 0, '.', '.');
+
+                $PurchaseMaterialStockDTO = new PurchaseMaterialStockDTO();
+                $PurchaseProductStocksInvariableDTO = $PurchaseMaterialStockDTO->getInvariable();
+
+                $PurchaseProductStocksInvariableDTO
+                    ->setUsr($User->getId())
+                    ->setProfile($message->getProfile())
+                    ->setNumber($PurchaseNumber);
+
+                $MaterialStockDTO = new MaterialStockDTO()
+                    ->setMaterial($message->getMaterial())
+                    ->setOffer($message->getOffer())
+                    ->setVariation($message->getVariation())
+                    ->setModification($message->getModification())
+                    ->setTotal($totalPurchase);
+
+                $PurchaseMaterialStockDTO->addMaterial($MaterialStockDTO);
+
+                $ProductStock = $this->purchaseMaterialStockHandler->handle($PurchaseMaterialStockDTO);
+
+                if(false === ($ProductStock instanceof MaterialStock))
+                {
+                    $this->logger->critical(
+                        sprintf('products-sign: Ошибка %s при создании закупочного листа', $ProductStock),
+                        [self::class.':'.__LINE__],
+                    );
+                }
+            }
         }
     }
 }

@@ -29,7 +29,6 @@ use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariableInterface;
-use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
@@ -59,7 +58,7 @@ final class MaterialSignInvariableDTO implements MaterialSignInvariableInterface
     /** Группа штрихкодов, для отмены  */
     #[Assert\NotBlank]
     #[Assert\Uuid]
-    private MaterialSignUid $part;
+    private string $part;
 
     /** Грузовая таможенная декларация (номер) */
     private ?string $number = null;
@@ -111,14 +110,14 @@ final class MaterialSignInvariableDTO implements MaterialSignInvariableInterface
     /**
      * Group
      */
-    public function getPart(): MaterialSignUid
+    public function getPart(): string
     {
         return $this->part;
     }
 
-    public function setPart(MaterialSignUid $part): self
+    public function setPart(mixed $part): self
     {
-        $this->part = $part;
+        $this->part = (string) $part;
         return $this;
     }
 

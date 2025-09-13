@@ -77,8 +77,8 @@ class MaterialSignInvariable extends EntityReadonly
     /** Группа штрихкодов (для групповой отмены либо списания) */
     #[Assert\NotBlank]
     #[Assert\Uuid]
-    #[ORM\Column(type: MaterialSignUid::TYPE)]
-    private MaterialSignUid $part;
+    #[ORM\Column(type: Types::STRING)]
+    private string $part;
 
     /** Грузовая таможенная декларация (номер) */
     #[ORM\Column(type: Types::STRING, nullable: true)]
