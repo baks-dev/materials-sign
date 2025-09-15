@@ -26,7 +26,6 @@ declare(strict_types=1);
 namespace BaksDev\Materials\Sign\UseCase\Admin\Status\Invariable;
 
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariableInterface;
-use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use ReflectionProperty;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -37,7 +36,7 @@ final class MaterialSignInvariableDTO implements MaterialSignInvariableInterface
     /** Группа штрихкодов (для групповой отмены либо списания) */
     #[Assert\NotBlank]
     #[Assert\Uuid]
-    private readonly MaterialSignUid $part;
+    private readonly string $part;
 
 
     /**
@@ -49,16 +48,16 @@ final class MaterialSignInvariableDTO implements MaterialSignInvariableInterface
     /**
      * Part
      */
-    public function getPart(): MaterialSignUid
+    public function getPart(): string
     {
         return $this->part;
     }
 
-    public function setPart(MaterialSignUid $part): self
+    public function setPart(mixed $part): self
     {
         if(false === (new ReflectionProperty(self::class, 'part')->isInitialized($this)))
         {
-            $this->part = $part;
+            $this->part = (string) $part;
         }
 
         return $this;

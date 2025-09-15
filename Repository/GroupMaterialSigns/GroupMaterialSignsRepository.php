@@ -549,10 +549,10 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                     ->addSearchLike('code.code')
                     ->addSearchLike('invariable.number')
                     ->addSearchLike('orders.number')
-                    ->addSearchLike('product_modification.article')
-                    ->addSearchLike('product_variation.article')
-                    ->addSearchLike('product_offer.article')
-                    ->addSearchLike('product_info.article');
+                    ->addSearchLike('material_modification.article')
+                    ->addSearchLike('material_variation.article')
+                    ->addSearchLike('material_offer.article')
+                    ->addSearchLike('material_info.article');
             }
         }
 
