@@ -179,8 +179,13 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
         // Идентификатор группы честных знаков
         $MaterialSignUid = new MaterialSignUid();
 
-        foreach($products as $product)
+        foreach($products as $key => $product)
         {
+            /** Делим партии для печати по 100 шт. */
+            if(($key % 100) === 0)
+            {
+                $MaterialSignUid = new MaterialSignUid();
+            }
 
             /** Получаем идентификаторы продукции */
             $CurrentProductIdentifier = $this->CurrentProductIdentifierByConst
