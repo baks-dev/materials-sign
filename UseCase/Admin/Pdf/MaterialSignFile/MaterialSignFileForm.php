@@ -44,6 +44,7 @@ final class MaterialSignFileForm extends AbstractType
                     'label' => false,
                     'required' => false,
                     'attr' => ['accept' => ".pdf"],
+                    'multiple' => true,
                 ]
             );
     }
