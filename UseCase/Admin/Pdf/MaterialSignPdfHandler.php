@@ -35,6 +35,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 final readonly class MaterialSignPdfHandler
 {
@@ -112,28 +113,22 @@ final readonly class MaterialSignPdfHandler
 
         $filename = [];
 
-        /** @var MaterialSignFileDTO $file */
-        foreach($command->getFiles() as $file)
+        /**
+         * @var MaterialSignFileDTO $files
+         * @var UploadedFile $file
+         */
+        foreach($command->getFiles() as $files)
         {
-            $name = uniqid('original_', true).'.pdf';
-            $filename[] = $name;
+            foreach($files->pdf as $file)
+            {
+                $name = uniqid('original_', true).'.pdf';
+                $filename[] = $name;
 
-            $file->pdf->move($uploadDir, $name);
+                $file->move($uploadDir, $name);
 
-            /** Валидация файла  */
-            $this->validatorCollection->add($file->pdf);
-
-
-            //            /**
-            //             * Для запуска pdfcrop от пользователя sudo:
-            //             * sudo visudo
-            //             * unit ALL=(ALL) NOPASSWD: /usr/bin/pdfcrop
-            //             * Ctrl+X -> Y
-            //             */
-            //
-            //            $process = new Process(['sudo', 'pdfcrop', $file->pdf->getRealPath(), $uploadDir.$name]);
-            //            $process->mustRun();
-
+                /** Валидация файла  */
+                $this->validatorCollection->add($file);
+            }
         }
 
         /** Валидация всех объектов */
