@@ -39,7 +39,7 @@ use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Messenger\OrderMessage;
 use BaksDev\Orders\Order\Repository\OrderEvent\OrderEventInterface;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusCompleted;
-use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierInterface;
+use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierByEventInterface;
 use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierResult;
 use BaksDev\Products\Product\Repository\ProductMaterials\ProductMaterialsInterface;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
@@ -59,7 +59,7 @@ final readonly class MaterialSignDoneByOrderCompletedDispatcher
         private OrderEventInterface $OrderEventRepository,
         private MaterialSignProcessByOrderProductInterface $materialSignProcessByOrderMaterial,
         private ProductMaterialsInterface $ProductMaterials,
-        private CurrentProductIdentifierInterface $CurrentProductIdentifier,
+        private CurrentProductIdentifierByEventInterface $CurrentProductIdentifier,
         private CurrentIdentifierMaterialByValueInterface $CurrentIdentifierMaterialByValue,
         private DeduplicatorInterface $deduplicator,
     ) {}
