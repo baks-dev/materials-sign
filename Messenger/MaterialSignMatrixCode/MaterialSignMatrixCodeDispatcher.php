@@ -68,7 +68,8 @@ final readonly class MaterialSignMatrixCodeDispatcher
             $path = sprintf('https://%s%s/%s.%s', $this->CDN_HOST, $MaterialSignCode->getName(), 'small', $MaterialSignCode->getExt());
             $image = file_get_contents($path);
 
-            return sprintf('data:image/%s;base64,%s', $MaterialSignCode->getExt(), base64_encode($image));
+            return sprintf('data:image/%s;base64,%s', $MaterialSignCode->getExt(), base64_encode($image ?: ''));
+
         });
 
     }
