@@ -1,6 +1,6 @@
 # Роль
 ROLE_MATERIAL_SIGN:
-  name: 'Честный знак'
+  name: 'Честный знак на сырье'
   desc: 'Список QR кодов "Честный знак" сырья'
 
 # Правила
@@ -24,4 +24,6 @@ ROLE_MATERIAL_SIGN_STATUS:
   name: 'Статус'
   desc: ''
 
-
+ROLE_MATERIAL_SIGN_REISSUE:
+  name: 'Перевыпуск'
+  desc: 'Перевыпуск честных знаков на сырье в заказе'

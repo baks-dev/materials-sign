@@ -1,25 +1,29 @@
-# Role
+# Роль
 ROLE_MATERIAL_SIGN:
-  name: 'Honest Sign'
-  desc: 'List of QR codes for "Honest Sign" materials'
+  name: 'Честный знак на сырье'
+  desc: 'Список QR кодов "Честный знак" сырья'
 
-# Rules
+# Правила
 ROLE_MATERIAL_SIGN_INDEX:
-  name: 'View'
+  name: 'Просмотр'
   desc: ''
 
 ROLE_MATERIAL_SIGN_NEW:
-  name: 'Add'
+  name: 'Добавить'
   desc: ''
 
 ROLE_MATERIAL_SIGN_EDIT:
-  name: 'Edit'
+  name: 'Редактировать'
   desc: ''
 
 ROLE_MATERIAL_SIGN_DELETE:
-  name: 'Delete'
+  name: 'Удалить'
   desc: ''
 
 ROLE_MATERIAL_SIGN_STATUS:
-  name: 'Status'
+  name: 'Статус'
   desc: ''
+
+ROLE_MATERIAL_SIGN_REISSUE:
+  name: 'Перевыпуск'
+  desc: 'Перевыпуск честных знаков на сырье в заказе'
