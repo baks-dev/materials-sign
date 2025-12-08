@@ -45,7 +45,9 @@ final readonly class EditMaterialSignHandler
     public function handle(EditMaterialSignDTO $command): int
     {
         /** Валидация DTO  */
-        $this->validatorCollection->add($command);
+        $this->validatorCollection
+            ->init()
+            ->add($command);
 
         /** Валидация всех объектов */
         if($this->validatorCollection->isInvalid())
