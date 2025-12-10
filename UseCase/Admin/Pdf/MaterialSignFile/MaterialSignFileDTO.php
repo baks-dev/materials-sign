@@ -45,7 +45,8 @@ final class MaterialSignFileDTO
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ]),
         ],
-        allowExtraFields: true
+        allowExtraFields: true,
+        allowMissingFields: true,
     )]
     public ?array $pdf = null;
 

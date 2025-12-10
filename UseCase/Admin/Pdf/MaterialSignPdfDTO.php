@@ -56,6 +56,8 @@ final class MaterialSignPdfDTO
     #[Assert\Valid]
     private ArrayCollection $files;
 
+    private ?string $links = null;
+
     /** Категория */
     #[Assert\NotBlank]
     #[Assert\Uuid]
@@ -258,5 +260,16 @@ final class MaterialSignPdfDTO
     public function isNotShare(): bool
     {
         return $this->share === true;
+    }
+
+    public function getLinks(): ?string
+    {
+        return $this->links;
+    }
+
+    public function setLinks(?string $links): self
+    {
+        $this->links = $links;
+        return $this;
     }
 }
