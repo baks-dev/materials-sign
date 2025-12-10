@@ -26,10 +26,8 @@ declare(strict_types=1);
 namespace BaksDev\Materials\Sign\Controller\Admin\Documents;
 
 use BaksDev\Core\Controller\AbstractController;
-use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Files\Resources\Twig\ImagePathExtension;
-use BaksDev\Materials\Catalog\Entity\Material;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
@@ -39,8 +37,6 @@ use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartInter
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
-use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use Doctrine\ORM\Mapping\Table;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -54,7 +50,6 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
-#[RoleSecurity(['ROLE_ORDERS', 'ROLE_MATERIAL_SIGN'])]
 final class PdfController extends AbstractController
 {
     private string $projectDir;

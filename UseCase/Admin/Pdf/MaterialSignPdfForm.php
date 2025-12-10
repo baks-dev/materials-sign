@@ -46,6 +46,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -89,23 +90,6 @@ final class MaterialSignPdfForm extends AbstractType
             'material',
             HiddenType::class
         );
-
-        /*$builder
-            ->add('material', ChoiceType::class, [
-                'choices' => $this->materialChoice->fetchAllMaterial(),
-                'choice_value' => function (?MaterialUid $material) {
-                    return $material?->getValue();
-                },
-                'choice_label' => function (MaterialUid $material) {
-                    return $material->getAttr();
-                },
-
-                'choice_attr' => function (?MaterialUid $material) {
-                    return $material?->getOption() ? ['data-filter' => '('.$material?->getOption().')'] : [];
-                },
-
-                'label' => false,
-            ]);*/
 
 
         /** Все профили пользователя */
@@ -170,19 +154,6 @@ final class MaterialSignPdfForm extends AbstractType
                 $this->formMaterialModifier($event->getForm()->getParent(), $category);
             }
         );
-
-
-        //        $builder->get('material')->addModelTransformer(
-        //            new CallbackTransformer(
-        //                function($material) {
-        //                    return $material instanceof MaterialUid ? $material->getValue() : $material;
-        //                },
-        //                function($material) {
-        //                    return $material ? new MaterialUid($material) : null;
-        //                }
-        //            )
-        //        );
-
 
         $builder->get('material')->addModelTransformer(
             new CallbackTransformer(
@@ -296,6 +267,8 @@ final class MaterialSignPdfForm extends AbstractType
             'allow_add' => true,
             'prototype_name' => '__pdf_file__',
         ]);
+
+        $builder->add('links', TextAreaType::class, ['required' => false]);
 
         $builder->add('purchase', CheckboxType::class, ['required' => false]);
 
