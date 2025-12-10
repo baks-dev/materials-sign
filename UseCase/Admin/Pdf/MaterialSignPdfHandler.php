@@ -145,7 +145,19 @@ final readonly class MaterialSignPdfHandler
                 /** Если строка является ссылкой - пытаемся скачать  */
                 if(str_starts_with($line, 'https:'))
                 {
-                    $this->messageDispatch->dispatch(new MaterialSignLinkMessage($line, $uploadDir));
+                    $this->messageDispatch->dispatch(new MaterialSignLinkMessage(
+                        $line,
+                        $uploadDir,
+                        $command->getUsr(),
+                        $command->getProfile(),
+                        $command->getMaterial(),
+                        $command->getOffer(),
+                        $command->getVariation(),
+                        $command->getModification(),
+                        $command->isPurchase(),
+                        $command->isNotShare(),
+                        $command->getNumber(),
+                    ));
                 }
             }
         }
@@ -154,7 +166,8 @@ final readonly class MaterialSignPdfHandler
         {
             /**
              * Добавляем в коллекцию dto, т.к. пустая коллекция валидатора (в случае, если файлы не загружались
-             * пользователем, а были добавлены через ссылки) не позволит отправить сообщение на сканирование честных знаков
+             * пользователем, а были добавлены через ссылки) не позволит отправить сообщение на сканирование честных
+             * знаков
              */
             $this->validatorCollection->add($command);
         }

@@ -25,9 +25,62 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Messenger\MaterialSignLink;
 
+use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
+use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
+use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
+use BaksDev\Products\Product\Type\Material\MaterialUid;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Type\Id\UserUid;
+use Symfony\Component\Validator\Constraints as Assert;
+
 final readonly class MaterialSignLinkMessage
 {
-    public function __construct(private string $link, private string $uploadDir) {}
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private string $usr;
+
+    #[Assert\Uuid]
+    private ?string $profile;
+
+    /** ID сырья */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private string $material;
+
+    /** Постоянный уникальный идентификатор ТП */
+    #[Assert\Uuid]
+    private ?string $offer;
+
+    /** Постоянный уникальный идентификатор варианта */
+    #[Assert\Uuid]
+    private ?string $variation;
+
+    /** Постоянный уникальный идентификатор модификации */
+    #[Assert\Uuid]
+    private ?string $modification;
+
+    public function __construct(
+        private string $link,
+        private string $uploadDir,
+        UserUid $usr,
+        ?UserProfileUid $profile,
+        MaterialUid $material,
+        ?MaterialOfferConst $offer,
+        ?MaterialVariationConst $variation,
+        ?MaterialModificationConst $modification,
+        private bool $purchase,
+        private bool $share,
+        private ?string $number
+    )
+    {
+        $this->usr = (string) $usr;
+        $this->profile = (string) $profile;
+        $this->material = (string) $material;
+
+        $this->offer = $offer ? (string) $offer : null;
+        $this->variation = $variation ? (string) $variation : null;
+        $this->modification = $modification ? (string) $modification : null;
+    }
 
     public function getLink(): string
     {
@@ -37,5 +90,53 @@ final readonly class MaterialSignLinkMessage
     public function getUploadDir(): string
     {
         return $this->uploadDir;
+    }
+
+    /**
+     * Usr
+     */
+    public function getUsr(): UserUid
+    {
+        return new UserUid($this->usr);
+    }
+
+    /**
+     * Purchase
+     */
+    public function isPurchase(): bool
+    {
+        return $this->purchase;
+    }
+
+    /**
+     * Profile
+     */
+    public function getProfile(): ?UserProfileUid
+    {
+        return $this->profile ? new UserProfileUid($this->profile) : null;
+    }
+
+    /**
+     * Material
+     */
+    public function getMaterial(): MaterialUid
+    {
+        return new MaterialUid($this->material);
+    }
+
+    /**
+     * Offer
+     */
+    public function getOffer(): ?MaterialOfferConst
+    {
+        return $this->offer ? new MaterialOfferConst($this->offer) : null;
+    }
+
+    /**
+     * Variation
+     */
+    public function getVariation(): ?MaterialVariationConst
+    {
+        return $this->variation ? new MaterialVariationConst($this->variation) : null;
     }
 }

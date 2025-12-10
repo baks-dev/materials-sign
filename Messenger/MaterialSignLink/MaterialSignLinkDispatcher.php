@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Messenger\MaterialSignLink;
 
+use BaksDev\Core\Messenger\MessageDispatchInterface;
+use BaksDev\Materials\Sign\Messenger\MaterialSignPdf\MaterialSignPdfMessage;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -36,6 +38,7 @@ final readonly class MaterialSignLinkDispatcher
     public function __construct(
         #[Target('materialsSignLogger')] private LoggerInterface $Logger,
         private HttpClientInterface $HttpClient,
+        private MessageDispatchInterface $MessageDispatch,
     ) {}
 
     /** Обрабатываем ссылки на скачивание PDF-файлов */
@@ -68,11 +71,6 @@ final readonly class MaterialSignLinkDispatcher
             $name = uniqid('original_', true).'.pdf';
         }
 
-        if('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' === $contentType)
-        {
-            $name = uniqid('original_', true).'.xlsx';
-        }
-
         if(empty($name))
         {
             return;
@@ -88,7 +86,7 @@ final readonly class MaterialSignLinkDispatcher
 
 
         /** Необходимо проверить, что файл действительно был создан */
-        $file = fopen($message->getUploadDir().$name, 'r');
+        $file = file_exists($message->getUploadDir().$name);
 
         if(empty($file))
         {
@@ -99,6 +97,24 @@ final readonly class MaterialSignLinkDispatcher
 
             return;
         }
+
+
+        /** @var MaterialSignPdfMessage $message */
+        /* Отправляем сообщение в шину для обработки файлов */
+        $this->MessageDispatch->dispatch(
+            message: new MaterialSignPdfMessage(
+                $message->getUsr(),
+                $message->getProfile(),
+                $message->getMaterial(),
+                $message->getOffer(),
+                $message->getVariation(),
+                $message->getModification(),
+                $message->isPurchase(),
+                $message->isNotShare(),
+                $message->getNumber(),
+            ),
+            transport: 'materials-sign'
+        );
 
         $this->Logger->info(sprintf(
             'Сохранен файл PDF честного знака %s',
