@@ -25,18 +25,16 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Messenger\MaterialSignPdf\MaterialSignScaner;
 
-
 use BaksDev\Barcode\Reader\BarcodeRead;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
+use BaksDev\Materials\Catalog\Repository\ExistMaterialBarcode\ExistMaterialBarcodeInterface;
+use BaksDev\Materials\Catalog\Type\Barcode\MaterialBarcode;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusError;
 use BaksDev\Materials\Sign\UseCase\Admin\New\MaterialSignDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\New\MaterialSignHandler;
-use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\PurchaseMaterialStockDTO;
-use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\PurchaseMaterialStockHandler;
-use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use Doctrine\ORM\Mapping\Table;
 use Exception;
 use Imagick;
@@ -49,7 +47,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler(priority: 0)]
-final class MaterialSignScannerDispatcher
+final readonly class MaterialSignScannerDispatcher
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private string $upload,
@@ -58,6 +56,7 @@ final class MaterialSignScannerDispatcher
         private Filesystem $filesystem,
         private BarcodeRead $barcodeRead,
         private MessageDispatchInterface $messageDispatch,
+        private ExistMaterialBarcodeInterface $ExistMaterialBarcodeRepository,
     ) {}
 
     public function __invoke(MaterialSignScannerMessage $message): void
@@ -179,6 +178,40 @@ final class MaterialSignScannerDispatcher
                 $code = uniqid('error_', true);
                 $MaterialSignDTO->setStatus(MaterialSignStatusError::class);
             }
+
+
+            /**
+             * Необходимо убедиться, что баркод соответствует выбранному сырью, однако только при условии, что ранее
+             * данному сырью был присвоен баркод
+             */
+            if(false === $message->isNew())
+            {
+                /** Пытаемся проверить соответствие продукта и баркода в базе */
+                $result = $this->ExistMaterialBarcodeRepository
+                    ->forBarcode(new MaterialBarcode($code))
+                    ->forMaterial($message->getMaterial())
+                    ->forOffer($message->getOffer())
+                    ->forVariation($message->getVariation())
+                    ->forModification($message->getModification())
+                    ->exist();
+
+
+                /** Если баркод не соответствует торговому предложению - не сохраняем такой честный знак */
+                if(false === $result)
+                {
+                    $this->logger->warning(
+                        sprintf('Баркод %s не соответствует выбранному продукту', $code),
+                        [self::class.':'.__LINE__],
+                    );
+
+
+                    /** Удаляем после обработки файл PDF */
+                    $this->filesystem->remove($pdfPath);
+
+                    return;
+                }
+            }
+
 
             /**
              * Переименовываем директорию по коду честного знака (для уникальности)

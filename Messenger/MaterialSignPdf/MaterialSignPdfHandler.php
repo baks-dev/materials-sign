@@ -27,7 +27,6 @@ namespace BaksDev\Materials\Sign\Messenger\MaterialSignPdf;
 
 use BaksDev\Barcode\Reader\BarcodeRead;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
-use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Materials\Sign\Messenger\MaterialSignPdf\MaterialSignScaner\MaterialSignScannerMessage;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Materials\Sign\UseCase\Admin\New\MaterialSignHandler;
@@ -35,11 +34,9 @@ use BaksDev\Materials\Stocks\Entity\Stock\MaterialStock;
 use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\Materials\MaterialStockDTO;
 use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\PurchaseMaterialStockDTO;
 use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\PurchaseMaterialStockHandler;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use DateTimeImmutable;
 use DirectoryIterator;
-use Doctrine\ORM\Mapping\Table;
 use Imagick;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -141,6 +138,7 @@ final readonly class MaterialSignPdfHandler
 
                 share: $message->isNotShare(),
                 number: $message->getNumber(),
+                isNew: $message->isNew()
             );
 
             $this->messageDispatch->dispatch(
