@@ -31,10 +31,10 @@ use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\Materia
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
+use Symfony\Component\Validator\Constraints as Assert;
 
 final class MaterialSignScannerMessage
 {
-
     #[Assert\NotBlank]
     #[Assert\Uuid]
     private string $usr;
@@ -77,7 +77,8 @@ final class MaterialSignScannerMessage
         ?MaterialModificationConst $modification,
 
         bool $share,
-        ?string $number
+        ?string $number,
+        private readonly bool $isNew
     )
     {
         $this->usr = (string) $usr;
@@ -165,5 +166,10 @@ final class MaterialSignScannerMessage
     public function getPart(): string
     {
         return (string) $this->part;
+    }
+
+    public function isNew(): bool
+    {
+        return $this->isNew;
     }
 }

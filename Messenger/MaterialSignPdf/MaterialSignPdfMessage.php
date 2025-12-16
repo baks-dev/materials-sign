@@ -78,7 +78,8 @@ final class MaterialSignPdfMessage
         ?MaterialModificationConst $modification,
         bool $purchase,
         bool $share,
-        ?string $number
+        ?string $number,
+        private readonly ?bool $isNew = null
     )
     {
         $this->usr = (string) $usr;
@@ -164,5 +165,10 @@ final class MaterialSignPdfMessage
     public function isNotShare(): bool
     {
         return $this->share;
+    }
+
+    public function isNew(): bool
+    {
+        return true === $this->isNew;
     }
 }
