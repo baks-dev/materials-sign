@@ -99,15 +99,24 @@ final class MaterialSignScannerDispatcher
         /** Если директория загрузки не найдена - создаем с правами 0700 */
         $this->filesystem->exists($dirCode) ?: $this->filesystem->mkdir($dirCode);
 
+        $pdfPath = $message->getRealPath();
+
+        if(false === $this->filesystem->exists($pdfPath))
+        {
+            return;
+        }
+
 
         /**
          * Открываем PDF для подсчета страниц на случай если их несколько
          */
 
-        Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 86400);
+        Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
+        Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, (1024 * 1024 * 256));
 
-        $pdfPath = $message->getRealPath();
+
         $Imagick = new Imagick();
+
         $Imagick->setResolution(500, 500);
         $Imagick->readImage($pdfPath);
         $pages = $Imagick->getNumberImages(); // количество страниц в файле
