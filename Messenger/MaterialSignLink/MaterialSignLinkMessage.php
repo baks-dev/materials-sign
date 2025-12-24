@@ -145,7 +145,7 @@ final readonly class MaterialSignLinkMessage
         return $this->modification ? new MaterialModificationConst($this->modification) : null;
     }
 
-    public function isShare(): bool
+    public function isNotShare(): bool
     {
         return $this->share;
     }
