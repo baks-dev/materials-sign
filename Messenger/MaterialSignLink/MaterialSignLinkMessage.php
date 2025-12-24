@@ -70,7 +70,8 @@ final readonly class MaterialSignLinkMessage
         ?MaterialModificationConst $modification,
         private bool $purchase,
         private bool $share,
-        private ?string $number
+        private ?string $number,
+        private bool $isNew
     )
     {
         $this->usr = (string) $usr;
@@ -153,5 +154,10 @@ final readonly class MaterialSignLinkMessage
     public function getNumber(): ?string
     {
         return $this->number;
+    }
+
+    public function isNew(): bool
+    {
+        return true === $this->isNew;
     }
 }

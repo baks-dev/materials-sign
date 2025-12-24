@@ -112,6 +112,7 @@ final readonly class MaterialSignLinkDispatcher
                 $message->isPurchase(),
                 $message->isNotShare(),
                 $message->getNumber(),
+                $message->isNew()
             ),
             transport: 'materials-sign'
         );
