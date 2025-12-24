@@ -139,4 +139,19 @@ final readonly class MaterialSignLinkMessage
     {
         return $this->variation ? new MaterialVariationConst($this->variation) : null;
     }
+
+    public function getModification(): ?MaterialModificationConst
+    {
+        return $this->modification ? new MaterialModificationConst($this->modification) : null;
+    }
+
+    public function isShare(): bool
+    {
+        return $this->share;
+    }
+
+    public function getNumber(): ?string
+    {
+        return $this->number;
+    }
 }
