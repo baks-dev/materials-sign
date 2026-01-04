@@ -70,7 +70,8 @@ final readonly class MaterialSignLinkMessage
         ?MaterialModificationConst $modification,
         private bool $purchase,
         private bool $share,
-        private ?string $number
+        private ?string $number,
+        private bool $isNew
     )
     {
         $this->usr = (string) $usr;
@@ -138,5 +139,25 @@ final readonly class MaterialSignLinkMessage
     public function getVariation(): ?MaterialVariationConst
     {
         return $this->variation ? new MaterialVariationConst($this->variation) : null;
+    }
+
+    public function getModification(): ?MaterialModificationConst
+    {
+        return $this->modification ? new MaterialModificationConst($this->modification) : null;
+    }
+
+    public function isNotShare(): bool
+    {
+        return $this->share;
+    }
+
+    public function getNumber(): ?string
+    {
+        return $this->number;
+    }
+
+    public function isNew(): bool
+    {
+        return true === $this->isNew;
     }
 }

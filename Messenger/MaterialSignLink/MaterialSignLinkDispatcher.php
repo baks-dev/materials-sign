@@ -99,7 +99,7 @@ final readonly class MaterialSignLinkDispatcher
         }
 
 
-        /** @var MaterialSignPdfMessage $message */
+        /** @var MaterialSignLinkMessage $message */
         /* Отправляем сообщение в шину для обработки файлов */
         $this->MessageDispatch->dispatch(
             message: new MaterialSignPdfMessage(
@@ -112,6 +112,7 @@ final readonly class MaterialSignLinkDispatcher
                 $message->isPurchase(),
                 $message->isNotShare(),
                 $message->getNumber(),
+                $message->isNew()
             ),
             transport: 'materials-sign'
         );

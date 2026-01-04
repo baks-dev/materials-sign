@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace BaksDev\Materials\Sign\Messenger\MaterialSignPdf\MaterialSignScaner;
 
 use BaksDev\Barcode\Reader\BarcodeRead;
+use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Materials\Catalog\Repository\ExistMaterialBarcode\ExistMaterialBarcodeInterface;
@@ -117,7 +118,22 @@ final readonly class MaterialSignScannerDispatcher
         $Imagick = new Imagick();
 
         $Imagick->setResolution(500, 500);
-        $Imagick->readImage($pdfPath);
+
+        try
+        {
+            $Imagick->readImage($pdfPath);
+        }
+        catch(Exception)
+        {
+            $this->messageDispatch->dispatch(
+                message: $message,
+                stamps: [new MessageDelay('5 seconds')],
+                transport: 'materials-sign'
+            );
+
+            return;
+        }
+
         $pages = $Imagick->getNumberImages(); // количество страниц в файле
 
         for($number = 0; $number < $pages; $number++)
