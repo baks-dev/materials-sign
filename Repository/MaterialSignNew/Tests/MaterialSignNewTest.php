@@ -46,7 +46,7 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 #[When(env: 'test')]
-#[Group('material-sign')]
+#[Group('materials-sign')]
 class MaterialSignNewTest extends KernelTestCase
 {
     private static string|false $user = false;

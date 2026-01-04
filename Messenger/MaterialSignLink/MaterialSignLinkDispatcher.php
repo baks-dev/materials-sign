@@ -25,12 +25,13 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Messenger\MaterialSignLink;
 
+use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Materials\Sign\Messenger\MaterialSignPdf\MaterialSignPdfMessage;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Psr\Log\LoggerInterface;
 
 #[AsMessageHandler(priority: 0)]
 final readonly class MaterialSignLinkDispatcher
@@ -46,8 +47,22 @@ final readonly class MaterialSignLinkDispatcher
     {
         $linkResponse = $this->HttpClient->request('GET', $message->getLink());
 
+
         if(200 !== $linkResponse->getStatusCode())
         {
+            $this->Logger->critical(sprintf(
+                'products-sign: Не удается получить файл по ссылке %s: код %s',
+                $message->getLink(),
+                $linkResponse->getStatusCode(),
+            ));
+
+            /** Пробуем загрузить позже */
+            $this->MessageDispatch->dispatch(
+                message: $message,
+                stamps: [new MessageDelay('1 minutes')],
+                transport: 'materials-sign',
+            );
+
             return;
         }
 
@@ -55,6 +70,11 @@ final readonly class MaterialSignLinkDispatcher
 
         if(empty($contentType))
         {
+            $this->Logger->critical(
+                'materials-sign: Ошибка при получении заголовков файла PDF честного знака. Пробуем загрузить позже.',
+                [self::class.':'.__LINE__],
+            );
+
             return;
         }
 
@@ -64,7 +84,7 @@ final readonly class MaterialSignLinkDispatcher
                 'application/acrobat',
                 'application/nappdf',
                 'application/x-pdf',
-                'image/pdf'
+                'image/pdf',
             ])
         )
         {
@@ -73,10 +93,16 @@ final readonly class MaterialSignLinkDispatcher
 
         if(empty($name))
         {
+            $this->Logger->critical(
+                'materials-sign: Ошибка content-type файла PDF честного знака',
+                [self::class.':'.__LINE__, $contentType],
+            );
+
             return;
         }
 
         $fileStream = fopen($message->getUploadDir().$name, 'w');
+
         foreach($this->HttpClient->stream($linkResponse) as $chunk)
         {
             fwrite($fileStream, $chunk->getContent());
@@ -90,9 +116,16 @@ final readonly class MaterialSignLinkDispatcher
 
         if(empty($file))
         {
+            /** Пробуем загрузить позже */
+            $this->MessageDispatch->dispatch(
+                message: $message,
+                stamps: [new MessageDelay('1 minutes')],
+                transport: 'materials-sign',
+            );
+
             $this->Logger->critical(sprintf(
-                'Файл PDF с честным знаком %s не был корректно сохранен',
-                $message->getUploadDir().$name
+                'materials-sign: Файл PDF с честным знаком %s не был корректно сохранен',
+                $message->getUploadDir().$name,
             ));
 
             return;
@@ -113,12 +146,12 @@ final readonly class MaterialSignLinkDispatcher
                 $message->isNotShare(),
                 $message->getNumber(),
             ),
-            transport: 'materials-sign'
+            transport: 'materials-sign',
         );
 
         $this->Logger->info(sprintf(
             'Сохранен файл PDF честного знака %s',
-            $message->getUploadDir().$name
+            $message->getUploadDir().$name,
         ));
     }
 }

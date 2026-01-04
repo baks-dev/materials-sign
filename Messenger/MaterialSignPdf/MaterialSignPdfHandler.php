@@ -29,7 +29,6 @@ use BaksDev\Barcode\Reader\BarcodeRead;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Materials\Sign\Messenger\MaterialSignPdf\MaterialSignScaner\MaterialSignScannerMessage;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
-use BaksDev\Materials\Sign\UseCase\Admin\New\MaterialSignHandler;
 use BaksDev\Materials\Stocks\Entity\Stock\MaterialStock;
 use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\Materials\MaterialStockDTO;
 use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\PurchaseMaterialStockDTO;
@@ -37,6 +36,7 @@ use BaksDev\Materials\Stocks\UseCase\Admin\Purchase\PurchaseMaterialStockHandler
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use DateTimeImmutable;
 use DirectoryIterator;
+use Exception;
 use Imagick;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -50,10 +50,7 @@ final readonly class MaterialSignPdfHandler
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private string $upload,
         #[Target('materialsSignLogger')] private LoggerInterface $logger,
-        private MaterialSignHandler $materialSignHandler,
         private PurchaseMaterialStockHandler $purchaseMaterialStockHandler,
-        private Filesystem $filesystem,
-        private BarcodeRead $barcodeRead,
         private MessageDispatchInterface $messageDispatch,
         private UserByUserProfileInterface $UserByUserProfileInterface,
 
@@ -103,6 +100,7 @@ final readonly class MaterialSignPdfHandler
         $totalPurchase = 0;
 
         Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
+        Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, (1024 * 1024 * 256));
 
         foreach(new DirectoryIterator($uploadDir) as $SignFile)
         {
@@ -160,7 +158,20 @@ final readonly class MaterialSignPdfHandler
 
             $Imagick = new Imagick();
             $Imagick->setResolution(50, 50); // устанавливаем малое разрешение
-            $Imagick->readImage($pdfPath);
+
+            try
+            {
+                $Imagick->readImage($pdfPath);
+            }
+            catch(Exception)
+            {
+                $this->messageDispatch->dispatch(
+                    $message,
+                    transport: 'materials-sign-low',
+                );
+
+                return;
+            }
 
             $totalPurchase += $Imagick->getNumberImages(); // количество страниц в файле
 

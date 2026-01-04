@@ -117,7 +117,21 @@ final readonly class MaterialSignScannerDispatcher
         $Imagick = new Imagick();
 
         $Imagick->setResolution(500, 500);
-        $Imagick->readImage($pdfPath);
+
+        try
+        {
+            $Imagick->readImage($pdfPath);
+        }
+        catch(Exception)
+        {
+            $this->messageDispatch->dispatch(
+                $message,
+                transport: 'materials-sign-low',
+            );
+
+            return;
+        }
+
         $pages = $Imagick->getNumberImages(); // количество страниц в файле
 
         for($number = 0; $number < $pages; $number++)

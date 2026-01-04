@@ -146,14 +146,14 @@ final class MaterialSignDTO implements MaterialSignEventInterface
     }
 
 
-    /**
-     * Profile
-     */
-    public function setProfile(?UserProfileUid $profile): self
-    {
-        $this->profile = $profile;
-        return $this;
-    }
+    //    /**
+    //     * Profile
+    //     */
+    //    public function setProfile(?UserProfileUid $profile): self
+    //    {
+    //        $this->profile = $profile;
+    //        return $this;
+    //    }
 
     //    public function getProfile(): ?UserProfileUid
     //    {

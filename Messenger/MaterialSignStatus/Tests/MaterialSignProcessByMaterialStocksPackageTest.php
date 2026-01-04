@@ -34,7 +34,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
 #[When(env: 'test')]
-#[Group('material-sign')]
+#[Group('materials-sign')]
 class MaterialSignProcessByMaterialStocksPackageTest extends KernelTestCase
 {
 

@@ -25,35 +25,38 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\UseCase\Admin\Status\Tests;
 
+use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Repository\CurrentEvent\MaterialSignCurrentEventInterface;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
-use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\Collection\MaterialSignStatusCollection;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusProcess;
 use BaksDev\Materials\Sign\UseCase\Admin\New\Tests\MaterialSignEditHandleTest;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignProcessDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignStatusHandler;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
-use BaksDev\Orders\Order\Type\Material\OrderMaterialUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\DependencyInjection\Attribute\When;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 #[When(env: 'test')]
-#[Group('material-sign')]
+#[Group('materials-sign')]
 final class MaterialSignProcessHandleTest extends KernelTestCase
 {
-    #[DependsOnClass(MaterialSignProcessHandleTest::class)]
+    #[DependsOnClass(MaterialSignEditHandleTest::class)]
     public function testUseCase(): void
     {
-        /**
-         * Инициируем статус для итератора тегов
-         * @var MaterialSignStatusCollection $status
-         */
-        $status = self::getContainer()->get(MaterialSignStatusCollection::class);
-        $status->cases();
+        // Бросаем событие консольной комманды
+        $dispatcher = self::getContainer()->get(EventDispatcherInterface::class);
+        $event = new ConsoleCommandEvent(new Command(), new StringInput(''), new NullOutput());
+        $dispatcher->dispatch($event, 'console.command');
+
 
         /** @var MaterialSignCurrentEventInterface $MaterialSignCurrentEvent */
         $MaterialSignCurrentEvent = self::getContainer()->get(MaterialSignCurrentEventInterface::class);
@@ -61,7 +64,7 @@ final class MaterialSignProcessHandleTest extends KernelTestCase
             ->forMaterialSign(MaterialSignUid::TEST)
             ->find();
 
-        self::assertNotNull($MaterialSignEvent);
+        self::assertInstanceOf(MaterialSignEvent::class, $MaterialSignEvent);
 
 
         /** @see MaterialSignCancelDTO */

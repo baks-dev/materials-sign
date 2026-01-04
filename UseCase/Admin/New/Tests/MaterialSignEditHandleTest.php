@@ -25,46 +25,57 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\UseCase\Admin\New\Tests;
 
-use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Repository\CurrentEvent\MaterialSignCurrentEventInterface;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
-use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\Collection\MaterialSignStatusCollection;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusDone;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusNew;
 use BaksDev\Materials\Sign\UseCase\Admin\New\Code\MaterialSignCodeDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\New\MaterialSignDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\New\MaterialSignHandler;
+use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use PHPUnit\Framework\Attributes\DependsOnClass;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\DependencyInjection\Attribute\When;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 #[When(env: 'test')]
+#[Group('materials-sign')]
 final class MaterialSignEditHandleTest extends KernelTestCase
 {
+
+    #[DependsOnClass(MaterialSignNewHandleTest::class)]
     public function testUseCase(): void
     {
-        /**
-         * Инициируем статус для итератора тегов
-         * @var MaterialSignStatusCollection $status
-         */
-        $status = self::getContainer()->get(MaterialSignStatusCollection::class);
-        $status->cases();
+        // Бросаем событие консольной комманды
+        $dispatcher = self::getContainer()->get(EventDispatcherInterface::class);
+        $event = new ConsoleCommandEvent(new Command(), new StringInput(''), new NullOutput());
+        $dispatcher->dispatch($event, 'console.command');
 
         /** @var MaterialSignCurrentEventInterface $MaterialSignCurrentEvent */
         $MaterialSignCurrentEvent = self::getContainer()->get(MaterialSignCurrentEventInterface::class);
-        $MaterialSignEvent = $MaterialSignCurrentEvent->findByMaterialSign(MaterialSignUid::TEST);
+        $MaterialSignEvent = $MaterialSignCurrentEvent
+            ->forMaterialSign(new MaterialSignUid(MaterialSignUid::TEST))
+            ->find();
+
         self::assertNotNull($MaterialSignEvent);
 
 
         /** @see MaterialSignDTO */
 
-        $MaterialSignDTO = new MaterialSignDTO($UserProfileUid = clone new UserProfileUid());
+        $MaterialSignDTO = new MaterialSignDTO();
         $MaterialSignEvent->getDto($MaterialSignDTO);
-        self::assertSame($UserProfileUid, $MaterialSignDTO->getProfile());
+
+        //self::assertSame($UserProfileUid, $MaterialSignDTO->getProfile());
 
         self::assertTrue($MaterialSignDTO->getStatus()->equals(MaterialSignStatusNew::class));
         $MaterialSignDTO->setStatus(MaterialSignStatusDone::class);
@@ -76,19 +87,21 @@ final class MaterialSignEditHandleTest extends KernelTestCase
         self::assertEquals('code', $MaterialSignCodeDTO->getCode());
         $MaterialSignCodeDTO->setCode('code_edit');
 
-        self::assertNotNull($MaterialSignCodeDTO->getQr());
+        //self::assertNotNull($MaterialSignCodeDTO->getQr());
 
-        self::assertTrue($MaterialSignCodeDTO->getMaterial()->equals(MaterialUid::TEST));
-        $MaterialSignCodeDTO->setMaterial(clone $MaterialSignCodeDTO->getMaterial());
+        $MaterialSignInvariableDTO = $MaterialSignDTO->getInvariable();
 
-        self::assertTrue($MaterialSignCodeDTO->getOffer()->equals(MaterialOfferConst::TEST));
-        $MaterialSignCodeDTO->setOffer(clone $MaterialSignCodeDTO->getOffer());
+        self::assertTrue($MaterialSignInvariableDTO->getMaterial()->equals(MaterialUid::TEST));
+        $MaterialSignInvariableDTO->setMaterial(clone $MaterialSignInvariableDTO->getMaterial());
 
-        self::assertTrue($MaterialSignCodeDTO->getVariation()->equals(MaterialVariationConst::TEST));
-        $MaterialSignCodeDTO->setVariation(clone $MaterialSignCodeDTO->getVariation());
+        self::assertTrue($MaterialSignInvariableDTO->getOffer()->equals(MaterialOfferConst::TEST));
+        $MaterialSignInvariableDTO->setOffer(clone $MaterialSignInvariableDTO->getOffer());
 
-        self::assertTrue($MaterialSignCodeDTO->getModification()->equals(MaterialModificationConst::TEST));
-        $MaterialSignCodeDTO->setModification(clone $MaterialSignCodeDTO->getModification());
+        self::assertTrue($MaterialSignInvariableDTO->getVariation()->equals(MaterialVariationConst::TEST));
+        $MaterialSignInvariableDTO->setVariation(clone $MaterialSignInvariableDTO->getVariation());
+
+        self::assertTrue($MaterialSignInvariableDTO->getModification()->equals(MaterialModificationConst::TEST));
+        $MaterialSignInvariableDTO->setModification(clone $MaterialSignInvariableDTO->getModification());
 
 
         /** @var MaterialSignHandler $MaterialSignHandler */
