@@ -116,7 +116,7 @@ final readonly class MaterialSignScannerDispatcher
 
         $Imagick = new Imagick();
 
-        $Imagick->setResolution(500, 500);
+        $Imagick->setResolution(400, 400);
 
         try
         {
