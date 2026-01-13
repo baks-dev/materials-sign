@@ -41,9 +41,11 @@ use BaksDev\Products\Product\Repository\ProductMaterials\ProductMaterialsInterfa
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Products\Stocks\Entity\Stock\Event\ProductStockEvent;
 use BaksDev\Products\Stocks\Entity\Stock\Products\ProductStockProduct;
+use BaksDev\Products\Stocks\Messenger\Orders\EditProductStockTotal\EditProductStockTotalMessage;
 use BaksDev\Products\Stocks\Messenger\ProductStockMessage;
 use BaksDev\Products\Stocks\Repository\CurrentProductStocks\CurrentProductStocksInterface;
 use BaksDev\Products\Stocks\Repository\ProductStocksEvent\ProductStocksEventInterface;
+use BaksDev\Products\Stocks\Type\Event\ProductStockEventUid;
 use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusPackage;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
@@ -70,13 +72,13 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
         private MessageDispatchInterface $messageDispatch
     ) {}
 
-    public function __invoke(ProductStockMessage $message): void
+    public function __invoke(EditProductStockTotalMessage $message): void
     {
         $Deduplicator = $this->deduplicator
             ->namespace('materials-sign')
             ->deduplication([
                 $message,
-                self::class
+                self::class,
             ]);
 
         if($Deduplicator->isExecuted())
@@ -84,16 +86,22 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
             return;
         }
 
+        /** Новая складская заявка не должна иметь предыдущего события */
+        if(true === ($message->getLast() instanceof ProductStockEventUid))
+        {
+            $Deduplicator->save();
+            return;
+        }
+
         $ProductStockEvent = $this->ProductStocksEventRepository
             ->forEvent($message->getEvent())
             ->find();
-
 
         if(false === ($ProductStockEvent instanceof ProductStockEvent))
         {
             $this->logger->critical(
                 'products-sign: Не найдено событие ProductStock',
-                [self::class.':'.__LINE__, var_export($message, true)]
+                [self::class.':'.__LINE__, var_export($message, true)],
             );
 
             return;
@@ -103,7 +111,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
         {
             $this->logger->notice(
                 'Не резервируем честный знак: Складская заявка не является Package «Упаковка»',
-                [self::class.':'.__LINE__, var_export($message, true)]
+                [self::class.':'.__LINE__, var_export($message, true)],
             );
 
             return;
@@ -113,7 +121,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
         {
             $this->logger->notice(
                 'Не резервируем честный знак: упаковка без идентификатора заказа',
-                [self::class.':'.__LINE__, var_export($message, true)]
+                [self::class.':'.__LINE__, var_export($message, true)],
             );
 
             return;
@@ -123,7 +131,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
         {
             $this->logger->warning(
                 'Заявка на упаковку не может определить ProductStocksInvariable',
-                [self::class.':'.__LINE__, var_export($message, true)]
+                [self::class.':'.__LINE__, var_export($message, true)],
             );
 
             return;
@@ -136,7 +144,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
         {
             $this->logger->warning(
                 'Заявка на упаковку не имеет продукции в коллекции',
-                [self::class.':'.__LINE__, var_export($message, true)]
+                [self::class.':'.__LINE__, var_export($message, true)],
             );
 
             return;
@@ -158,9 +166,9 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
                 ->critical(
                     sprintf(
                         'products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ',
-                        $UserProfileUid
+                        $UserProfileUid,
                     ),
-                    [self::class.':'.__LINE__, var_export($message, true)]
+                    [self::class.':'.__LINE__, var_export($message, true)],
                 );
 
             return;
@@ -245,7 +253,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
                     {
                         $this->logger->warning(
                             'Честный знак на сырьё не найдено',
-                            [$ProductStockEvent, $CurrentMaterialDTO, self::class.':'.__LINE__]
+                            [$ProductStockEvent, $CurrentMaterialDTO, self::class.':'.__LINE__],
                         );
 
                         break;
@@ -253,7 +261,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
 
                     $MaterialSignProcessDTO = new MaterialSignProcessDTO(
                         $UserProfileUid,
-                        $ProductStockEvent->getOrder()
+                        $ProductStockEvent->getOrder(),
                     );
                     $ProductSignInvariableDTO = $MaterialSignProcessDTO->getInvariable();
                     $ProductSignInvariableDTO->setPart($MaterialSignUid);
@@ -266,7 +274,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
                     {
                         $this->logger->critical(
                             sprintf('%s: Ошибка при обновлении статуса честного знака на сырье', $MaterialSign),
-                            [$MaterialSignProcessDTO, self::class.':'.__LINE__]
+                            [$MaterialSignProcessDTO, self::class.':'.__LINE__],
                         );
 
                         continue 2;
@@ -274,7 +282,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
 
                     $this->logger->info(
                         'Отметили Честный знак Process «В процессе» на сырье',
-                        [$MaterialSignEvent, self::class.':'.__LINE__]
+                        [$MaterialSignEvent, self::class.':'.__LINE__],
                     );
 
                     /** Прогреваем кеш стикеров честных знаков заказа */
@@ -282,7 +290,7 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
 
                     $this->messageDispatch->dispatch(
                         message: $MaterialSignMatrixCodeMessage,
-                        transport: 'files-res'
+                        transport: 'files-res',
                     );
 
                 }
