@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace BaksDev\Materials\Sign\Messenger\MaterialSignStatus\Tests;
 
 use BaksDev\Materials\Sign\Messenger\MaterialSignStatus\MaterialSignProcessByMaterialStocksPackageDispatcher;
+use BaksDev\Products\Stocks\Messenger\Orders\EditProductStockTotal\EditProductStockTotalMessage;
 use BaksDev\Products\Stocks\Messenger\ProductStockMessage;
 use BaksDev\Products\Stocks\Type\Event\ProductStockEventUid;
 use BaksDev\Products\Stocks\Type\Id\ProductStockUid;
@@ -45,7 +46,7 @@ class MaterialSignProcessByMaterialStocksPackageTest extends KernelTestCase
             self::getContainer()->get(MaterialSignProcessByMaterialStocksPackageDispatcher::class);
 
         $MaterialSignProcessByMaterialStocksPackage(
-            new ProductStockMessage(
+            new EditProductStockTotalMessage(
                 new ProductStockUid('9900e5f5-5477-752b-b8c3-325b977bac92'),
                 new ProductStockEventUid('6d3617d3-7b3f-725f-8fc8-0a26014137d3')
             )
