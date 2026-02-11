@@ -47,6 +47,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 #[When(env: 'test')]
 #[Group('materials-sign')]
+#[Group('materials-sign-repository')]
 class MaterialSignNewTest extends KernelTestCase
 {
     private static string|false $user = false;
@@ -99,13 +100,6 @@ class MaterialSignNewTest extends KernelTestCase
 
         /** @var MaterialSignNewInterface $MaterialSignNewInterface */
         $MaterialSignNewInterface = self::getContainer()->get(MaterialSignNewInterface::class);
-
-        // self::$user = "0191d360-1613-7d30-8859-f43991ffe926";
-        // self::$profile = "0191d362-a007-7d4b-863e-bdd8a5d9a28a";
-        // self::$material = "01876b4b-886d-7cff-a70e-b73559356089";
-        // self::$offer = "01878a7a-aa04-7c07-ab5c-426ad8b01ae0";
-        // self::$variation = "01878a7a-aa00-77a6-9f90-4dc47498a632";
-        // self::$modification = "01878a7a-a9ff-7e4f-8809-151e88674d80";
 
         $profile = '018d3075-6e7b-7b5e-95f6-923243b1fa3d'; // admin
         //$profile = '018d36b7-0d03-71a8-b1b0-e57b5c186ef9'; // moderator
