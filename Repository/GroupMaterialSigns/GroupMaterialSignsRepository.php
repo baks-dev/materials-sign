@@ -56,6 +56,7 @@ use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Entity\Modify\MaterialSignModify;
 use BaksDev\Materials\Sign\Forms\MaterialSignFilter\MaterialSignFilterDTO;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
+use BaksDev\Orders\Order\Entity\Invariable\OrderInvariable;
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Users\Profile\UserProfile\Entity\Event\Personal\UserProfilePersonal;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
@@ -198,12 +199,12 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
 
 
         $dbal
-            ->addSelect('orders.number AS order_number')
+            ->addSelect('orders_invariable.number AS order_number')
             ->leftJoin(
                 'event',
-                Order::class,
-                'orders',
-                'orders.id = event.ord'
+                OrderInvariable::class,
+                'orders_invariable',
+                'orders_invariable.id = event.ord',
             );
 
 
@@ -531,7 +532,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
 
                 $dbal
                     ->createSearchQueryBuilder($this->search)
-                    ->addSearchLike('orders.number');
+                    ->addSearchLike('orders_invariable.number');
             }
 
             // поиск по номеру ГТД формата 10702070/190725/5247456
@@ -548,7 +549,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                     ->createSearchQueryBuilder($this->search)
                     ->addSearchLike('code.code')
                     ->addSearchLike('invariable.number')
-                    ->addSearchLike('orders.number')
+                    ->addSearchLike('orders_invariable.number')
                     ->addSearchLike('material_modification.article')
                     ->addSearchLike('material_variation.article')
                     ->addSearchLike('material_offer.article')
