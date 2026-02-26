@@ -204,7 +204,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'event',
                 OrderInvariable::class,
                 'orders_invariable',
-                'orders_invariable.id = event.ord',
+                'orders_invariable.main = event.ord',
             );
 
 
