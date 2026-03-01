@@ -26,7 +26,9 @@ namespace BaksDev\Materials\Sign\Repository\CurrentEvent;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 
+#[Autoconfigure(public: true)]
 interface MaterialSignCurrentEventInterface
 {
     public function forMaterialSign(MaterialSign|MaterialSignUid|string $sign): self;

@@ -50,12 +50,14 @@ use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusPac
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * При статусе складской заявки Package «Упаковка» - резервируем сырьевой честный знак в статус Process «В процессе»
  */
+#[Autoconfigure(public: true)]
 #[AsMessageHandler(priority: -5)]
 final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
 {

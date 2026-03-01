@@ -25,10 +25,9 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Messenger;
 
-use BaksDev\Materials\Sign\Repository\CurrentEvent\MaterialSignCurrentEventInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(priority: 0)]
 final class MaterialSignNullHandler
 {
     public function __invoke(MaterialSignMessage $message): void {}
