@@ -28,13 +28,13 @@ namespace BaksDev\Materials\Sign\Controller\Admin;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
+use BaksDev\Materials\Sign\Forms\MaterialsSignsReissue\MaterialsSignsReissueDTO;
+use BaksDev\Materials\Sign\Forms\MaterialsSignsReissue\MaterialsSignsReissueForm;
 use BaksDev\Materials\Sign\Messenger\MaterialSignReissue\MaterialsSignsReissueMessage;
 use BaksDev\Orders\Order\Entity\Event\OrderEvent;
 use BaksDev\Orders\Order\Repository\ExistOrderEventByStatus\ExistOrderEventByStatusInterface;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusCompleted;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusPackage;
-use BaksDev\Materials\Sign\Forms\MaterialsSignsReissue\MaterialsSignsReissueDTO;
-use BaksDev\Materials\Sign\Forms\MaterialsSignsReissue\MaterialsSignsReissueForm;
 use JsonException;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -45,7 +45,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
 #[RoleSecurity('ROLE_MATERIAL_SIGN_REISSUE')]
-final class MaterialsSignsReissueController extends AbstractController
+final class ReissueController extends AbstractController
 {
     /**
      * @throws JsonException
@@ -119,13 +119,13 @@ final class MaterialsSignsReissueController extends AbstractController
 
             $materialsSignsReissueMessage = new MaterialsSignsReissueMessage(
                 $orderEvent->getMain(),
-                $this->getUsr()->getId(),
+                $this->getUsr()?->getId(),
                 $this->getProfileUid(),
             );
 
 
             /** Отправляем сообщение для перевыпуска честных знаков */
-            $MessageDispatch->dispatch(message:$materialsSignsReissueMessage, transport: 'materials-sign');
+            $MessageDispatch->dispatch(message: $materialsSignsReissueMessage, transport: 'materials-sign');
 
             $this->addFlash
             (

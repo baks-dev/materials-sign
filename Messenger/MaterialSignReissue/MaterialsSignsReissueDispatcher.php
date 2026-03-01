@@ -78,28 +78,23 @@ final readonly class MaterialsSignsReissueDispatcher
             ->forOrder($orderEvent->getMain())
             ->findAllByOrder();
 
-        if(true === empty($signs))
+        if(false === empty($signs))
         {
-            $this->Logger->critical(
-                sprintf("Не были найдены честные знаки для заказа %s", $orderEvent->getMain()),
-                [self::class.':'.__LINE__, var_export($message, true)]
-            );
-
-            return;
+            /** @var MaterialSignEvent $materialSignEvent */
+            foreach($signs as $materialSignEvent)
+            {
+                /** Отменяем честный знак */
+                $this->MessageDispatch->dispatch(
+                    message: new MaterialSignCancelMessage(
+                        $message->getProfile(),
+                        $materialSignEvent->getId(),
+                    ),
+                    transport: 'materials-sign',
+                );
+            }
         }
 
-        /** @var MaterialSignEvent $materialSignEvent*/
-        foreach($signs as $materialSignEvent)
-        {
-            /** Отменяем честный знак */
-            $this->MessageDispatch->dispatch(
-                message: new MaterialSignCancelMessage(
-                    $message->getProfile(),
-                    $materialSignEvent->getId(),
-                ),
-                transport: 'materials-sign',
-            );
-        }
+
 
 
         // Идентификатор группы честных знаков
