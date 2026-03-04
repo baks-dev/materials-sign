@@ -126,7 +126,7 @@ final readonly class MaterialSignScannerDispatcher
         {
             $this->messageDispatch->dispatch(
                 $message,
-                transport: 'materials-sign-low',
+                transport: 'barcode',
             );
 
             return;

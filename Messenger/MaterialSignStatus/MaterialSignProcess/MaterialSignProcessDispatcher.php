@@ -29,13 +29,14 @@ namespace BaksDev\Materials\Sign\Messenger\MaterialSignStatus\MaterialSignProces
 use BaksDev\Core\Cache\AppCacheInterface;
 use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
-use BaksDev\Orders\Order\Entity\Event\OrderEvent;
-use BaksDev\Orders\Order\Repository\CurrentOrderEvent\CurrentOrderEventInterface;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
+use BaksDev\Materials\Sign\Messenger\MaterialSignMatrixCode\MaterialSignMatrixCodeMessage;
 use BaksDev\Materials\Sign\Repository\MaterialSignNew\MaterialSignNewInterface;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignProcessDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\Status\MaterialSignStatusHandler;
+use BaksDev\Orders\Order\Entity\Event\OrderEvent;
+use BaksDev\Orders\Order\Repository\CurrentOrderEvent\CurrentOrderEventInterface;
 use BaksDev\Ozon\Orders\BaksDevOzonOrdersBundle;
 use BaksDev\Ozon\Orders\Type\DeliveryType\TypeDeliveryDbsOzon;
 use BaksDev\Ozon\Orders\Type\DeliveryType\TypeDeliveryFbsOzon;
@@ -59,14 +60,14 @@ use BaksDev\Yandex\Market\Orders\Type\DeliveryType\TypeDeliveryDbsYaMarket;
 use BaksDev\Yandex\Market\Orders\Type\DeliveryType\TypeDeliveryFbsYaMarket;
 use BaksDev\Yandex\Market\Orders\Type\PaymentType\TypePaymentDbsYaMarket;
 use BaksDev\Yandex\Market\Orders\Type\PaymentType\TypePaymentFbsYandex;
-use DateInterval;
-use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /** Ставит в резерв честный знак по заказу */
 #[AsMessageHandler(priority: 0)]
+#[Autoconfigure(shared: false)]
 final readonly class MaterialSignProcessDispatcher
 {
     public function __construct(
@@ -150,28 +151,40 @@ final readonly class MaterialSignProcessDispatcher
             return;
         }
 
-        /**
-         * Мьютекс на идентификатор честного знака
-         */
-
-        $cache = $this->Cache->init('materials-sign');
-        $item = $cache->getItem((string) $materialSignEvent);
-
-        /** Если идентификатор найден - пробуем через время */
-        if(true === $item->isHit())
+        if(false === $materialSignEvent->isInvariable())
         {
             $this->MessageDispatch->dispatch(
                 message: $message,
-                stamps: [new MessageDelay('5 seconds')],
+                stamps: [new MessageDelay('1 seconds')],
                 transport: 'materials-sign',
             );
 
             return;
         }
 
-        $item->expiresAfter(DateInterval::createFromDateString('1 minutes'));
-        $item->set(true);
-        $cache->save($item);
+
+        //        /**
+        //         * Мьютекс на идентификатор честного знака
+        //         */
+        //
+        //        $cache = $this->Cache->init('materials-sign');
+        //        $item = $cache->getItem((string) $materialSignEvent);
+        //
+        //        /** Если идентификатор найден - пробуем через время */
+        //        if(true === $item->isHit())
+        //        {
+        //            $this->MessageDispatch->dispatch(
+        //                message: $message,
+        //                stamps: [new MessageDelay('5 seconds')],
+        //                transport: 'materials-sign',
+        //            );
+        //
+        //            return;
+        //        }
+        //
+        //        $item->expiresAfter(DateInterval::createFromDateString('1 minutes'));
+        //        $item->set(true);
+        //        $cache->save($item);
 
         /**
          * Резервируем «Честный знак»
@@ -237,21 +250,35 @@ final readonly class MaterialSignProcessDispatcher
         /** Присваиваем партию упаковки */
         $materialSignInvariableDTO->setPart($message->getPart());
 
-        $handle = $this->MaterialSignStatusHandler->handle($materialSignProcessDTO);
+        $MaterialSign = $this->MaterialSignStatusHandler->handle($materialSignProcessDTO);
 
-        if(false === ($handle instanceof MaterialSign))
+        if(false === ($MaterialSign instanceof MaterialSign))
         {
             $this->logger->critical(
-                sprintf('%s: Ошибка при обновлении статуса честного знака', $handle),
+                sprintf('%s: Ошибка при обновлении статуса честного знака', $MaterialSign),
                 [var_export($message, true), self::class.':'.__LINE__],
             );
 
-            throw new InvalidArgumentException('Ошибка при обновлении статуса честного знака');
+            $this->MessageDispatch->dispatch(
+                message: $message,
+                stamps: [new MessageDelay('5 seconds')],
+                transport: 'materials-sign',
+            );
+
+            return;
         }
 
         $this->logger->info(
             'Отметили Честный знак Process «В резерве»',
             [var_export($message, true), self::class.':'.__LINE__],
+        );
+
+        /** Прогреваем кеш стикеров честных знаков заказа */
+        $MaterialSignMatrixCodeMessage = new MaterialSignMatrixCodeMessage($MaterialSign);
+
+        $this->MessageDispatch->dispatch(
+            message: $MaterialSignMatrixCodeMessage,
+            transport: 'files-res',
         );
     }
 

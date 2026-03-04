@@ -186,7 +186,7 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
             ->setParameter(
                 key: 'usr',
                 value: $this->user,
-                type: UserUid::TYPE
+                type: UserUid::TYPE,
             );
 
         $orm
@@ -194,7 +194,7 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
             ->setParameter(
                 key: 'material',
                 value: $this->material,
-                type: MaterialUid::TYPE
+                type: MaterialUid::TYPE,
             );
 
 
@@ -203,7 +203,7 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
             ->setParameter(
                 key: 'seller',
                 value: $this->profile,
-                type: UserProfileUid::TYPE
+                type: UserProfileUid::TYPE,
             );
 
         if($this->offer instanceof MaterialOfferConst)
@@ -213,7 +213,7 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
                 ->setParameter(
                     key: 'offer',
                     value: $this->offer,
-                    type: MaterialOfferConst::TYPE
+                    type: MaterialOfferConst::TYPE,
                 );
         }
         else
@@ -229,7 +229,7 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
                 ->setParameter(
                     key: 'variation',
                     value: $this->variation,
-                    type: MaterialVariationConst::TYPE
+                    type: MaterialVariationConst::TYPE,
                 );
         }
         else
@@ -244,7 +244,7 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
                 ->setParameter(
                     key: 'modification',
                     value: $this->modification,
-                    type: MaterialModificationConst::TYPE
+                    type: MaterialModificationConst::TYPE,
                 );
         }
         else
@@ -257,7 +257,7 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
             MaterialSign::class,
             'main',
             'WITH',
-            'main.id = invariable.main'
+            'main.id = invariable.main',
         );
 
         $orm
@@ -273,7 +273,7 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
             ->setParameter(
                 key: 'status',
                 value: MaterialSignStatusNew::class,
-                type: MaterialSignStatus::TYPE
+                type: MaterialSignStatus::TYPE,
             );
 
         $orm
@@ -281,7 +281,7 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
                 MaterialSignModify::class,
                 'modify',
                 'WITH',
-                'modify.event = main.event'
+                'modify.event = main.event',
             );
 
         /**
@@ -295,12 +295,11 @@ final class MaterialSignNewRepository implements MaterialSignNewInterface
             ->setParameter(
                 key: 'profile',
                 value: $this->profile,
-                type: UserProfileUid::TYPE
+                type: UserProfileUid::TYPE,
             );
 
-        /** Сортируем по дате, выбирая самый старый знак */
-        $orm->addOrderBy('modify.modDate');
-        $orm->addOrderBy('modify.modDate');
+        /** Сортируем по дате добавления (по id) выбирая самый старый знак */
+        $orm->addOrderBy('invariable.main');
 
         $orm->setMaxResults(1);
 

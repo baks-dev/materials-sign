@@ -151,6 +151,11 @@ class MaterialSignEvent extends EntityEvent
         return $this->main;
     }
 
+    public function isInvariable(): bool
+    {
+        return $this->invariable instanceof MaterialSignInvariable;
+    }
+
     /**
      * Profile
      */
