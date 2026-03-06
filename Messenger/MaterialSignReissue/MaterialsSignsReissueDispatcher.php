@@ -95,8 +95,6 @@ final readonly class MaterialsSignsReissueDispatcher
         }
 
 
-
-
         // Идентификатор группы честных знаков
         $materialSignUid = new MaterialSignUid();
 
@@ -121,7 +119,7 @@ final readonly class MaterialsSignsReissueDispatcher
             {
                 $this->Logger->critical(
                     sprintf("Не найдены идентификаторы для события продукта %s", $orderProduct->getProduct()),
-                    [self::class.':'.__LINE__, var_export($message, true)]
+                    [self::class.':'.__LINE__, var_export($message, true)],
                 );
 
                 continue;
@@ -156,17 +154,20 @@ final readonly class MaterialsSignsReissueDispatcher
                 for($i = 1; $i <= $total; $i++)
                 {
                     $materialSignProcessMessage = new MaterialSignProcessMessage(
-                        $orderEvent->getMain(),
-                        $materialSignUid,
-                        $message->getUser(),
-                        $message->getProfile(),
-                        $productMaterial,
-                        $currentMaterialDTO->getOfferConst(),
-                        $currentMaterialDTO->getVariationConst(),
-                        $currentMaterialDTO->getModificationConst(),
+                        order: $orderEvent->getMain(),
+                        part: $materialSignUid,
+                        user: $message->getUser(),
+                        profile: $message->getProfile(),
+                        material: $productMaterial,
+                        offer: $currentMaterialDTO->getOfferConst(),
+                        variation: $currentMaterialDTO->getVariationConst(),
+                        modification: $currentMaterialDTO->getModificationConst(),
                     );
 
-                    $this->MessageDispatch->dispatch(message: $materialSignProcessMessage, transport: 'materials-sign');
+                    $this->MessageDispatch->dispatch(
+                        message: $materialSignProcessMessage,
+                        transport: 'materials-sign',
+                    );
                 }
             }
         }

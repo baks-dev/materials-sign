@@ -1,6 +1,6 @@
 # BaksDev Material Sign
 
-[![Version](https://img.shields.io/badge/version-v7.4.4-blue)](https://github.com/baks-dev/materials-sign/releases)
+[![Version](https://img.shields.io/badge/version-v7.4.5-blue)](https://github.com/baks-dev/materials-sign/releases)
 ![php 8.4+](https://img.shields.io/badge/php-min%208.4-red.svg)
 [![packagist](https://img.shields.io/badge/packagist-green)](https://packagist.org/packages/baks-dev/materials-sign)
 
@@ -8,7 +8,7 @@
 
 ## Установка
 
-``` bash
+```bash
 composer require \
 phpoffice/phpspreadsheet
 baks-dev/barcode
@@ -17,7 +17,7 @@ baks-dev/materials-sign
 
 Добавить директорию и установить права для загрузки файлов:
 
-``` bash
+```bash
 sudo mkdir <path_to_project>/public/upload/material_sign_code
 sudo chown -R unit:unit <path_to_project>/public/upload/material_sign_code
 ```
@@ -59,13 +59,13 @@ unit ALL=(ALL) NOPASSWD: /usr/bin/pdfcrop
 
 Установка конфигурации и файловых ресурсов:
 
-``` bash
+```bash
 $ php bin/console baks:assets:install
 ```
 
 Изменения в схеме базы данных с помощью миграции
 
-``` bash
+```bash
 $ php bin/console doctrine:migrations:diff
 
 $ php bin/console doctrine:migrations:migrate
@@ -73,7 +73,7 @@ $ php bin/console doctrine:migrations:migrate
 
 ## Тестирование
 
-``` bash
+```bash
 $ php bin/phpunit --group=materials-sign
 ```
 
