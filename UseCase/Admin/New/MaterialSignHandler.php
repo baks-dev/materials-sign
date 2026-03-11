@@ -39,7 +39,7 @@ use BaksDev\Materials\Sign\Repository\ExistsMaterialSignCode\ExistsMaterialSignC
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 
-#[Autoconfigure(public: true)]
+// #[Autoconfigure(public: true)]
 final class MaterialSignHandler extends AbstractHandler
 {
     public function __construct(

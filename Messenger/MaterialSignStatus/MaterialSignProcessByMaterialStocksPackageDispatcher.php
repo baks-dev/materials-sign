@@ -55,7 +55,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 /**
  * При статусе складской заявки Package «Упаковка» - резервируем сырьевой честный знак в статус Process «В процессе»
  */
-#[Autoconfigure(public: true)]
+// #[Autoconfigure(public: true)]
 #[AsMessageHandler(priority: -5)]
 final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
 {

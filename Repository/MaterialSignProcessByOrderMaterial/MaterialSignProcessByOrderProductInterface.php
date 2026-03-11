@@ -31,7 +31,7 @@ use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 
-#[Autoconfigure(public: true)]
+// #[Autoconfigure(public: true)]
 interface MaterialSignProcessByOrderProductInterface
 {
     public function forOrder(Order|OrderUid|string $order): self;
