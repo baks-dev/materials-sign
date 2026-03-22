@@ -51,7 +51,7 @@ return static function(ContainerConfigurator $container): void {
     /* Статусы заказов */
     $services->load(
         $NAMESPACE.'Type\Status\MaterialSignStatus\\',
-        $PATH.implode(DIRECTORY_SEPARATOR, ['Type', 'Status', 'MaterialSignStatus']) //.'Type/Status/MaterialSignStatus'
+        $PATH.implode(DIRECTORY_SEPARATOR, ['Type', 'Status', 'MaterialSignStatus']), //.'Type/Status/MaterialSignStatus'
     );
 
     /** @see https://symfony.com/doc/current/service_container/autowiring.html#dealing-with-multiple-implementations-of-the-same-type */

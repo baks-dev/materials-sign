@@ -134,7 +134,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
             ->setParameter(
                 'status',
                 OrderStatusCompleted::class,
-                OrderStatus::TYPE
+                OrderStatus::TYPE,
             );
 
         $dbal
@@ -148,7 +148,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 'event',
                 Order::class,
                 'main',
-                'main.event = event.id'
+                'main.event = event.id',
             );
 
 
@@ -160,12 +160,12 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 'order_invariable',
                 'order_invariable.main = main.id AND 
                 order_invariable.event = event.id AND 
-                order_invariable.profile = :profile'
+                order_invariable.profile = :profile',
             )
             ->setParameter(
                 'profile',
                 $this->profile,
-                UserProfileUid::TYPE
+                UserProfileUid::TYPE,
             );
 
 
@@ -174,7 +174,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 'main',
                 OrderUser::class,
                 'order_user',
-                'order_user.event = main.event'
+                'order_user.event = main.event',
             );
 
         $dbal
@@ -183,7 +183,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 'order_user',
                 OrderDelivery::class,
                 'order_delivery',
-                'order_delivery.usr = order_user.id'
+                'order_delivery.usr = order_user.id',
             );
 
         $dbal
@@ -192,7 +192,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 'order_delivery',
                 DeliveryEvent::class,
                 'delivery_event',
-                'delivery_event.id = order_delivery.event'
+                'delivery_event.id = order_delivery.event',
             );
 
         $dbal
@@ -201,7 +201,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 'order_delivery',
                 DeliveryTrans::class,
                 'delivery_trans',
-                'delivery_trans.event = order_delivery.event AND delivery_trans.local = :local'
+                'delivery_trans.event = order_delivery.event AND delivery_trans.local = :local',
             );
 
         $dbal
@@ -209,7 +209,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 'event',
                 OrderMaterial::class,
                 'order_material',
-                'order_material.event = event.id'
+                'order_material.event = event.id',
             );
 
 
@@ -219,7 +219,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 'event',
                 OrderPrice::class,
                 'order_price',
-                'order_price.material = order_material.id'
+                'order_price.material = order_material.id',
             );
 
         $dbal
@@ -227,7 +227,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 'order_material',
                 MaterialEvent::class,
                 'material_event',
-                'material_event.id = order_material.material'
+                'material_event.id = order_material.material',
             );
 
         $dbal
@@ -235,7 +235,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 'order_material',
                 MaterialOffer::class,
                 'material_offer',
-                'material_offer.id = order_material.offer AND material_offer.event = order_material.material'
+                'material_offer.id = order_material.offer AND material_offer.event = order_material.material',
             );
 
         $dbal
@@ -243,7 +243,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 'order_material',
                 MaterialVariation::class,
                 'material_variation',
-                'material_variation.id = order_material.variation AND material_variation.offer = material_offer.id'
+                'material_variation.id = order_material.variation AND material_variation.offer = material_offer.id',
             );
 
         $dbal
@@ -251,7 +251,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 'order_material',
                 MaterialModification::class,
                 'material_modification',
-                'material_modification.id = order_material.modification AND material_modification.variation = material_variation.id'
+                'material_modification.id = order_material.modification AND material_modification.variation = material_variation.id',
             );
 
 
@@ -263,12 +263,12 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 '
                     sign_event.ord = main.id AND
                     sign_event.status = :sign_status
-                '
+                ',
             )
             ->setParameter(
                 'sign_status',
                 MaterialSignStatusDone::class,
-                MaterialSignStatus::TYPE
+                MaterialSignStatus::TYPE,
             );
 
         $dbal
@@ -284,7 +284,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                     sign_invariable.offer = material_offer.const AND
                     sign_invariable.variation = material_variation.const AND
                     sign_invariable.modification = material_modification.const
-                '
+                ',
             );
 
 
@@ -296,7 +296,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                 '
                     sign_code.main = sign_invariable.main AND 
                     sign_code.event = sign_invariable.event
-                '
+                ',
             );
 
 
@@ -311,7 +311,7 @@ final class AllMaterialSignExportRepository implements AllMaterialSignExportInte
                                 'code', sign_code.code
                             )
         
-                    ) AS materials"
+                    ) AS materials",
         );
 
 

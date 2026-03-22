@@ -45,12 +45,12 @@ var limit_mBdrnGXdN = 1000;
 setTimeout(function init_wUgQTMHU()
 {
 
-    var object_material = document.getElementById('material_sign_form_code_material');
+    var object_material = document.getElementById("material_sign_form_code_material");
 
     if(object_material)
     {
 
-        object_material.addEventListener('change', changeObjectMaterial, false);
+        object_material.addEventListener("change", changeObjectMaterial, false);
 
         //let $addButtonStock = document.getElementById('material_sign_form_addPurchase');
 
@@ -60,7 +60,7 @@ setTimeout(function init_wUgQTMHU()
         let purchaseForm = document.forms.material_sign_form;
 
 
-        let forms = object_material.closest('form');
+        let forms = object_material.closest("form");
 
 
         /* событие отправки формы */
@@ -69,15 +69,14 @@ setTimeout(function init_wUgQTMHU()
         //     return false;
         // });
 
-        document.getElementById('material_sign_form_material_sign')
-            .addEventListener('click', function(event)
+        document.getElementById("material_sign_form_material_sign").addEventListener("click", function(event)
+        {
+            if(event.key !== "Enter")
             {
-                if(event.key !== "Enter")
-                {
-                    submitModalForm(forms);
-                }
-                return false;
-            });
+                submitModalForm(forms);
+            }
+            return false;
+        });
 
         return;
     }
@@ -135,7 +134,7 @@ setTimeout(function init_wUgQTMHU()
 function changeObjectMaterial()
 {
 
-    let replaceId = 'material_sign_form_code_offer';
+    let replaceId = "material_sign_form_code_offer";
 
 
     /* Создаём объект класса XMLHttpRequest */
@@ -145,12 +144,12 @@ function changeObjectMaterial()
     /* Имя формы */
     let purchaseForm = document.forms.material_sign_form;
     let formData = new FormData();
-    formData.append(this.getAttribute('name'), this.value);
+    formData.append(this.getAttribute("name"), this.value);
 
-    requestModalName.open(purchaseForm.getAttribute('method'), purchaseForm.getAttribute('action'), true);
+    requestModalName.open(purchaseForm.getAttribute("method"), purchaseForm.getAttribute("action"), true);
 
     /* Указываем заголовки для сервера */
-    requestModalName.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    requestModalName.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
     /* Получаем ответ от сервера на запрос*/
     requestModalName.addEventListener("readystatechange", function()
@@ -159,25 +158,25 @@ function changeObjectMaterial()
         if(requestModalName.readyState === 4 && requestModalName.status === 200)
         {
 
-            let result = requestModalName.response.getElementById('offer');
+            let result = requestModalName.response.getElementById("offer");
 
 
-            document.getElementById('offer').replaceWith(result);
+            document.getElementById("offer").replaceWith(result);
 
             let replacer = document.getElementById(replaceId);
 
-            if(replacer.tagName === 'SELECT')
+            if(replacer.tagName === "SELECT")
             {
-                new NiceSelect(replacer, {searchable: true, id: 'select2-' + replaceId});
+                new NiceSelect(replacer, {searchable : true, id : "select2-" + replaceId});
 
                 /** Событие на изменение торгового предложения */
-                let offerChange = document.getElementById('material_sign_form_code_offer');
+                let offerChange = document.getElementById("material_sign_form_code_offer");
 
                 if(offerChange)
                 {
-                    offerChange.addEventListener('change', changeObjectOffer, false);
+                    offerChange.addEventListener("change", changeObjectOffer, false);
 
-                    let focus = document.getElementById(replaceId + '_select2');
+                    let focus = document.getElementById(replaceId + "_select2");
                     focus ? focus.click() : null;
 
                 }
@@ -197,7 +196,7 @@ function changeObjectOffer()
 {
 
 
-    let replaceId = 'material_sign_form_code_variation';
+    let replaceId = "material_sign_form_code_variation";
 
     /* Создаём объект класса XMLHttpRequest */
     const requestModalName = new XMLHttpRequest();
@@ -206,12 +205,12 @@ function changeObjectOffer()
     /* Имя формы */
     let purchaseForm = document.forms.material_sign_form;
     let formData = new FormData();
-    formData.append(this.getAttribute('name'), this.value);
+    formData.append(this.getAttribute("name"), this.value);
 
-    requestModalName.open(purchaseForm.getAttribute('method'), purchaseForm.getAttribute('action'), true);
+    requestModalName.open(purchaseForm.getAttribute("method"), purchaseForm.getAttribute("action"), true);
 
     /* Указываем заголовки для сервера */
-    requestModalName.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    requestModalName.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
     /* Получаем ответ от сервера на запрос*/
     requestModalName.addEventListener("readystatechange", function()
@@ -221,33 +220,33 @@ function changeObjectOffer()
         {
 
 
-            let result = requestModalName.response.getElementById('variation');
+            let result = requestModalName.response.getElementById("variation");
 
-            document.getElementById('variation').replaceWith(result);
+            document.getElementById("variation").replaceWith(result);
 
             let replacer = document.getElementById(replaceId);
 
             /* Удаляем предыдущий Select2 */
-            let select2 = document.getElementById(replaceId + '_select2');
+            let select2 = document.getElementById(replaceId + "_select2");
 
             if(select2)
             {
                 select2.remove();
             }
 
-            if(replacer.tagName === 'SELECT')
+            if(replacer.tagName === "SELECT")
             {
-                new NiceSelect(document.getElementById(replaceId), {searchable: true, id: 'select2-' + replaceId});
+                new NiceSelect(document.getElementById(replaceId), {searchable : true, id : "select2-" + replaceId});
 
                 /** Событие на изменение множественного варианта предложения */
-                let offerVariation = document.getElementById('material_sign_form_code_variation');
+                let offerVariation = document.getElementById("material_sign_form_code_variation");
 
                 if(offerVariation)
                 {
-                    offerVariation.addEventListener('change', changeObjectVariation, false);
+                    offerVariation.addEventListener("change", changeObjectVariation, false);
                 }
 
-                let focus = document.getElementById(replaceId + '_select2');
+                let focus = document.getElementById(replaceId + "_select2");
                 focus ? focus.click() : null;
             }
 
@@ -263,7 +262,7 @@ function changeObjectOffer()
 function changeObjectVariation()
 {
 
-    let replaceId = 'material_sign_form_code_modification';
+    let replaceId = "material_sign_form_code_modification";
 
     /* Создаём объект класса XMLHttpRequest */
     const requestModalName = new XMLHttpRequest();
@@ -272,12 +271,12 @@ function changeObjectVariation()
     /* Имя формы */
     let purchaseForm = document.forms.material_sign_form;
     let formData = new FormData();
-    formData.append(this.getAttribute('name'), this.value);
+    formData.append(this.getAttribute("name"), this.value);
 
-    requestModalName.open(purchaseForm.getAttribute('method'), purchaseForm.getAttribute('action'), true);
+    requestModalName.open(purchaseForm.getAttribute("method"), purchaseForm.getAttribute("action"), true);
 
     /* Указываем заголовки для сервера */
-    requestModalName.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    requestModalName.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
     /* Получаем ответ от сервера на запрос*/
     requestModalName.addEventListener("readystatechange", function()
@@ -286,23 +285,23 @@ function changeObjectVariation()
         if(requestModalName.readyState === 4 && requestModalName.status === 200)
         {
 
-            let result = requestModalName.response.getElementById('modification');
+            let result = requestModalName.response.getElementById("modification");
 
-            document.getElementById('modification').replaceWith(result);
+            document.getElementById("modification").replaceWith(result);
 
             let replacer = document.getElementById(replaceId);
 
-            if(replacer.tagName === 'SELECT')
+            if(replacer.tagName === "SELECT")
             {
-                new NiceSelect(document.getElementById(replaceId), {searchable: true, id: 'select2-' + replaceId});
+                new NiceSelect(document.getElementById(replaceId), {searchable : true, id : "select2-" + replaceId});
             }
 
-            let focus = document.getElementById(replaceId + '_select2');
+            let focus = document.getElementById(replaceId + "_select2");
             focus ? focus.click() : null;
 
 
             /** Событие на изменение множественного варианта предложения */
-            let offerModification = document.getElementById('material_sign_form_code_modification');
+            let offerModification = document.getElementById("material_sign_form_code_modification");
 
             // if (offerModification) {
             //

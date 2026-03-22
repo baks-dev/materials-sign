@@ -78,17 +78,17 @@ final class MaterialSignCurrentEventRepository implements MaterialSignCurrentEve
             ->setParameter(
                 key: 'main',
                 value: $this->sign,
-                type: MaterialSignUid::TYPE
+                type: MaterialSignUid::TYPE,
             );
 
         $orm
             ->select('event')
             ->join(
-            MaterialSignEvent::class,
-            'event',
-            'WITH',
-            'event.id = main.event'
-        );
+                MaterialSignEvent::class,
+                'event',
+                'WITH',
+                'event.id = main.event',
+            );
 
         return $orm->getOneOrNullResult() ?: false;
     }

@@ -23,7 +23,7 @@
 
 executeFunc(function materialsSignReport()
 {
-    const modal = document.getElementById('modal');
+    const modal = document.getElementById("modal");
 
     if(!modal)
     {
@@ -31,25 +31,25 @@ executeFunc(function materialsSignReport()
     }
 
     /** Инициируем календарь */
-    document.querySelectorAll('.js-datepicker').forEach((datepicker) =>
+    document.querySelectorAll(".js-datepicker").forEach((datepicker) =>
     {
         MCDatepicker.create({
-            el: '#' + datepicker.id,
-            bodyType: 'modal', // ‘modal’, ‘inline’, or ‘permanent’.
-            autoClose: false,
-            closeOndblclick: true,
-            closeOnBlur: false,
-            customOkBTN: 'OK',
-            customClearBTN: datapickerLang[$locale].customClearBTN,
-            customCancelBTN: datapickerLang[$locale].customCancelBTN,
-            firstWeekday: datapickerLang[$locale].firstWeekday,
-            dateFormat: 'DD.MM.YYYY',
-            customWeekDays: datapickerLang[$locale].customWeekDays,
-            customMonths: datapickerLang[$locale].customMonths,
+            el : "#" + datepicker.id,
+            bodyType : "modal", // ‘modal’, ‘inline’, or ‘permanent’.
+            autoClose : false,
+            closeOndblclick : true,
+            closeOnBlur : false,
+            customOkBTN : "OK",
+            customClearBTN : datapickerLang[$locale].customClearBTN,
+            customCancelBTN : datapickerLang[$locale].customCancelBTN,
+            firstWeekday : datapickerLang[$locale].firstWeekday,
+            dateFormat : "DD.MM.YYYY",
+            customWeekDays : datapickerLang[$locale].customWeekDays,
+            customMonths : datapickerLang[$locale].customMonths,
         });
     });
 
-    modal.addEventListener('hidden.bs.modal', event =>
+    modal.addEventListener("hidden.bs.modal", event =>
     {
         MCDatepicker.close();
     });

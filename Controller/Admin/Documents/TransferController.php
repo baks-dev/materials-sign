@@ -58,7 +58,7 @@ final class TransferController extends AbstractController
             ->createForm(
                 type: MaterialSignTransferForm::class,
                 data: $MaterialSignReportDTO,
-                options: ['action' => $this->generateUrl('materials-sign:admin.transfer'),]
+                options: ['action' => $this->generateUrl('materials-sign:admin.transfer'),],
             )
             ->handleRequest($request);
 
@@ -82,7 +82,7 @@ final class TransferController extends AbstractController
                 $this->addFlash(
                     'Отчет о передаче честных знаков',
                     'Отчета за указанный период не найдено',
-                    'materials-sign.admin'
+                    'materials-sign.admin',
                 );
 
                 return $this->redirectToReferer();

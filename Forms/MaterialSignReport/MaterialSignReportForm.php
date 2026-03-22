@@ -85,7 +85,6 @@ final class MaterialSignReportForm extends AbstractType
         ]);
 
 
-
         /** Все профили пользователя */
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
@@ -108,16 +107,16 @@ final class MaterialSignReportForm extends AbstractType
                             return $profile->getAttr();
                         },
 
-                        'label' => false
+                        'label' => false,
                     ]);
-            }
+            },
         );
 
         /* Сохранить ******************************************************/
         $builder->add(
             'material_sign_report',
             SubmitType::class,
-            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']]
+            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']],
         );
 
     }

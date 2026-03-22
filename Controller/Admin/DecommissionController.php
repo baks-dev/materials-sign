@@ -81,7 +81,7 @@ final class DecommissionController extends AbstractController
                 'page.off',
                 $handle instanceof MaterialSignUid ? 'success.off' : $handle,
                 'materials-sign.admin',
-                $handle
+                $handle,
             );
 
             return $this->redirectToRoute('materials-sign:admin.index');

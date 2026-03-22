@@ -53,7 +53,7 @@ final class MaterialSignDeleteHandler extends AbstractHandler
         /* Отправляем сообщение в шину */
         $this->messageDispatch->dispatch(
             message: new MaterialSignMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()),
-            transport: 'materials-sign'
+            transport: 'materials-sign',
         );
 
         return $this->main;

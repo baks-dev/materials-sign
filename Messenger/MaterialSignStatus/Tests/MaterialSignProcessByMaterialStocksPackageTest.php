@@ -48,8 +48,8 @@ class MaterialSignProcessByMaterialStocksPackageTest extends KernelTestCase
         $MaterialSignProcessByMaterialStocksPackage(
             new EditProductStockTotalMessage(
                 new ProductStockUid('9900e5f5-5477-752b-b8c3-325b977bac92'),
-                new ProductStockEventUid('6d3617d3-7b3f-725f-8fc8-0a26014137d3')
-            )
+                new ProductStockEventUid('6d3617d3-7b3f-725f-8fc8-0a26014137d3'),
+            ),
         );
 
         self::assertTrue(true);

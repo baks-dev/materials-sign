@@ -60,7 +60,7 @@ final class ExistsMaterialSignCodeRepository implements ExistsMaterialSignCodeIn
                 'sign_code',
                 MaterialSign::class,
                 'sign',
-                'sign.id = sign_code.main'
+                'sign.id = sign_code.main',
             );
 
         $dbal
@@ -68,12 +68,12 @@ final class ExistsMaterialSignCodeRepository implements ExistsMaterialSignCodeIn
                 'sign_code',
                 MaterialSignInvariable::class,
                 'invariable',
-                'invariable.main = sign_code.main AND invariable.usr = :usr'
+                'invariable.main = sign_code.main AND invariable.usr = :usr',
             )
             ->setParameter(
                 'usr',
                 $user,
-                UserUid::TYPE
+                UserUid::TYPE,
             );
 
 
@@ -82,12 +82,12 @@ final class ExistsMaterialSignCodeRepository implements ExistsMaterialSignCodeIn
                 'sign',
                 MaterialSignEvent::class,
                 'event',
-                'event.id = sign.event AND event.status != :status'
+                'event.id = sign.event AND event.status != :status',
             )
             ->setParameter(
                 'status',
                 MaterialSignStatusError::class,
-                MaterialSignStatus::TYPE
+                MaterialSignStatus::TYPE,
             );
 
         return $dbal->fetchExist();

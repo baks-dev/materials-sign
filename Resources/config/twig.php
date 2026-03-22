@@ -30,7 +30,7 @@ return static function(TwigConfig $twig) {
 
     $twig->path(
         BaksDevMaterialsSignBundle::PATH.implode(DIRECTORY_SEPARATOR, ['Resources', 'view', '']),
-        'materials-sign'
+        'materials-sign',
     );
 
 };

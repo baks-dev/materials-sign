@@ -58,7 +58,7 @@ final class DetailController extends AbstractController
             ->createForm(
                 type: SearchForm::class,
                 data: $search,
-                options: ['action' => $this->generateUrl('materials-sign:admin.index')]
+                options: ['action' => $this->generateUrl('materials-sign:admin.index')],
             )
             ->handleRequest($request);
 
@@ -98,7 +98,7 @@ final class DetailController extends AbstractController
                 'search' => $searchForm->createView(),
                 'filter' => $filterForm->createView(),
                 'status' => $filterSignForm->createView(),
-            ]
+            ],
         );
     }
 }

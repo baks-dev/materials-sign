@@ -64,7 +64,7 @@ final class MaterialSignHandler extends AbstractHandler
 
         $isExistsBarcode = $this->existsMaterialSignCode->isExists(
             $Invariable->getUsr(),
-            $Barcode->getCode()
+            $Barcode->getCode(),
         );
 
         if($isExistsBarcode === true)
@@ -88,13 +88,13 @@ final class MaterialSignHandler extends AbstractHandler
         /* Отправляем сообщение в шину */
         $this->messageDispatch->dispatch(
             message: new MaterialSignMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()),
-            transport: 'materials-sign'
+            transport: 'materials-sign',
         );
 
         /* Загружаем файл обложки раздела на CDN */
         $this->messageDispatch->dispatch(
             message: new CDNUploadImageMessage($this->main->getId(), MaterialSignCode::class, $Barcode->getName()),
-            transport: 'files-res'
+            transport: 'files-res',
         );
 
         return $this->main;

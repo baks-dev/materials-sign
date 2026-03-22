@@ -88,7 +88,7 @@ final class MaterialSignPdfForm extends AbstractType
 
         $builder->add(
             'material',
-            HiddenType::class
+            HiddenType::class,
         );
 
         $builder->add('isNew', CheckboxType::class, ['required' => false]);
@@ -145,7 +145,7 @@ final class MaterialSignPdfForm extends AbstractType
                         }
                     }
                 }
-            }
+            },
         );
 
 
@@ -154,7 +154,7 @@ final class MaterialSignPdfForm extends AbstractType
             function(FormEvent $event) {
                 $category = $event->getForm()->getData();
                 $this->formMaterialModifier($event->getForm()->getParent(), $category);
-            }
+            },
         );
 
         $builder->get('material')->addModelTransformer(
@@ -164,18 +164,19 @@ final class MaterialSignPdfForm extends AbstractType
                 },
                 function($material) {
                     return $material ? new MaterialUid($material) : null;
-                }
-            )
+                },
+            ),
         );
 
         /**
          * Торговые предложения
+         *
          * @var MaterialOfferConst $offer
          */
 
         $builder->add(
             'offer',
-            HiddenType::class
+            HiddenType::class,
         );
 
         $builder->get('offer')->addModelTransformer(
@@ -185,8 +186,8 @@ final class MaterialSignPdfForm extends AbstractType
                 },
                 function($offer) {
                     return $offer ? new MaterialOfferConst($offer) : null;
-                }
-            )
+                },
+            ),
         );
 
 
@@ -195,19 +196,20 @@ final class MaterialSignPdfForm extends AbstractType
             function(FormEvent $event) {
                 $material = $event->getForm()->getData();
                 $this->formOfferModifier($event->getForm()->getParent(), $material);
-            }
+            },
         );
 
 
         /**
          * Множественный вариант торгового предложения
+         *
          * @var MaterialVariationConst $variation
          */
 
 
         $builder->add(
             'variation',
-            HiddenType::class
+            HiddenType::class,
         );
 
         $builder->get('variation')->addModelTransformer(
@@ -217,8 +219,8 @@ final class MaterialSignPdfForm extends AbstractType
                 },
                 function($variation) {
                     return $variation ? new MaterialVariationConst($variation) : null;
-                }
-            )
+                },
+            ),
         );
 
         $builder->get('offer')->addEventListener(
@@ -226,18 +228,19 @@ final class MaterialSignPdfForm extends AbstractType
             function(FormEvent $event) {
                 $offer = $event->getForm()->getData();
                 $this->formVariationModifier($event->getForm()->getParent(), $offer);
-            }
+            },
         );
 
 
         /**
          * Модификатор множественного варианта торгового предложения
+         *
          * @var MaterialModificationConst $modification
          */
 
         $builder->add(
             'modification',
-            HiddenType::class
+            HiddenType::class,
         );
 
         $builder->get('modification')->addModelTransformer(
@@ -247,8 +250,8 @@ final class MaterialSignPdfForm extends AbstractType
                 },
                 function($modification) {
                     return $modification ? new MaterialModificationConst($modification) : null;
-                }
-            )
+                },
+            ),
         );
 
         $builder->get('variation')->addEventListener(
@@ -256,7 +259,7 @@ final class MaterialSignPdfForm extends AbstractType
             function(FormEvent $event) {
                 $variation = $event->getForm()->getData();
                 $this->formModificationModifier($event->getForm()->getParent(), $variation);
-            }
+            },
         );
 
 
@@ -279,7 +282,7 @@ final class MaterialSignPdfForm extends AbstractType
         $builder->add(
             'material_sign_pdf',
             SubmitType::class,
-            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']]
+            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']],
         );
 
 
@@ -316,7 +319,7 @@ final class MaterialSignPdfForm extends AbstractType
                     return $material?->getOption() ? ['data-filter' => '('.$material?->getOption().')'] : [];
                 },
 
-                'label' => false
+                'label' => false,
             ]);
     }
 

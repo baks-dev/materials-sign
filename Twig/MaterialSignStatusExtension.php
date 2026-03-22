@@ -46,7 +46,7 @@ final class MaterialSignStatusExtension extends AbstractExtension
             new TwigFunction(
                 'material_sign_status',
                 [$this, 'status'],
-                ['needs_environment' => true, 'is_safe' => ['html']]
+                ['needs_environment' => true, 'is_safe' => ['html']],
             ),
         ];
     }

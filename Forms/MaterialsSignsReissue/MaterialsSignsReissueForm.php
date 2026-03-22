@@ -46,14 +46,14 @@ final class MaterialsSignsReissueForm extends AbstractType
                 },
                 function($order) {
                     return $order ? new OrderUid($order) : null;
-                }
-            )
+                },
+            ),
         );
 
         $builder->add(
             'material_signs_reissue',
             SubmitType::class,
-            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-danger']]
+            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-danger']],
         );
     }
 

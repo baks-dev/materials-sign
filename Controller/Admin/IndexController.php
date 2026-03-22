@@ -58,7 +58,7 @@ final class IndexController extends AbstractController
             ->createForm(
                 type: SearchForm::class,
                 data: $search,
-                options: ['action' => $this->generateUrl('materials-sign:admin.index')]
+                options: ['action' => $this->generateUrl('materials-sign:admin.index')],
             )
             ->handleRequest($request);
 
@@ -71,7 +71,7 @@ final class IndexController extends AbstractController
             ->createForm(
                 type: MaterialFilterForm::class,
                 data: $filter,
-                options: ['action' => $this->generateUrl('materials-sign:admin.index'),]
+                options: ['action' => $this->generateUrl('materials-sign:admin.index'),],
             )
             ->handleRequest($request);
 
@@ -83,7 +83,7 @@ final class IndexController extends AbstractController
             ->createForm(
                 type: MaterialSignFilterForm::class,
                 data: $filterSign,
-                options: ['action' => $this->generateUrl('materials-sign:admin.index'),]
+                options: ['action' => $this->generateUrl('materials-sign:admin.index'),],
             )
             ->handleRequest($request);
 
@@ -102,7 +102,7 @@ final class IndexController extends AbstractController
                 'search' => $searchForm->createView(),
                 'filter' => $filterForm->createView(),
                 'status' => $filterSignForm->createView(),
-            ]
+            ],
         );
     }
 }

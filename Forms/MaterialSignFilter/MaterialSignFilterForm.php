@@ -67,7 +67,7 @@ final class MaterialSignFilterForm extends AbstractType
                 return $region->getValue();
             },
             'label' => false,
-            'translation_domain' => 'materials-sign.status'
+            'translation_domain' => 'materials-sign.status',
         ]);
 
 
@@ -123,7 +123,7 @@ final class MaterialSignFilterForm extends AbstractType
                     $data->setFrom($sessionArray['from']['date'] ?? null);
                     $data->setTo($sessionArray['to']['date'] ?? null);
                 }
-            }
+            },
         );
 
         $builder->addEventListener(
@@ -156,7 +156,7 @@ final class MaterialSignFilterForm extends AbstractType
                     $this->request->getSession()->remove($this->sessionKey);
 
                 }
-            }
+            },
         );
 
 

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Controller\Admin\Documents\Orders;
 
+use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Twig\CallTwigFuncExtension;
 use BaksDev\Materials\Sign\Repository\GroupMaterialSignsByOrder\GroupMaterialSignsByOrderInterface;
 use BaksDev\Orders\Order\Entity\Order;
@@ -33,10 +34,9 @@ use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use BaksDev\Core\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
@@ -83,7 +83,7 @@ final class LinksListController extends AbstractController
                     $productSign->getMaterialOfferReference().'_render',
                 );
 
-                
+
                 /** Множественный вариант */
                 $variation = $call->call(
                     $environment,
@@ -92,8 +92,8 @@ final class LinksListController extends AbstractController
                 );
 
                 $strOffer = $variation ? ' '.trim($variation) : null;
-                
-                
+
+
                 /** Модификация множественного варианта */
                 $modification = $call->call(
                     $environment,
@@ -103,7 +103,7 @@ final class LinksListController extends AbstractController
 
                 $strOffer .= $modification ? ' '.trim($modification) : null;
                 $strOffer .= $offer ? ' '.trim($offer) : null;
-                
+
                 $productName = $productSign->getMaterialName().$strOffer;
 
                 $parameters = [
@@ -113,14 +113,14 @@ final class LinksListController extends AbstractController
                     'material' => $productSign->getMaterialId(),
                     'offer' => $productSign->getMaterialOfferConst(),
                     'variation' => $productSign->getMaterialVariationConst(),
-                    'modification' => $productSign->getMaterialModificationConst()
+                    'modification' => $productSign->getMaterialModificationConst(),
                 ];
-                
+
                 $url = $host.$UrlGenerator->generate(
-                    'materials-sign:document.pdf.orders',
-                    $parameters,
-                    UrlGeneratorInterface::ABSOLUTE_URL
-                );
+                        'materials-sign:document.pdf.orders',
+                        $parameters,
+                        UrlGeneratorInterface::ABSOLUTE_URL,
+                    );
 
                 fwrite($handle, $productName.PHP_EOL.$url.PHP_EOL);
             }

@@ -77,7 +77,7 @@ final class MaterialSignCodeRepository implements MaterialSignCodeInterface
             ->setParameter(
                 key: 'sign',
                 value: $this->sign,
-                type: MaterialSignUid::TYPE
+                type: MaterialSignUid::TYPE,
             );
 
         return $dbal

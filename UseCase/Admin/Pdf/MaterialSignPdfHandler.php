@@ -102,8 +102,8 @@ final readonly class MaterialSignPdfHandler
                 $this->logger->critical(
                     'Ошибка при создании директории. Попробуйте применить комманду ',
                     [
-                        'chown -R unit:unit '.$uploadDir
-                    ]
+                        'chown -R unit:unit '.$uploadDir,
+                    ],
                 );
 
                 return 'Ошибка при создании директории.';
@@ -140,7 +140,7 @@ final readonly class MaterialSignPdfHandler
             /** Разделение текста на строки */
             $lines = preg_split('/\r\n|\r|\n/', $text);
 
-            foreach ($lines as $line)
+            foreach($lines as $line)
             {
                 /** Если строка является ссылкой - пытаемся скачать  */
                 if(str_starts_with($line, 'https:'))
@@ -200,7 +200,7 @@ final readonly class MaterialSignPdfHandler
                 $command->getNumber(),
                 $command->isNew(),
             ),
-            transport: 'materials-sign'
+            transport: 'materials-sign',
         );
 
         return true;

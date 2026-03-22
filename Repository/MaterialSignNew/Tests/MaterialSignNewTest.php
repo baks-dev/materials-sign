@@ -77,7 +77,7 @@ class MaterialSignNewTest extends KernelTestCase
                 'invariable',
                 MaterialSignEvent::class,
                 'event',
-                'event.id = invariable.event AND status = :status'
+                'event.id = invariable.event AND status = :status',
             )
             ->setParameter('status', MaterialSignStatusNew::class, MaterialSignStatus::TYPE)
             ->setMaxResults(1)

@@ -114,7 +114,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
             ->addSelect('invariable.number AS sign_number')
             ->from(
                 MaterialSignInvariable::class,
-                'invariable'
+                'invariable',
             )
             ->andWhere('invariable.usr = :usr')
             ->setParameter('usr', $user, UserUid::TYPE);
@@ -131,7 +131,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'invariable',
                 MaterialSignCode::class,
                 'code',
-                'code.main = invariable.main'
+                'code.main = invariable.main',
             );
 
 
@@ -140,7 +140,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'invariable',
                 MaterialSign::class,
                 'main',
-                'main.id = invariable.main'
+                'main.id = invariable.main',
             );
 
 
@@ -152,7 +152,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'main',
                 MaterialSignEvent::class,
                 'event',
-                'event.id = main.event'
+                'event.id = main.event',
             );
 
         if($this->status?->getStatus())
@@ -169,7 +169,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'main',
                 MaterialSignModify::class,
                 'modify',
-                'modify.event = main.event'
+                'modify.event = main.event',
             );
 
 
@@ -215,14 +215,14 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
             'invariable',
             Material::class,
             'material',
-            'material.id = invariable.material'
+            'material.id = invariable.material',
         );
 
         $dbal->join(
             'material',
             MaterialEvent::class,
             'material_event',
-            'material_event.id = material.event'
+            'material_event.id = material.event',
         );
 
         $dbal
@@ -230,7 +230,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'material',
                 MaterialInfo::class,
                 'material_info',
-                'material_info.material = material.id'
+                'material_info.material = material.id',
             );
 
 
@@ -240,7 +240,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'material',
                 MaterialTrans::class,
                 'material_trans',
-                'material_trans.event = material.event AND material_trans.local = :local'
+                'material_trans.event = material.event AND material_trans.local = :local',
             );
 
 
@@ -256,7 +256,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'material',
                 MaterialOffer::class,
                 'material_offer',
-                'material_offer.event = material.event AND material_offer.const = invariable.offer'
+                'material_offer.event = material.event AND material_offer.const = invariable.offer',
             );
 
 
@@ -274,7 +274,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'material_offer',
                 CategoryMaterialOffers::class,
                 'category_offer',
-                'category_offer.id = material_offer.category_offer'
+                'category_offer.id = material_offer.category_offer',
             );
 
         // Множественные варианты торгового предложения
@@ -287,7 +287,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'material_offer',
                 MaterialVariation::class,
                 'material_variation',
-                'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation'
+                'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation',
             );
 
         if($this->filter?->getVariation())
@@ -303,7 +303,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'material_variation',
                 CategoryMaterialVariation::class,
                 'category_variation',
-                'category_variation.id = material_variation.category_variation'
+                'category_variation.id = material_variation.category_variation',
             );
 
 
@@ -317,7 +317,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'material_variation',
                 MaterialModification::class,
                 'material_modification',
-                'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification'
+                'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification',
             );
 
         if($this->filter?->getModification())
@@ -333,7 +333,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'material_modification',
                 CategoryMaterialModification::class,
                 'category_offer_modification',
-                'category_offer_modification.id = material_modification.category_modification'
+                'category_offer_modification.id = material_modification.category_modification',
             );
 
         // Артикул сырья
@@ -344,7 +344,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 material_variation.article,
                 material_offer.article,
                 material_info.article
-            ) AS material_article'
+            ) AS material_article',
         );
 
 
@@ -357,7 +357,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
             '
                 material_modification_image.modification = material_modification.id AND
                 material_modification_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -367,7 +367,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
             '
                 material_variation_image.variation = material_variation.id AND
                 material_variation_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -378,7 +378,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 material_variation_image.name IS NULL AND
                 material_offer_images.offer = material_offer.id AND
                 material_offer_images.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -389,7 +389,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 material_offer_images.name IS NULL AND
                 material_photo.event = material.event AND
                 material_photo.root = true
-			'
+			',
         );
 
 
@@ -407,7 +407,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
 					CONCAT ( '/upload/".$dbal->table(MaterialPhoto::class)."' , '/', material_photo.name)
 			   ELSE NULL
 			END AS material_image
-		"
+		",
         );
 
 
@@ -419,7 +419,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 material_variation_image.ext,
                 material_offer_images.ext,
                 material_photo.ext
-            ) AS material_image_ext'
+            ) AS material_image_ext',
         );
 
 
@@ -430,7 +430,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 material_variation_image.cdn,
                 material_offer_images.cdn,
                 material_photo.cdn
-            ) AS material_image_cdn'
+            ) AS material_image_cdn',
         );
 
 
@@ -441,7 +441,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'material_event',
                 MaterialCategory::class,
                 'material_event_category',
-                'material_event_category.event = material_event.id AND material_event_category.root = true'
+                'material_event_category.event = material_event.id AND material_event_category.root = true',
             );
 
         if($this->filter?->getCategory())
@@ -454,7 +454,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
             'material_event_category',
             CategoryMaterial::class,
             'category',
-            'category.id = material_event_category.category'
+            'category.id = material_event_category.category',
         );
 
 
@@ -467,7 +467,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'invariable',
                 UserProfile::class,
                 'users_profile',
-                'users_profile.id = invariable.profile'
+                'users_profile.id = invariable.profile',
             );
 
 
@@ -477,7 +477,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'users_profile',
                 UserProfilePersonal::class,
                 'users_profile_personal',
-                'users_profile_personal.event = users_profile.event'
+                'users_profile_personal.event = users_profile.event',
             );
 
 
@@ -490,7 +490,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'invariable',
                 UserProfile::class,
                 'users_profile_seller',
-                'users_profile_seller.id = invariable.seller'
+                'users_profile_seller.id = invariable.seller',
             );
 
 
@@ -500,7 +500,7 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 'users_profile_seller',
                 UserProfilePersonal::class,
                 'users_profile_personal_seller',
-                'users_profile_personal_seller.event = users_profile_seller.event'
+                'users_profile_personal_seller.event = users_profile_seller.event',
             );
 
 

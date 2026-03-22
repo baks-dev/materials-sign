@@ -134,9 +134,9 @@ class MaterialsCodeRepackImagesWebpCdnCommand extends Command
                 if($compress === false)
                 {
                     $io->writeln(sprintf(
-                            '<fg=red>Ошибка при сжатии изображения %s: %s</>',
-                            $UnCompressMaterialsCodeResult->getEntity(),
-                            $UnCompressMaterialsCodeResult->getIdentifier()),
+                        '<fg=red>Ошибка при сжатии изображения %s: %s</>',
+                        $UnCompressMaterialsCodeResult->getEntity(),
+                        $UnCompressMaterialsCodeResult->getIdentifier()),
                     );
                 }
             }

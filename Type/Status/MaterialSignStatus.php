@@ -78,14 +78,19 @@ final class MaterialSignStatus
 
     }
 
-    public function __toString(): string
-    {
-        return $this->status->getValue();
-    }
-
     public function getMaterialSignStatus(): MaterialSignStatusInterface
     {
         return $this->status;
+    }
+
+    public static function getDeclared(): array
+    {
+        return array_filter(
+            get_declared_classes(),
+            static function($className) {
+                return in_array(MaterialSignStatusInterface::class, class_implements($className), true);
+            },
+        );
     }
 
     public function getMaterialSignStatusValue(): string
@@ -109,14 +114,9 @@ final class MaterialSignStatus
         return $case;
     }
 
-    public static function getDeclared(): array
+    public function __toString(): string
     {
-        return array_filter(
-            get_declared_classes(),
-            static function($className) {
-                return in_array(MaterialSignStatusInterface::class, class_implements($className), true);
-            }
-        );
+        return $this->status->getValue();
     }
 
     public function equals(mixed $status): bool

@@ -48,7 +48,7 @@ final class MaterialSignForm extends AbstractType
         $builder->add(
             'material_sign',
             SubmitType::class,
-            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']]
+            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']],
         );
     }
 

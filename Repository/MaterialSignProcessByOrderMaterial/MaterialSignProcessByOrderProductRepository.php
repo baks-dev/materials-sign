@@ -144,7 +144,7 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
             ->setParameter(
                 key: 'ord',
                 value: $this->order,
-                type: OrderUid::TYPE
+                type: OrderUid::TYPE,
             );
 
         $orm
@@ -152,21 +152,21 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
             ->setParameter(
                 key: 'status',
                 value: MaterialSignStatusProcess::class,
-                type: MaterialSignStatus::TYPE
+                type: MaterialSignStatus::TYPE,
             );
 
         $orm->join(
             MaterialSign::class,
             'main',
             'WITH',
-            'main.event = event.id'
+            'main.event = event.id',
         );
 
         $orm->join(
             MaterialSignInvariable::class,
             'invariable',
             'WITH',
-            'invariable.event = event.id'
+            'invariable.event = event.id',
         );
 
 
@@ -177,7 +177,7 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
                 ->setParameter(
                     key: 'offer',
                     value: $this->offer,
-                    type: MaterialOfferConst::TYPE
+                    type: MaterialOfferConst::TYPE,
                 );
         }
         else
@@ -192,7 +192,7 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
                 ->setParameter(
                     key: 'variation',
                     value: $this->variation,
-                    type: MaterialVariationConst::TYPE
+                    type: MaterialVariationConst::TYPE,
                 );
 
         }
@@ -209,7 +209,7 @@ final class MaterialSignProcessByOrderProductRepository implements MaterialSignP
                 ->setParameter(
                     key: 'modification',
                     value: $this->modification,
-                    type: MaterialModificationConst::TYPE
+                    type: MaterialModificationConst::TYPE,
                 );
 
         }

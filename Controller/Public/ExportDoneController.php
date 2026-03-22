@@ -93,7 +93,7 @@ final class ExportDoneController extends AbstractController
         {
             return new JsonResponse([
                 'status' => 404,
-                'message' => 'За указанный период честных знаков не найдено'
+                'message' => 'За указанный период честных знаков не найдено',
             ], status: 404);
         }
 

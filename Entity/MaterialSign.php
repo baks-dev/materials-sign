@@ -66,14 +66,6 @@ class MaterialSign
     }
 
     /**
-     * Идентификатор
-     */
-    public function getId(): MaterialSignUid
-    {
-        return $this->id;
-    }
-
-    /**
      * Идентификатор События
      */
     public function getEvent(): MaterialSignEventUid
@@ -89,5 +81,13 @@ class MaterialSign
         }
 
         $this->event = $event instanceof MaterialSignEvent ? $event->getId() : $event;
+    }
+
+    /**
+     * Идентификатор
+     */
+    public function getId(): MaterialSignUid
+    {
+        return $this->id;
     }
 }

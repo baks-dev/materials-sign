@@ -21,7 +21,7 @@
  */
 
 /* Добавить контактный номер телефона */
-(document.querySelector('#pdf-add-collection'))?.addEventListener('click', addPdf);
+(document.querySelector("#pdf-add-collection"))?.addEventListener("click", addPdf);
 
 function addPdf()
 {
@@ -38,25 +38,25 @@ function addPdf()
     //newForm = newForm.replace(/__call__/g, call)
     newForm = newForm.replace(/__pdf_file__/g, index);
 
-    material_sign_pdf_form_files_0_pdf
+    material_sign_pdf_form_files_0_pdf;
 
-    let div = document.createElement('div');
+    let div = document.createElement("div");
     div.innerHTML = newForm;
-    div.id = 'item_material_sign_pdf_form_files_' + index;
-    div.classList.add('mb-3');
+    div.id = "item_material_sign_pdf_form_files_" + index;
+    div.classList.add("mb-3");
 
     let $collection = document.getElementById(collection);
     $collection.append(div);
 
     /* Удаляем контактный номер телефона */
-    (div.querySelector('.del-item-pdf'))?.addEventListener('click', deletePdf);
+    (div.querySelector(".del-item-pdf"))?.addEventListener("click", deletePdf);
 
     this.dataset.index = (index + 1).toString();
 }
 
 function deletePdf()
 {
-    document.getElementById('item_' + this.dataset.delete).remove();
+    document.getElementById("item_" + this.dataset.delete).remove();
 }
 
 
@@ -65,19 +65,19 @@ executeFunc(function materialsSignPdf()
     /* Имя формы */
     ChangeMaterialForm = document.forms.material_sign_pdf_form;
 
-    if(typeof ChangeMaterialForm === 'undefined')
+    if(typeof ChangeMaterialForm === "undefined")
     {
         return false;
     }
 
-    var object_category = document.getElementById(ChangeMaterialForm.name + '_category');
+    var object_category = document.getElementById(ChangeMaterialForm.name + "_category");
 
     if(object_category === null)
     {
         return false;
     }
 
-    object_category.addEventListener('change', function()
+    object_category.addEventListener("change", function()
     {
         changeObjectCategory(ChangeMaterialForm);
     }, false);
@@ -90,28 +90,28 @@ async function changeObjectCategory(forms)
 {
     disabledElementsForm(forms);
 
-    document.getElementById('material').classList.add('d-none');
-    document.getElementById('offer').classList.add('d-none');
-    document.getElementById('variation').classList.add('d-none');
-    document.getElementById('modification').classList.add('d-none');
+    document.getElementById("material").classList.add("d-none");
+    document.getElementById("offer").classList.add("d-none");
+    document.getElementById("variation").classList.add("d-none");
+    document.getElementById("modification").classList.add("d-none");
 
     const data = new FormData(forms);
 
     let formData = new FormData();
-    formData.append(forms.name + '[category]', data.get(forms.name + '[category]'));
+    formData.append(forms.name + "[category]", data.get(forms.name + "[category]"));
 
     await fetch(forms.action, {
-        method: forms.method, // *GET, POST, PUT, DELETE, etc.
+        method : forms.method, // *GET, POST, PUT, DELETE, etc.
         //mode: 'same-origin', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: 'same-origin', // include, *same-origin, omit
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
+        cache : "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials : "same-origin", // include, *same-origin, omit
+        headers : {
+            "X-Requested-With" : "XMLHttpRequest",
         },
 
-        redirect: 'follow', // manual, *follow, error
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: formData // body data type must match "Content-Type" header
+        redirect : "follow", // manual, *follow, error
+        referrerPolicy : "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body : formData, // body data type must match "Content-Type" header
     })
 
         //.then((response) => response)
@@ -125,64 +125,66 @@ async function changeObjectCategory(forms)
 
             return response.text();
 
-        })
-
-        .then((data) =>
+        }).then((data) =>
         {
             if(data)
             {
 
                 var parser = new DOMParser();
-                var result = parser.parseFromString(data, 'text/html');
+                var result = parser.parseFromString(data, "text/html");
 
-                let preMaterial = result.getElementById('material');
+                let preMaterial = result.getElementById("material");
 
 
                 /** Сбрасываем ошибки валидации */
-                preMaterial.querySelectorAll('.is-invalid').forEach((el) => { el.classList.remove('is-invalid'); });
-                preMaterial.querySelectorAll('.invalid-feedback').forEach((el) => { el.remove(); });
+                preMaterial.querySelectorAll(".is-invalid").forEach((el) =>
+                {
+                    el.classList.remove("is-invalid");
+                });
+                preMaterial.querySelectorAll(".invalid-feedback").forEach((el) =>
+                {
+                    el.remove();
+                });
 
 
                 preMaterial ?
-                    document
-                        .getElementById('material')
-                        .replaceWith(preMaterial) :
-                    preMaterial.innerHTML = '';
+                    document.getElementById("material").replaceWith(preMaterial) :
+                    preMaterial.innerHTML = "";
 
 
                 /** SELECT2 */
-                let replacer = document.getElementById(forms.name + '_material');
-                replacer && replacer.type !== 'hidden' ? preMaterial.classList.remove('d-none') : null;
+                let replacer = document.getElementById(forms.name + "_material");
+                replacer && replacer.type !== "hidden" ? preMaterial.classList.remove("d-none") : null;
 
                 /** Событие на изменение модификации */
                 if(replacer)
                 {
-                    if(replacer.tagName === 'SELECT')
+                    if(replacer.tagName === "SELECT")
                     {
-                        new NiceSelect(replacer, {searchable: true});
+                        new NiceSelect(replacer, {searchable : true});
 
-                        let focus = document.getElementById(forms.name + '_material_select2');
+                        let focus = document.getElementById(forms.name + "_material_select2");
                         focus ? focus.click() : null;
                     }
                 }
 
                 ///** сбрасываем зависимые поля */
-                let preOffer = document.getElementById('offer');
-                preOffer ? preOffer.innerHTML = '' : null;
-                preOffer ? preOffer.classList.add('d-none') : null;
+                let preOffer = document.getElementById("offer");
+                preOffer ? preOffer.innerHTML = "" : null;
+                preOffer ? preOffer.classList.add("d-none") : null;
 
                 ///** сбрасываем зависимые поля */
-                let preVariation = document.getElementById('variation');
-                preVariation ? preVariation.innerHTML = '' : null;
-                preVariation ? preVariation.classList.add('d-none') : null;
+                let preVariation = document.getElementById("variation");
+                preVariation ? preVariation.innerHTML = "" : null;
+                preVariation ? preVariation.classList.add("d-none") : null;
 
-                let preModification = document.getElementById('modification');
-                preModification ? preModification.innerHTML = '' : null;
-                preModification ? preModification.classList.add('d-none') : null;
+                let preModification = document.getElementById("modification");
+                preModification ? preModification.innerHTML = "" : null;
+                preModification ? preModification.classList.add("d-none") : null;
 
                 if(replacer)
                 {
-                    replacer.addEventListener('change', function(event)
+                    replacer.addEventListener("change", function(event)
                     {
                         changeObjectMaterial(forms);
                         return false;
@@ -198,9 +200,9 @@ async function changeObjectMaterial(forms)
 {
     disabledElementsForm(forms);
 
-    document.getElementById('offer').classList.add('d-none');
-    document.getElementById('variation').classList.add('d-none');
-    document.getElementById('modification').classList.add('d-none');
+    document.getElementById("offer").classList.add("d-none");
+    document.getElementById("variation").classList.add("d-none");
+    document.getElementById("modification").classList.add("d-none");
 
     //data.delete(forms.name + '[_token]');
     //data.delete(forms.name + '[_offer]');
@@ -209,20 +211,20 @@ async function changeObjectMaterial(forms)
 
     const data = new FormData(forms);
     const formData = new FormData();
-    formData.append(forms.name + '[material]', data.get(forms.name + '[material]'));
+    formData.append(forms.name + "[material]", data.get(forms.name + "[material]"));
 
     await fetch(forms.action, {
-        method: forms.method, // *GET, POST, PUT, DELETE, etc.
+        method : forms.method, // *GET, POST, PUT, DELETE, etc.
         //mode: 'same-origin', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: 'same-origin', // include, *same-origin, omit
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
+        cache : "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials : "same-origin", // include, *same-origin, omit
+        headers : {
+            "X-Requested-With" : "XMLHttpRequest",
         },
 
-        redirect: 'follow', // manual, *follow, error
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: formData // body data type must match "Content-Type" header
+        redirect : "follow", // manual, *follow, error
+        referrerPolicy : "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body : formData, // body data type must match "Content-Type" header
     })
 
         //.then((response) => response)
@@ -236,38 +238,36 @@ async function changeObjectMaterial(forms)
 
             return response.text();
 
-        })
-
-        .then((data) =>
+        }).then((data) =>
         {
 
             if(data)
             {
 
                 var parser = new DOMParser();
-                var result = parser.parseFromString(data, 'text/html');
+                var result = parser.parseFromString(data, "text/html");
 
 
-                let preOffer = result.getElementById('offer');
+                let preOffer = result.getElementById("offer");
 
-                preOffer ? document.getElementById('offer').replaceWith(preOffer) : preOffer.innerHTML = '';
+                preOffer ? document.getElementById("offer").replaceWith(preOffer) : preOffer.innerHTML = "";
 
                 if(preOffer)
                 {
 
                     /** SELECT2 */
 
-                    let replaceOfferId = forms.name + '_offer';
+                    let replaceOfferId = forms.name + "_offer";
 
                     let replacer = document.getElementById(replaceOfferId);
-                    replacer && replacer.type !== 'hidden' ? preOffer.classList.remove('d-none') : null;
+                    replacer && replacer.type !== "hidden" ? preOffer.classList.remove("d-none") : null;
 
 
-                    if(replacer.tagName === 'SELECT')
+                    if(replacer.tagName === "SELECT")
                     {
-                        new NiceSelect(replacer, {searchable: true});
+                        new NiceSelect(replacer, {searchable : true});
 
-                        let focus = document.getElementById(forms.name + '_offer_select2');
+                        let focus = document.getElementById(forms.name + "_offer_select2");
                         focus ? focus.click() : null;
                     }
 
@@ -275,22 +275,22 @@ async function changeObjectMaterial(forms)
 
 
                 /** сбрасываем зависимые поля */
-                let preVariation = document.getElementById('variation');
-                preVariation ? preVariation.innerHTML = '' : null;
-                preVariation ? preVariation.classList.add('d-none') : null;
+                let preVariation = document.getElementById("variation");
+                preVariation ? preVariation.innerHTML = "" : null;
+                preVariation ? preVariation.classList.add("d-none") : null;
 
-                let preModification = document.getElementById('modification');
-                preModification ? preModification.innerHTML = '' : null;
-                preModification ? preModification.classList.add('d-none') : null;
+                let preModification = document.getElementById("modification");
+                preModification ? preModification.innerHTML = "" : null;
+                preModification ? preModification.classList.add("d-none") : null;
 
 
                 /** Событие на изменение торгового предложения */
-                let offerChange = document.getElementById(forms.name + '_offer');
+                let offerChange = document.getElementById(forms.name + "_offer");
 
                 if(offerChange)
                 {
 
-                    offerChange.addEventListener('change', function(event)
+                    offerChange.addEventListener("change", function(event)
                     {
                         changeObjectOffer(forms);
                         return false;
@@ -323,8 +323,8 @@ async function changeObjectOffer(forms)
 {
     disabledElementsForm(forms);
 
-    document.getElementById('variation').classList.add('d-none');
-    document.getElementById('modification').classList.add('d-none');
+    document.getElementById("variation").classList.add("d-none");
+    document.getElementById("modification").classList.add("d-none");
 
     //const data = new FormData(forms);
     //data.delete(forms.name + '[_token]');
@@ -334,20 +334,20 @@ async function changeObjectOffer(forms)
 
     const data = new FormData(forms);
     const formData = new FormData();
-    formData.append(forms.name + '[offer]', data.get(forms.name + '[offer]'));
+    formData.append(forms.name + "[offer]", data.get(forms.name + "[offer]"));
 
     await fetch(forms.action, {
-        method: forms.method, // *GET, POST, PUT, DELETE, etc.
+        method : forms.method, // *GET, POST, PUT, DELETE, etc.
         //mode: 'same-origin', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: 'same-origin', // include, *same-origin, omit
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
+        cache : "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials : "same-origin", // include, *same-origin, omit
+        headers : {
+            "X-Requested-With" : "XMLHttpRequest",
         },
 
-        redirect: 'follow', // manual, *follow, error
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: formData // body data type must match "Content-Type" header
+        redirect : "follow", // manual, *follow, error
+        referrerPolicy : "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body : formData, // body data type must match "Content-Type" header
     })
 
         //.then((response) => response)
@@ -361,41 +361,39 @@ async function changeObjectOffer(forms)
 
             return response.text();
 
-        })
-
-        .then((data) =>
+        }).then((data) =>
         {
 
             if(data)
             {
 
                 var parser = new DOMParser();
-                var result = parser.parseFromString(data, 'text/html');
+                var result = parser.parseFromString(data, "text/html");
 
 
-                let preVariation = result.getElementById('variation');
+                let preVariation = result.getElementById("variation");
 
                 if(preVariation)
                 {
 
-                    document.getElementById('variation').replaceWith(preVariation);
+                    document.getElementById("variation").replaceWith(preVariation);
 
                     /** SELECT2 */
 
-                    let replacer = document.getElementById(forms.name + '_variation');
-                    replacer && replacer.type !== 'hidden' ? preVariation.classList.remove('d-none') : null;
+                    let replacer = document.getElementById(forms.name + "_variation");
+                    replacer && replacer.type !== "hidden" ? preVariation.classList.remove("d-none") : null;
 
                     if(replacer)
                     {
 
-                        if(replacer.tagName === 'SELECT')
+                        if(replacer.tagName === "SELECT")
                         {
-                            new NiceSelect(replacer, {searchable: true});
+                            new NiceSelect(replacer, {searchable : true});
 
-                            let focus = document.getElementById(forms.name + '_variation_select2');
+                            let focus = document.getElementById(forms.name + "_variation_select2");
                             focus ? focus.click() : null;
 
-                            replacer.addEventListener('change', function(event)
+                            replacer.addEventListener("change", function(event)
                             {
                                 changeObjectVariation(forms);
                                 return false;
@@ -406,9 +404,9 @@ async function changeObjectOffer(forms)
 
                 }
 
-                let preModification = document.getElementById('modification');
-                preModification ? preModification.innerHTML = '' : null;
-                preModification ? preModification.classList.add('d-none') : null;
+                let preModification = document.getElementById("modification");
+                preModification ? preModification.innerHTML = "" : null;
+                preModification ? preModification.classList.add("d-none") : null;
 
 
             }
@@ -422,7 +420,7 @@ async function changeObjectVariation(forms)
 
     disabledElementsForm(forms);
 
-    document.getElementById('modification').classList.add('d-none');
+    document.getElementById("modification").classList.add("d-none");
 
     //const data = new FormData(forms);
     //data.delete(forms.name + '[_token]');
@@ -430,21 +428,21 @@ async function changeObjectVariation(forms)
 
     const data = new FormData(forms);
     const formData = new FormData();
-    formData.append(forms.name + '[variation]', data.get(forms.name + '[variation]'));
+    formData.append(forms.name + "[variation]", data.get(forms.name + "[variation]"));
 
 
     await fetch(forms.action, {
-        method: forms.method, // *GET, POST, PUT, DELETE, etc.
+        method : forms.method, // *GET, POST, PUT, DELETE, etc.
         //mode: 'same-origin', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: 'same-origin', // include, *same-origin, omit
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
+        cache : "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials : "same-origin", // include, *same-origin, omit
+        headers : {
+            "X-Requested-With" : "XMLHttpRequest",
         },
 
-        redirect: 'follow', // manual, *follow, error
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: formData // body data type must match "Content-Type" header
+        redirect : "follow", // manual, *follow, error
+        referrerPolicy : "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body : formData, // body data type must match "Content-Type" header
     })
 
         //.then((response) => response)
@@ -458,39 +456,37 @@ async function changeObjectVariation(forms)
 
             return response.text();
 
-        })
-
-        .then((data) =>
+        }).then((data) =>
         {
 
             if(data)
             {
 
                 var parser = new DOMParser();
-                var result = parser.parseFromString(data, 'text/html');
+                var result = parser.parseFromString(data, "text/html");
 
-                let preModification = result.getElementById('modification');
+                let preModification = result.getElementById("modification");
 
 
                 if(preModification)
                 {
 
-                    document.getElementById('modification').replaceWith(preModification);
+                    document.getElementById("modification").replaceWith(preModification);
 
                     /** SELECT2 */
-                    let replacer = document.getElementById(forms.name + '_modification');
-                    replacer && replacer.type !== 'hidden' ? preModification.classList.remove('d-none') : null;
+                    let replacer = document.getElementById(forms.name + "_modification");
+                    replacer && replacer.type !== "hidden" ? preModification.classList.remove("d-none") : null;
 
-                    console.log(replacer && replacer.type !== 'hidden');
+                    console.log(replacer && replacer.type !== "hidden");
 
                     /** Событие на изменение модификации */
                     if(replacer)
                     {
-                        if(replacer.tagName === 'SELECT')
+                        if(replacer.tagName === "SELECT")
                         {
-                            new NiceSelect(replacer, {searchable: true});
+                            new NiceSelect(replacer, {searchable : true});
 
-                            let focus = document.getElementById(forms.name + '_modification_select2');
+                            let focus = document.getElementById(forms.name + "_modification_select2");
                             focus ? focus.click() : null;
 
                             //replacer.addEventListener('change', function(event)
@@ -512,21 +508,21 @@ async function changeObjectVariation(forms)
 function _____changeObjectMaterial()
 {
 
-    let replaceId = ChangeMaterialForm.name + '_offer';
+    let replaceId = ChangeMaterialForm.name + "_offer";
 
 
     /* Создаём объект класса XMLHttpRequest */
     const requestModalName = new XMLHttpRequest();
     requestModalName.responseType = "document";
 
-    (select_material = this).classList.add('disabled');
-    (select2_material = document.getElementById(this.id + '_select2'))?.classList.add('disabled');
+    (select_material = this).classList.add("disabled");
+    (select2_material = document.getElementById(this.id + "_select2"))?.classList.add("disabled");
 
 
     /** Блокируем submit */
-    btn_material_sign_pdf = document.getElementById(ChangeMaterialForm.name + '_material_sign_pdf');
-    btn_material_sign_pdf?.classList.add('disabled');
-    btn_material_sign_pdf?.querySelector('.spinner-border')?.classList.remove('d-none');
+    btn_material_sign_pdf = document.getElementById(ChangeMaterialForm.name + "_material_sign_pdf");
+    btn_material_sign_pdf?.classList.add("disabled");
+    btn_material_sign_pdf?.querySelector(".spinner-border")?.classList.remove("d-none");
 
 
     /* Имя формы */
@@ -534,12 +530,12 @@ function _____changeObjectMaterial()
 
 
     let formData = new FormData();
-    formData.append(this.getAttribute('name'), this.value);
+    formData.append(this.getAttribute("name"), this.value);
 
-    requestModalName.open(ChangeMaterialForm.getAttribute('method'), ChangeMaterialForm.getAttribute('action'), true);
+    requestModalName.open(ChangeMaterialForm.getAttribute("method"), ChangeMaterialForm.getAttribute("action"), true);
 
     /* Указываем заголовки для сервера */
-    requestModalName.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    requestModalName.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
     /* Получаем ответ от сервера на запрос*/
     requestModalName.addEventListener("readystatechange", function()
@@ -548,25 +544,25 @@ function _____changeObjectMaterial()
         if(requestModalName.readyState === 4 && requestModalName.status === 200)
         {
 
-            let result = requestModalName.response.getElementById('offer');
+            let result = requestModalName.response.getElementById("offer");
 
 
-            document.getElementById('offer').replaceWith(result);
+            document.getElementById("offer").replaceWith(result);
 
             let replacer = document.getElementById(replaceId);
 
-            if(replacer.tagName === 'SELECT')
+            if(replacer.tagName === "SELECT")
             {
-                new NiceSelect(replacer, {searchable: true, id: 'select2-' + replaceId});
+                new NiceSelect(replacer, {searchable : true, id : "select2-" + replaceId});
 
                 /** Событие на изменение торгового предложения */
-                let offerChange = document.getElementById(ChangeMaterialForm.name + '_offer');
+                let offerChange = document.getElementById(ChangeMaterialForm.name + "_offer");
 
                 if(offerChange)
                 {
-                    offerChange.addEventListener('change', changeObjectOffer, false);
+                    offerChange.addEventListener("change", changeObjectOffer, false);
 
-                    let focus = document.getElementById(replaceId + '_select2');
+                    let focus = document.getElementById(replaceId + "_select2");
                     focus ? focus.click() : null;
 
                 }
@@ -576,11 +572,11 @@ function _____changeObjectMaterial()
         }
 
         /** Снимаем блоки  */
-        select_material.classList.remove('disabled');
-        select2_material?.classList.remove('disabled');
+        select_material.classList.remove("disabled");
+        select2_material?.classList.remove("disabled");
 
-        btn_material_sign_pdf?.classList.remove('disabled');
-        btn_material_sign_pdf?.querySelector('.spinner-border')?.classList.add('d-none');
+        btn_material_sign_pdf?.classList.remove("disabled");
+        btn_material_sign_pdf?.querySelector(".spinner-border")?.classList.add("d-none");
 
         return false;
     });
@@ -592,19 +588,19 @@ function _____changeObjectMaterial()
 function ___________changeObjectOffer()
 {
 
-    select_material.classList.add('disabled');
-    select2_material?.classList.add('disabled');
+    select_material.classList.add("disabled");
+    select2_material?.classList.add("disabled");
 
-    (select_offer = this).classList.add('disabled');
-    (select2_offer = document.getElementById(this.id + '_select2'))?.classList.add('disabled');
+    (select_offer = this).classList.add("disabled");
+    (select2_offer = document.getElementById(this.id + "_select2"))?.classList.add("disabled");
 
     /** Блокируем submit */
-    btn_material_sign_pdf = document.getElementById(ChangeMaterialForm.name + '_material_sign_pdf');
-    btn_material_sign_pdf?.classList.add('disabled');
-    btn_material_sign_pdf?.querySelector('.spinner-border')?.classList.remove('d-none');
+    btn_material_sign_pdf = document.getElementById(ChangeMaterialForm.name + "_material_sign_pdf");
+    btn_material_sign_pdf?.classList.add("disabled");
+    btn_material_sign_pdf?.querySelector(".spinner-border")?.classList.remove("d-none");
 
 
-    let replaceId = ChangeMaterialForm.name + '_variation';
+    let replaceId = ChangeMaterialForm.name + "_variation";
 
     /* Создаём объект класса XMLHttpRequest */
     const requestModalName = new XMLHttpRequest();
@@ -614,12 +610,12 @@ function ___________changeObjectOffer()
     //let purchaseForm = document.forms.purchase_material_stock_form;
 
     let formData = new FormData();
-    formData.append(this.getAttribute('name'), this.value);
+    formData.append(this.getAttribute("name"), this.value);
 
-    requestModalName.open(ChangeMaterialForm.getAttribute('method'), ChangeMaterialForm.getAttribute('action'), true);
+    requestModalName.open(ChangeMaterialForm.getAttribute("method"), ChangeMaterialForm.getAttribute("action"), true);
 
     /* Указываем заголовки для сервера */
-    requestModalName.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    requestModalName.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
     /* Получаем ответ от сервера на запрос*/
     requestModalName.addEventListener("readystatechange", function()
@@ -629,46 +625,46 @@ function ___________changeObjectOffer()
         {
 
 
-            let result = requestModalName.response.getElementById('variation');
+            let result = requestModalName.response.getElementById("variation");
 
-            document.getElementById('variation').replaceWith(result);
+            document.getElementById("variation").replaceWith(result);
 
             let replacer = document.getElementById(replaceId);
 
             /* Удаляем предыдущий Select2 */
-            let select2 = document.getElementById(replaceId + '_select2');
+            let select2 = document.getElementById(replaceId + "_select2");
 
             if(select2)
             {
                 select2.remove();
             }
 
-            if(replacer.tagName === 'SELECT')
+            if(replacer.tagName === "SELECT")
             {
-                new NiceSelect(document.getElementById(replaceId), {searchable: true, id: 'select2-' + replaceId});
+                new NiceSelect(document.getElementById(replaceId), {searchable : true, id : "select2-" + replaceId});
 
                 /** Событие на изменение множественного варианта предложения */
-                let offerVariation = document.getElementById(ChangeMaterialForm.name + '_variation');
+                let offerVariation = document.getElementById(ChangeMaterialForm.name + "_variation");
 
                 if(offerVariation)
                 {
-                    offerVariation.addEventListener('change', changeObjectVariation, false);
+                    offerVariation.addEventListener("change", changeObjectVariation, false);
                 }
 
-                let focus = document.getElementById(replaceId + '_select2');
+                let focus = document.getElementById(replaceId + "_select2");
                 focus ? focus.click() : null;
             }
 
         }
 
-        select_material.classList.remove('disabled');
-        select2_material?.classList.remove('disabled');
+        select_material.classList.remove("disabled");
+        select2_material?.classList.remove("disabled");
 
-        select_offer.classList.remove('disabled');
-        select2_offer?.classList.remove('disabled');
+        select_offer.classList.remove("disabled");
+        select2_offer?.classList.remove("disabled");
 
-        btn_material_sign_pdf?.classList.remove('disabled');
-        btn_material_sign_pdf?.querySelector('.spinner-border')?.classList.add('d-none');
+        btn_material_sign_pdf?.classList.remove("disabled");
+        btn_material_sign_pdf?.querySelector(".spinner-border")?.classList.add("d-none");
 
         return false;
     });
@@ -680,23 +676,23 @@ function ___________changeObjectOffer()
 function _________changeObjectVariation()
 {
 
-    select_material.classList.add('disabled');
-    select2_material?.classList.add('disabled');
+    select_material.classList.add("disabled");
+    select2_material?.classList.add("disabled");
 
-    select_offer.classList.add('disabled');
-    select2_offer?.classList.add('disabled');
+    select_offer.classList.add("disabled");
+    select2_offer?.classList.add("disabled");
 
-    (select_variation = this).classList.add('disabled');
-    (select2_variation = document.getElementById(this.id + '_select2'))?.classList.add('disabled');
+    (select_variation = this).classList.add("disabled");
+    (select2_variation = document.getElementById(this.id + "_select2"))?.classList.add("disabled");
 
 
     /** Блокируем submit */
-    btn_material_sign_pdf = document.getElementById(ChangeMaterialForm.name + '_material_sign_pdf');
-    btn_material_sign_pdf?.classList.add('disabled');
-    btn_material_sign_pdf?.querySelector('.spinner-border')?.classList.remove('d-none');
+    btn_material_sign_pdf = document.getElementById(ChangeMaterialForm.name + "_material_sign_pdf");
+    btn_material_sign_pdf?.classList.add("disabled");
+    btn_material_sign_pdf?.querySelector(".spinner-border")?.classList.remove("d-none");
 
 
-    let replaceId = ChangeMaterialForm.name + '_modification';
+    let replaceId = ChangeMaterialForm.name + "_modification";
 
     /* Создаём объект класса XMLHttpRequest */
     const requestModalName = new XMLHttpRequest();
@@ -706,12 +702,12 @@ function _________changeObjectVariation()
     //let purchaseForm = document.forms.purchase_material_stock_form;
 
     let formData = new FormData();
-    formData.append(this.getAttribute('name'), this.value);
+    formData.append(this.getAttribute("name"), this.value);
 
-    requestModalName.open(ChangeMaterialForm.getAttribute('method'), ChangeMaterialForm.getAttribute('action'), true);
+    requestModalName.open(ChangeMaterialForm.getAttribute("method"), ChangeMaterialForm.getAttribute("action"), true);
 
     /* Указываем заголовки для сервера */
-    requestModalName.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    requestModalName.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
     /* Получаем ответ от сервера на запрос*/
     requestModalName.addEventListener("readystatechange", function()
@@ -719,18 +715,18 @@ function _________changeObjectVariation()
         /* request.readyState - возвращает текущее состояние объекта XHR(XMLHttpRequest) */
         if(requestModalName.readyState === 4 && requestModalName.status === 200)
         {
-            let result = requestModalName.response.getElementById('modification');
+            let result = requestModalName.response.getElementById("modification");
 
-            document.getElementById('modification').replaceWith(result);
+            document.getElementById("modification").replaceWith(result);
 
             let replacer = document.getElementById(replaceId);
 
-            if(replacer.tagName === 'SELECT')
+            if(replacer.tagName === "SELECT")
             {
-                new NiceSelect(document.getElementById(replaceId), {searchable: true, id: 'select2-' + replaceId});
+                new NiceSelect(document.getElementById(replaceId), {searchable : true, id : "select2-" + replaceId});
             }
 
-            let focus = document.getElementById(replaceId + '_select2');
+            let focus = document.getElementById(replaceId + "_select2");
             focus ? focus.click() : null;
 
 
@@ -753,17 +749,17 @@ function _________changeObjectVariation()
         }
 
 
-        select_material.classList.remove('disabled');
-        select2_material?.classList.remove('disabled');
+        select_material.classList.remove("disabled");
+        select2_material?.classList.remove("disabled");
 
-        select_offer.classList.remove('disabled');
-        select2_offer?.classList.remove('disabled');
+        select_offer.classList.remove("disabled");
+        select2_offer?.classList.remove("disabled");
 
-        select_variation.classList.remove('disabled');
-        select2_variation?.classList.remove('disabled');
+        select_variation.classList.remove("disabled");
+        select2_variation?.classList.remove("disabled");
 
-        btn_material_sign_pdf?.classList.remove('disabled');
-        btn_material_sign_pdf?.querySelector('.spinner-border')?.classList.add('d-none');
+        btn_material_sign_pdf?.classList.remove("disabled");
+        btn_material_sign_pdf?.querySelector(".spinner-border")?.classList.add("d-none");
 
         return false;
     });

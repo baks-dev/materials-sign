@@ -106,7 +106,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
         $dbal->addSelect('material.event as material_event');
         $dbal->from(
             Material::class,
-            'material'
+            'material',
         );
 
 
@@ -114,7 +114,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
             'material',
             MaterialEvent::class,
             'material_event',
-            'material_event.id = material.event'
+            'material_event.id = material.event',
         );
 
         $dbal
@@ -122,7 +122,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 'material',
                 MaterialInfo::class,
                 'material_info',
-                'material_info.material = material.id'
+                'material_info.material = material.id',
             );
 
 
@@ -132,7 +132,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 'material',
                 MaterialTrans::class,
                 'material_trans',
-                'material_trans.event = material.event AND material_trans.local = :local'
+                'material_trans.event = material.event AND material_trans.local = :local',
             );
 
 
@@ -147,7 +147,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 'material',
                 MaterialOffer::class,
                 'material_offer',
-                'material_offer.event = material.event'
+                'material_offer.event = material.event',
             );
 
 
@@ -165,7 +165,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 'material_offer',
                 CategoryMaterialOffers::class,
                 'category_offer',
-                'category_offer.id = material_offer.category_offer'
+                'category_offer.id = material_offer.category_offer',
             );
 
         // Множественные варианты торгового предложения
@@ -176,7 +176,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 'material_offer',
                 MaterialVariation::class,
                 'material_variation',
-                'material_variation.offer = material_offer.id'
+                'material_variation.offer = material_offer.id',
             );
 
         if($this->filter?->getVariation())
@@ -192,7 +192,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 'material_variation',
                 CategoryMaterialVariation::class,
                 'category_variation',
-                'category_variation.id = material_variation.category_variation'
+                'category_variation.id = material_variation.category_variation',
             );
 
 
@@ -205,7 +205,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 'material_variation',
                 MaterialModification::class,
                 'material_modification',
-                'material_modification.variation = material_variation.id'
+                'material_modification.variation = material_variation.id',
             );
 
         if($this->filter?->getModification())
@@ -221,7 +221,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 'material_modification',
                 CategoryMaterialModification::class,
                 'category_offer_modification',
-                'category_offer_modification.id = material_modification.category_modification'
+                'category_offer_modification.id = material_modification.category_modification',
             );
 
         // Артикул сырья
@@ -232,7 +232,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 material_variation.article,
                 material_offer.article,
                 material_info.article
-            ) AS material_article'
+            ) AS material_article',
         );
 
 
@@ -245,7 +245,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
             '
                 material_modification_image.modification = material_modification.id AND
                 material_modification_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -255,7 +255,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
             '
                 material_variation_image.variation = material_variation.id AND
                 material_variation_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -266,7 +266,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 material_variation_image.name IS NULL AND
                 material_offer_images.offer = material_offer.id AND
                 material_offer_images.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -277,7 +277,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 material_offer_images.name IS NULL AND
                 material_photo.event = material.event AND
                 material_photo.root = true
-			'
+			',
         );
 
 
@@ -295,7 +295,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
 					CONCAT ( '/upload/".$dbal->table(MaterialPhoto::class)."' , '/', material_photo.name)
 			   ELSE NULL
 			END AS material_image
-		"
+		",
         );
 
 
@@ -307,7 +307,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 material_variation_image.ext,
                 material_offer_images.ext,
                 material_photo.ext
-            ) AS material_image_ext'
+            ) AS material_image_ext',
         );
 
 
@@ -318,7 +318,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 material_variation_image.cdn,
                 material_offer_images.cdn,
                 material_photo.cdn
-            ) AS material_image_cdn'
+            ) AS material_image_cdn',
         );
 
 
@@ -329,7 +329,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 'material_event',
                 MaterialCategory::class,
                 'material_event_category',
-                'material_event_category.event = material_event.id AND material_event_category.root = true'
+                'material_event_category.event = material_event.id AND material_event_category.root = true',
             );
 
         if($this->filter?->getCategory())
@@ -342,7 +342,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
             'material_event_category',
             CategoryMaterial::class,
             'category',
-            'category.id = material_event_category.category'
+            'category.id = material_event_category.category',
         );
 
 
@@ -352,7 +352,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 'category',
                 CategoryMaterialTrans::class,
                 'category_trans',
-                'category_trans.event = category.event AND category_trans.local = :local'
+                'category_trans.event = category.event AND category_trans.local = :local',
             );
 
 
@@ -362,7 +362,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
             'material',
             MaterialPrice::class,
             'material_price',
-            'material_price.event = material.event'
+            'material_price.event = material.event',
         );
 
         /* Наличие и резерв торгового предложения */
@@ -370,7 +370,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
             'material_offer',
             MaterialOfferQuantity::class,
             'material_offer_quantity',
-            'material_offer_quantity.offer = material_offer.id'
+            'material_offer_quantity.offer = material_offer.id',
         );
 
         /* Наличие и резерв множественного варианта */
@@ -378,7 +378,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
             'material_variation',
             MaterialVariationQuantity::class,
             'material_variation_quantity',
-            'material_variation_quantity.variation = material_variation.id'
+            'material_variation_quantity.variation = material_variation.id',
         );
 
         $dbal
@@ -386,7 +386,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 'material_modification',
                 MaterialModificationQuantity::class,
                 'material_modification_quantity',
-                'material_modification_quantity.modification = material_modification.id'
+                'material_modification_quantity.modification = material_modification.id',
             );
 
 
@@ -431,7 +431,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 'invariable',
                 MaterialSign::class,
                 'sign_exists',
-                'sign_exists.id = invariable.main'
+                'sign_exists.id = invariable.main',
             );
 
         $notExists
@@ -439,7 +439,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                 'sign_exists',
                 MaterialSignEvent::class,
                 'event_exists',
-                'event_exists.id = sign_exists.event AND (event_exists.status = :status_new OR event_exists.status = :status_progress)'
+                'event_exists.id = sign_exists.event AND (event_exists.status = :status_new OR event_exists.status = :status_progress)',
             );
 
         $dbal
@@ -456,14 +456,14 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
             ->setParameter(
                 'status_new',
                 MaterialSignStatusNew::class,
-                MaterialSignStatus::TYPE
+                MaterialSignStatus::TYPE,
             );
 
         $dbal
             ->setParameter(
                 'status_progress',
                 MaterialSignStatusProcess::class,
-                MaterialSignStatus::TYPE
+                MaterialSignStatus::TYPE,
             );
 
 
@@ -497,7 +497,7 @@ final class NotExistsMaterialSignCodeRepository implements NotExistsMaterialSign
                         'material_property_'.$property->getType(),
                         'material_property_'.$property->getType().'.event = material.event AND 
                         material_property_'.$property->getType().'.field = :'.$property->getType().'_const AND 
-                        material_property_'.$property->getType().'.value = :'.$property->getType().'_value'
+                        material_property_'.$property->getType().'.value = :'.$property->getType().'_value',
                     );
 
                     $dbal->setParameter($property->getType().'_const', $property->getConst());

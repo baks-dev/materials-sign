@@ -81,7 +81,7 @@ final class DeleteController extends AbstractController
                     'page.cancel',
                     'danger.cancel',
                     'materials-sign.admin',
-                    'Группы не найдено'
+                    'Группы не найдено',
                 );
 
                 return $this->redirectToRoute('materials-sign:admin.index');
@@ -99,7 +99,7 @@ final class DeleteController extends AbstractController
                 'page.delete',
                 $handle instanceof MaterialSign ? 'success.delete' : 'danger.delete',
                 'materials-sign.admin',
-                $handle
+                $handle,
             );
 
             return $this->redirectToRoute('materials-sign:admin.index');

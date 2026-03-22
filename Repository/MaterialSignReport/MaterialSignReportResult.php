@@ -105,7 +105,7 @@ final class MaterialSignReportResult
 
         $values = array_filter(
             json_decode($this->profile_value, false, 512, JSON_THROW_ON_ERROR),
-            static fn($n) => $n->type === InnField::TYPE
+            static fn($n) => $n->type === InnField::TYPE,
         );
 
         $value = current($values);
@@ -155,7 +155,7 @@ final class MaterialSignReportResult
 
         $values = array_filter(
             json_decode($this->profile_value, false, 512, JSON_THROW_ON_ERROR),
-            static fn($n) => $n->type === KppField::TYPE
+            static fn($n) => $n->type === KppField::TYPE,
         );
 
         $value = current($values);

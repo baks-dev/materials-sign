@@ -23,29 +23,32 @@
 /** Функция отправки формы поиска */
 executeFunc(function submitMaterialSignFilter()
 {
-    if(typeof formDebounce !== 'function')
+    if(typeof formDebounce !== "function")
     {
         return false;
     }
 
     const form = document.forms.material_sign_filter_form;
 
-    if(typeof form === 'undefined')
+    if(typeof form === "undefined")
     {
         return true;
     }
 
-    form.addEventListener('change', formDebounce(() => { form.submit(); }, 1500));
-
-
-    const myCollapsible = document.getElementById('filterMaterialSign')
-    myCollapsible.addEventListener('show.bs.collapse', event =>
+    form.addEventListener("change", formDebounce(() =>
     {
-        if(typeof idFormDebounce !== 'undefined' && idFormDebounce !== false)
+        form.submit();
+    }, 1500));
+
+
+    const myCollapsible = document.getElementById("filterMaterialSign");
+    myCollapsible.addEventListener("show.bs.collapse", event =>
+    {
+        if(typeof idFormDebounce !== "undefined" && idFormDebounce !== false)
         {
             clearTimeout(idFormDebounce);
         }
-    })
+    });
 
     return true;
 });

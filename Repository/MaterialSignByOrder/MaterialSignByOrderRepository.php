@@ -204,7 +204,7 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
 
         $dbal->from(
             MaterialSignEvent::class,
-            'event'
+            'event',
         );
 
         $dbal
@@ -221,7 +221,7 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
                 'event',
                 Order::class,
                 'ord',
-                'ord.id = event.ord'
+                'ord.id = event.ord',
             );
 
 
@@ -229,7 +229,7 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
                 'ord',
                 OrderUser::class,
                 'ord_usr',
-                'ord_usr.event = ord.event'
+                'ord_usr.event = ord.event',
             );
 
             $dbal
@@ -237,7 +237,7 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
                     'ord_usr',
                     UserProfileEvent::class,
                     'profile_event',
-                    'profile_event.id = ord_usr.profile AND profile_event.profile = :profile'
+                    'profile_event.id = ord_usr.profile AND profile_event.profile = :profile',
                 )
                 ->setParameter('profile', $this->profile, UserProfileUid::TYPE);
         }
@@ -248,7 +248,7 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
                 'event',
                 MaterialSign::class,
                 'main',
-                'main.id = event.main'
+                'main.id = event.main',
             );
 
 
@@ -274,12 +274,12 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
                     invariable.offer '.$offerParam.' AND
                     invariable.variation '.$variationParam.' AND
                     invariable.modification '.$modificationParam.'
-                '
+                ',
                 )
                 ->setParameter(
                     'material',
                     $this->material,
-                    MaterialUid::TYPE
+                    MaterialUid::TYPE,
                 );
         }
 
@@ -300,7 +300,7 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
                 'event',
                 MaterialSignCode::class,
                 'code',
-                'code.main = main.id'
+                'code.main = main.id',
             );
 
 

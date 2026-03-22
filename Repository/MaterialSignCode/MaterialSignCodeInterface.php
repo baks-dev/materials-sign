@@ -28,6 +28,7 @@ use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 interface MaterialSignCodeInterface
 {
     public function forMaterialSign(MaterialSignUid|string $sign): self;
+
     /**
      * Метод возвращает QR-код честного знака
      */

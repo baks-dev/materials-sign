@@ -94,7 +94,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
 
         $dbal->from(
             MaterialSignEvent::class,
-            'event'
+            'event',
         );
 
         $dbal
@@ -102,7 +102,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
             ->setParameter(
                 key: 'ord',
                 value: $this->order,
-                type: OrderUid::TYPE
+                type: OrderUid::TYPE,
             );
 
         $dbal
@@ -110,7 +110,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
             ->setParameter(
                 key: 'status',
                 value: MaterialSignStatusProcess::class,
-                type: MaterialSignStatus::TYPE
+                type: MaterialSignStatus::TYPE,
             );
 
         $dbal
@@ -119,7 +119,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 'event',
                 MaterialSign::class,
                 'main',
-                'main.event = event.id'
+                'main.event = event.id',
             );
 
         $dbal
@@ -128,7 +128,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 'event',
                 MaterialSignInvariable::class,
                 'invariable',
-                'invariable.main = main.id'
+                'invariable.main = main.id',
             );
 
 
@@ -137,7 +137,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 'main',
                 MaterialSignCode::class,
                 'code',
-                'code.main = main.id'
+                'code.main = main.id',
             );
 
 
@@ -148,14 +148,14 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 'invariable',
                 Material::class,
                 'material',
-                'material.id = invariable.material'
+                'material.id = invariable.material',
             );
 
         $dbal->join(
             'material',
             MaterialEvent::class,
             'material_event',
-            'material_event.id = material.event'
+            'material_event.id = material.event',
         );
 
         $dbal
@@ -163,7 +163,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 'material',
                 MaterialInfo::class,
                 'material_info',
-                'material_info.material = material.id'
+                'material_info.material = material.id',
             );
 
 
@@ -173,7 +173,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 'material',
                 MaterialTrans::class,
                 'material_trans',
-                'material_trans.event = material.event AND material_trans.local = :local'
+                'material_trans.event = material.event AND material_trans.local = :local',
             );
 
 
@@ -188,7 +188,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 'material',
                 MaterialOffer::class,
                 'material_offer',
-                'material_offer.event = material.event AND material_offer.const = invariable.offer'
+                'material_offer.event = material.event AND material_offer.const = invariable.offer',
             );
 
         // Получаем тип торгового предложения
@@ -198,7 +198,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 'material_offer',
                 CategoryMaterialOffers::class,
                 'category_offer',
-                'category_offer.id = material_offer.category_offer'
+                'category_offer.id = material_offer.category_offer',
             );
 
         // Множественные варианты торгового предложения
@@ -210,7 +210,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 'material_offer',
                 MaterialVariation::class,
                 'material_variation',
-                'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation'
+                'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation',
             );
 
 
@@ -221,7 +221,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 'material_variation',
                 CategoryMaterialVariation::class,
                 'category_variation',
-                'category_variation.id = material_variation.category_variation'
+                'category_variation.id = material_variation.category_variation',
             );
 
 
@@ -234,7 +234,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 'material_variation',
                 MaterialModification::class,
                 'material_modification',
-                'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification'
+                'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification',
             );
 
 
@@ -245,7 +245,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 'material_modification',
                 CategoryMaterialModification::class,
                 'category_offer_modification',
-                'category_offer_modification.id = material_modification.category_modification'
+                'category_offer_modification.id = material_modification.category_modification',
             );
 
         // Артикул сырья
@@ -256,7 +256,7 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 material_variation.article,
                 material_offer.article,
                 material_info.article
-            ) AS material_article'
+            ) AS material_article',
         );
 
 

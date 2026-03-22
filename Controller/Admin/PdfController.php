@@ -87,7 +87,7 @@ final class PdfController extends AbstractController
             $this->addFlash(
                 'page.pdf',
                 $handle === true ? 'success.pdf' : 'danger.pdf',
-                'materials-sign.admin'
+                'materials-sign.admin',
             );
 
             return $this->redirectToReferer();

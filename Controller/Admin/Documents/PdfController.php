@@ -109,44 +109,6 @@ final class PdfController extends AbstractController
 
     }
 
-    #[Route('/admin/material/sign/document/pdf/parts/{article}/{part}', name: 'document.pdf.parts', methods: ['GET'])]
-    public function parts(
-        #[Autowire('%kernel.project_dir%')] $projectDir,
-        #[ParamConverter(MaterialSignUid::class)] $part,
-        string $article,
-        MaterialSignByPartInterface $materialSignByPart,
-        ImagePathExtension $ImagePathExtension,
-    ): Response
-    {
-        $this->projectDir = $projectDir;
-        $this->ImagePathExtension = $ImagePathExtension;
-        $this->article = $article;
-
-        $codes = $materialSignByPart
-            ->forPart($part)
-            ->withStatusDone()
-            ->findAll();
-
-        /**
-         * Создаем путь для создания PDF файла
-         */
-
-        $ref = new ReflectionClass(MaterialSignCode::class);
-        /** @var ReflectionAttribute $current */
-        $current = current($ref->getAttributes(Table::class));
-        $dirName = $current->getArguments()['name'] ?? 'barcode';
-
-        $paths[] = $projectDir;
-        $paths[] = 'public';
-        $paths[] = 'upload';
-        $paths[] = $dirName;
-
-        $paths[] = (string) $part;
-
-        return $this->BinaryFileResponse($paths, $codes);
-    }
-
-
     private function BinaryFileResponse(array $paths, array $codes): BinaryFileResponse
     {
         $filesystem = new Filesystem();
@@ -183,7 +145,7 @@ final class PdfController extends AbstractController
         $projectDir = implode(DIRECTORY_SEPARATOR, [
             $this->projectDir,
             'public',
-            ''
+            '',
         ]);
 
         foreach($codes as $code)
@@ -199,9 +161,46 @@ final class PdfController extends AbstractController
         return new BinaryFileResponse($uploadFile, Response::HTTP_OK)
             ->setContentDisposition(
                 ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                $this->article.'.pdf'
+                $this->article.'.pdf',
             );
 
+    }
+
+    #[Route('/admin/material/sign/document/pdf/parts/{article}/{part}', name: 'document.pdf.parts', methods: ['GET'])]
+    public function parts(
+        #[Autowire('%kernel.project_dir%')] $projectDir,
+        #[ParamConverter(MaterialSignUid::class)] $part,
+        string $article,
+        MaterialSignByPartInterface $materialSignByPart,
+        ImagePathExtension $ImagePathExtension,
+    ): Response
+    {
+        $this->projectDir = $projectDir;
+        $this->ImagePathExtension = $ImagePathExtension;
+        $this->article = $article;
+
+        $codes = $materialSignByPart
+            ->forPart($part)
+            ->withStatusDone()
+            ->findAll();
+
+        /**
+         * Создаем путь для создания PDF файла
+         */
+
+        $ref = new ReflectionClass(MaterialSignCode::class);
+        /** @var ReflectionAttribute $current */
+        $current = current($ref->getAttributes(Table::class));
+        $dirName = $current->getArguments()['name'] ?? 'barcode';
+
+        $paths[] = $projectDir;
+        $paths[] = 'public';
+        $paths[] = 'upload';
+        $paths[] = $dirName;
+
+        $paths[] = (string) $part;
+
+        return $this->BinaryFileResponse($paths, $codes);
     }
 
 }

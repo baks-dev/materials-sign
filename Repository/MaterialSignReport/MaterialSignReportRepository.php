@@ -267,7 +267,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 ->setParameter(
                     key: 'seller',
                     value: $this->seller,
-                    type: UserProfileUid::TYPE
+                    type: UserProfileUid::TYPE,
                 );
         }
 
@@ -280,7 +280,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 ->setParameter(
                     key: 'profile',
                     value: $this->profile,
-                    type: UserProfileUid::TYPE
+                    type: UserProfileUid::TYPE,
                 );
 
             /** Получаем все КИЗЫ для передачи */
@@ -297,7 +297,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                     ->setParameter(
                         key: 'seller',
                         value: $this->seller,
-                        type: UserProfileUid::TYPE
+                        type: UserProfileUid::TYPE,
                     );
             }
         }
@@ -312,7 +312,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 ->setParameter(
                     key: 'material',
                     value: $this->material,
-                    type: MaterialUid::TYPE
+                    type: MaterialUid::TYPE,
                 );
         }
 
@@ -323,7 +323,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 ->setParameter(
                     key: 'offer',
                     value: $this->offer,
-                    type: MaterialOfferConst::TYPE
+                    type: MaterialOfferConst::TYPE,
                 );
         }
 
@@ -334,7 +334,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 ->setParameter(
                     key: 'variation',
                     value: $this->variation,
-                    type: MaterialVariationConst::TYPE
+                    type: MaterialVariationConst::TYPE,
                 );
         }
 
@@ -345,7 +345,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 ->setParameter(
                     key: 'modification',
                     value: $this->modification,
-                    type: MaterialModificationConst::TYPE
+                    type: MaterialModificationConst::TYPE,
                 );
         }
 
@@ -369,7 +369,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 'invariable',
                 MaterialSignModify::class,
                 'modify',
-                'modify.event = event.id AND DATE(modify.mod_date) BETWEEN :date_from AND :date_to'
+                'modify.event = event.id AND DATE(modify.mod_date) BETWEEN :date_from AND :date_to',
             )
             ->setParameter('date_from', $this->from, Types::DATE_IMMUTABLE)
             ->setParameter('date_to', $this->to, Types::DATE_IMMUTABLE);
@@ -378,7 +378,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             'invariable',
             MaterialSignCode::class,
             'code',
-            'code.main = invariable.main'
+            'code.main = invariable.main',
         );
 
 
@@ -388,14 +388,14 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             'invariable',
             Material::class,
             'material',
-            'material.id = invariable.material'
+            'material.id = invariable.material',
         );
 
         $dbal->join(
             'material',
             MaterialTrans::class,
             'material_trans',
-            'material_trans.event = material.event AND material_trans.local = :local'
+            'material_trans.event = material.event AND material_trans.local = :local',
         );
 
         /** Свойства торговых предложений */
@@ -404,7 +404,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             'material',
             MaterialOffer::class,
             'material_offer',
-            'material_offer.event = material.event AND material_offer.const = invariable.offer'
+            'material_offer.event = material.event AND material_offer.const = invariable.offer',
         );
 
         $dbal
@@ -412,14 +412,14 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 'material_offer',
                 MaterialVariation::class,
                 'material_variation',
-                'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation'
+                'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation',
             );
 
         $dbal->leftJoin(
             'material_variation',
             MaterialModification::class,
             'material_modification',
-            'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification'
+            'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification',
         );
 
 
@@ -429,21 +429,21 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             'material_offer',
             CategoryMaterialOffers::class,
             'category_offer',
-            'category_offer.id = material_offer.category_offer'
+            'category_offer.id = material_offer.category_offer',
         );
 
         $dbal->leftJoin(
             'material_variation',
             CategoryMaterialVariation::class,
             'category_variation',
-            'category_variation.id = material_variation.category_variation'
+            'category_variation.id = material_variation.category_variation',
         );
 
         $dbal->leftJoin(
             'material_modification',
             CategoryMaterialModification::class,
             'category_modification',
-            'category_modification.id = material_modification.category_modification'
+            'category_modification.id = material_modification.category_modification',
         );
 
 
@@ -453,7 +453,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             'event',
             Order::class,
             'ord',
-            'ord.id = event.ord'
+            'ord.id = event.ord',
         );
 
 
@@ -463,7 +463,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 'event',
                 OrderInvariable::class,
                 'order_invariable',
-                'order_invariable.main = event.ord'
+                'order_invariable.main = event.ord',
             );
 
         $dbal
@@ -471,7 +471,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 'order_invariable',
                 OrderProduct::class,
                 'order_product',
-                'order_product.event = order_invariable.event'
+                'order_product.event = order_invariable.event',
             );
 
         $dbal
@@ -480,7 +480,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                 'order_product',
                 OrderPrice::class,
                 'order_price',
-                'order_price.product = order_product.id'
+                'order_price.product = order_product.id',
             );
 
         $dbal->addSelect(
@@ -511,7 +511,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                                 'code', code.code
                             )
         
-                    ) AS products"
+                    ) AS products",
         );
 
 
@@ -523,21 +523,21 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             'invariable',
             UserProfile::class,
             'profile',
-            'profile.id = invariable.seller'
+            'profile.id = invariable.seller',
         );
 
         $dbal->leftJoin(
             'profile',
             UserProfileValue::class,
             'profile_value',
-            'profile_value.event = profile.event'
+            'profile_value.event = profile.event',
         );
 
         $dbal->leftJoin(
             'profile_value',
             TypeProfileSectionField::class,
             'profile_field',
-            'profile_field.id = profile_value.field'
+            'profile_field.id = profile_value.field',
         );
 
         $dbal->addSelect(
@@ -549,7 +549,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                     'type', profile_field.type
                 )
 
-            ) AS profile_value"
+            ) AS profile_value",
         );
 
 

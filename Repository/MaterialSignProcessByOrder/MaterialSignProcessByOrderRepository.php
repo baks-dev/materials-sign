@@ -80,21 +80,21 @@ final class MaterialSignProcessByOrderRepository implements MaterialSignProcessB
             ->setParameter(
                 key: 'ord',
                 value: $this->order,
-                type: OrderUid::TYPE
+                type: OrderUid::TYPE,
             );
 
         $orm->andWhere('event.status = :status')
             ->setParameter(
                 key: 'status',
                 value: MaterialSignStatusProcess::class,
-                type: MaterialSignStatus::TYPE
+                type: MaterialSignStatus::TYPE,
             );
 
         $orm->join(
             MaterialSign::class,
             'main',
             'WITH',
-            'main.event = event.id'
+            'main.event = event.id',
         );
 
         return $orm->getQuery()->getResult();

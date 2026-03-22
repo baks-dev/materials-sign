@@ -117,7 +117,7 @@ final class MaterialSignByPartRepository implements MaterialSignByPartInterface
 
         $dbal->from(
             MaterialSignInvariable::class,
-            'invariable'
+            'invariable',
         );
 
         $dbal
@@ -132,7 +132,7 @@ final class MaterialSignByPartRepository implements MaterialSignByPartInterface
                 'invariable',
                 MaterialSign::class,
                 'main',
-                'main.id = invariable.main'
+                'main.id = invariable.main',
             );
 
 
@@ -149,7 +149,7 @@ final class MaterialSignByPartRepository implements MaterialSignByPartInterface
                     ->setParameter(
                         $key,
                         $status,
-                        MaterialSignStatus::TYPE
+                        MaterialSignStatus::TYPE,
                     );
             }
             $dbal
@@ -157,7 +157,7 @@ final class MaterialSignByPartRepository implements MaterialSignByPartInterface
                     'invariable',
                     MaterialSignEvent::class,
                     'event',
-                    sprintf('event.id = invariable.event AND (%s)', implode(' OR ', $condition))
+                    sprintf('event.id = invariable.event AND (%s)', implode(' OR ', $condition)),
                 );
 
         }
@@ -179,7 +179,7 @@ final class MaterialSignByPartRepository implements MaterialSignByPartInterface
                 'event',
                 MaterialSignCode::class,
                 'code',
-                'code.main = main.id'
+                'code.main = main.id',
             );
 
         return $dbal

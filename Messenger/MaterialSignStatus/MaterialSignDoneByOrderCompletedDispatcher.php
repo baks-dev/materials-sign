@@ -71,7 +71,7 @@ final readonly class MaterialSignDoneByOrderCompletedDispatcher
             ->deduplication([
                 (string) $message->getId(),
                 MaterialSignStatusDone::STATUS,
-                self::class
+                self::class,
             ]);
 
         if($Deduplicator->isExecuted())
@@ -157,7 +157,7 @@ final readonly class MaterialSignDoneByOrderCompletedDispatcher
                     {
                         $this->logger->warning(
                             'Честный знак на сырьё не найден',
-                            [$message, $product, self::class.':'.__LINE__]
+                            [$message, $product, self::class.':'.__LINE__],
                         );
 
                         break;
@@ -178,8 +178,8 @@ final readonly class MaterialSignDoneByOrderCompletedDispatcher
                             sprintf('%s: Ошибка при обновлении статуса честного знака', $MaterialSign),
                             [
                                 self::class.':'.__LINE__,
-                                'MaterialSignEventUid' => $MaterialSignDoneDTO->getEvent()
-                            ]
+                                'MaterialSignEventUid' => $MaterialSignDoneDTO->getEvent(),
+                            ],
                         );
 
                         break;
@@ -187,13 +187,14 @@ final readonly class MaterialSignDoneByOrderCompletedDispatcher
 
                     $this->logger->info(
                         'Отметили Честный знак на сырье в статус Done «Выполнен»',
-                        [$message, self::class.':'.__LINE__,]
+                        [$message, self::class.':'.__LINE__,],
                     );
                 }
             }
 
             /**
              * Все остальные незавершенные «Честные знаки» будут отменены при вызове MaterialSignCancelByOrderCanceled
+             *
              * @see MaterialSignCancelByOrderCanceledDispatcher
              */
 

@@ -58,7 +58,7 @@ final class ReportController extends AbstractController
             ->createForm(
                 MaterialSignReportForm::class,
                 $MaterialSignReportDTO,
-                ['action' => $this->generateUrl('materials-sign:admin.report'),]
+                ['action' => $this->generateUrl('materials-sign:admin.report'),],
             )
             ->handleRequest($request);
 
@@ -81,7 +81,7 @@ final class ReportController extends AbstractController
                 $this->addFlash(
                     'Отчет о реализации честных знаков',
                     'Отчета за указанный период не найдено',
-                    'materials-sign.admin'
+                    'materials-sign.admin',
                 );
 
                 return $this->redirectToReferer();

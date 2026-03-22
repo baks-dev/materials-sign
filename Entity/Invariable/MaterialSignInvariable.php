@@ -112,14 +112,14 @@ class MaterialSignInvariable extends EntityReadonly
         $this->main = $event->getMain();
     }
 
-    public function __toString(): string
-    {
-        return (string) $this->main;
-    }
-
     public function getMain(): MaterialSignUid
     {
         return $this->main;
+    }
+
+    public function __toString(): string
+    {
+        return (string) $this->main;
     }
 
     /**

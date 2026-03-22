@@ -27,6 +27,7 @@ namespace BaksDev\Materials\Sign\Repository\BarcodeByMaterial;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Materials\Catalog\Entity\Material;
+use BaksDev\Materials\Catalog\Type\Barcode\MaterialBarcode;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
@@ -39,7 +40,6 @@ use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusNew;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use InvalidArgumentException;
-use BaksDev\Materials\Catalog\Type\Barcode\MaterialBarcode;
 
 final class BarcodeByMaterialRepository implements BarcodeByMaterialInterface
 {

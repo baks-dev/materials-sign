@@ -57,14 +57,14 @@ class ExistsMaterialSignCodeTest extends KernelTestCase
                 'sign',
                 MaterialSignCode::class,
                 'code',
-                'code.main = sign.id'
+                'code.main = sign.id',
             )
             ->addSelect('invariable.usr')
             ->leftJoin(
                 'sign',
                 MaterialSignInvariable::class,
                 'invariable',
-                'invariable.main = sign.id'
+                'invariable.main = sign.id',
             )->fetchAssociative();
 
 
@@ -81,7 +81,7 @@ class ExistsMaterialSignCodeTest extends KernelTestCase
             $ExistsMaterialSignCodeInterface = self::getContainer()->get(ExistsMaterialSignCodeInterface::class);
             $ExistsMaterialSignCodeEvent = $ExistsMaterialSignCodeInterface->isExists(
                 self::$usr,
-                self::$code
+                self::$code,
             );
 
             self::assertTrue($ExistsMaterialSignCodeEvent);

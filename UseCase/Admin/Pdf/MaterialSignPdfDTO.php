@@ -98,6 +98,12 @@ final class MaterialSignPdfDTO
         $this->addFiles($MaterialSignFileDTO);
     }
 
+    public function addFiles(MaterialSignFile\MaterialSignFileDTO $file): self
+    {
+        $this->files->add($file);
+        return $this;
+    }
+
     /**
      * Number
      */
@@ -118,12 +124,6 @@ final class MaterialSignPdfDTO
     public function getFiles(): ArrayCollection
     {
         return $this->files;
-    }
-
-    public function addFiles(MaterialSignFile\MaterialSignFileDTO $file): self
-    {
-        $this->files->add($file);
-        return $this;
     }
 
     public function setFiles(ArrayCollection $files): self

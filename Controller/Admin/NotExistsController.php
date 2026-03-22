@@ -56,7 +56,7 @@ final class NotExistsController extends AbstractController
             ->createForm(
                 type: SearchForm::class,
                 data: $search,
-                options: ['action' => $this->generateUrl('materials-sign:admin.notexists')]
+                options: ['action' => $this->generateUrl('materials-sign:admin.notexists')],
             )
             ->handleRequest($request);
 
@@ -83,7 +83,7 @@ final class NotExistsController extends AbstractController
                 'query' => $MaterialSign,
                 'search' => $searchForm->createView(),
                 'filter' => $filterForm->createView(),
-            ]
+            ],
         );
     }
 }

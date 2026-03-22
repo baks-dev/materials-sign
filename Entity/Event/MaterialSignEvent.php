@@ -90,6 +90,7 @@ class MaterialSignEvent extends EntityEvent
 
     /**
      * Профиль пользователя (null - общий)
+     *
      * @deprecated переносится в MaterialSignInvariable
      * @see MaterialSignInvariable
      */
@@ -127,9 +128,9 @@ class MaterialSignEvent extends EntityEvent
         return (string) $this->id;
     }
 
-    public function getId(): MaterialSignEventUid
+    public function getMain(): ?MaterialSignUid
     {
-        return $this->id;
+        return $this->main;
     }
 
     /**
@@ -145,10 +146,9 @@ class MaterialSignEvent extends EntityEvent
         $this->main = $main instanceof MaterialSign ? $main->getId() : $main;
     }
 
-
-    public function getMain(): ?MaterialSignUid
+    public function getId(): MaterialSignEventUid
     {
-        return $this->main;
+        return $this->id;
     }
 
     public function isInvariable(): bool

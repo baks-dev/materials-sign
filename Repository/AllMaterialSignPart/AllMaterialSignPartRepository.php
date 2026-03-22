@@ -93,7 +93,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
         $dbal
             ->select('invariable.number')
             ->from(
-                MaterialSignInvariable::class, 'invariable'
+                MaterialSignInvariable::class, 'invariable',
             );
 
         $dbal
@@ -112,7 +112,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'invariable',
                 MaterialSign::class,
                 'main',
-                'main.id = invariable.main'
+                'main.id = invariable.main',
             );
 
         $dbal
@@ -122,7 +122,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'code',
                 MaterialSignEvent::class,
                 'event',
-                'event.id = main.event'
+                'event.id = main.event',
             );
 
         $dbal
@@ -138,7 +138,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'main',
                 MaterialSignCode::class,
                 'code',
-                'code.main = main.id'
+                'code.main = main.id',
             );
 
         $dbal
@@ -147,7 +147,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'code',
                 MaterialSignModify::class,
                 'modify',
-                'modify.event = code.event'
+                'modify.event = code.event',
             );
 
 
@@ -158,7 +158,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
             'invariable',
             Material::class,
             'material',
-            'material.id = invariable.material'
+            'material.id = invariable.material',
         );
 
 
@@ -166,7 +166,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
             'material',
             MaterialEvent::class,
             'material_event',
-            'material_event.id = material.event'
+            'material_event.id = material.event',
         );
 
         $dbal
@@ -174,7 +174,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'material_event',
                 MaterialInfo::class,
                 'material_info',
-                'material_info.material = material.id'
+                'material_info.material = material.id',
             );
 
 
@@ -184,7 +184,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'material_event',
                 MaterialTrans::class,
                 'material_trans',
-                'material_trans.event = material_event.id AND material_trans.local = :local'
+                'material_trans.event = material_event.id AND material_trans.local = :local',
             );
 
 
@@ -199,7 +199,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'material_event',
                 MaterialOffer::class,
                 'material_offer',
-                'material_offer.event = material_event.id AND material_offer.const = invariable.offer'
+                'material_offer.event = material_event.id AND material_offer.const = invariable.offer',
             );
 
 
@@ -217,7 +217,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'material_offer',
                 CategoryMaterialOffers::class,
                 'category_offer',
-                'category_offer.id = material_offer.category_offer'
+                'category_offer.id = material_offer.category_offer',
             );
 
         // Множественные варианты торгового предложения
@@ -228,7 +228,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'material_offer',
                 MaterialVariation::class,
                 'material_variation',
-                'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation'
+                'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation',
             );
 
         //        if($this->filter?->getVariation())
@@ -244,7 +244,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'material_variation',
                 CategoryMaterialVariation::class,
                 'category_variation',
-                'category_variation.id = material_variation.category_variation'
+                'category_variation.id = material_variation.category_variation',
             );
 
         // Модификация множественного варианта торгового предложения
@@ -256,7 +256,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'material_variation',
                 MaterialModification::class,
                 'material_modification',
-                'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification'
+                'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification',
             );
 
         //        if($this->filter?->getModification())
@@ -272,7 +272,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'material_modification',
                 CategoryMaterialModification::class,
                 'category_offer_modification',
-                'category_offer_modification.id = material_modification.category_modification'
+                'category_offer_modification.id = material_modification.category_modification',
             );
 
         // Артикул сырья
@@ -296,7 +296,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
             '
                 material_modification_image.modification = material_modification.id AND
                 material_modification_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -306,7 +306,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
             '
                 material_variation_image.variation = material_variation.id AND
                 material_variation_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -317,7 +317,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 material_variation_image.name IS NULL AND
                 material_offer_images.offer = material_offer.id AND
                 material_offer_images.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -328,7 +328,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 material_offer_images.name IS NULL AND
                 material_photo.event = material_event.id AND
                 material_photo.root = true
-			'
+			',
         );
 
         $dbal->addSelect(
@@ -345,7 +345,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
 					CONCAT ( '/upload/".$dbal->table(MaterialPhoto::class)."' , '/', material_photo.name)
 			   ELSE NULL
 			END AS material_image
-		"
+		",
         );
 
         // Расширение файла
@@ -360,7 +360,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
 			   ELSE NULL
 			   
 			END AS material_image_ext
-		"
+		",
         );
 
         // Флаг загрузки файла CDN
@@ -375,7 +375,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
 					material_photo.cdn
 			   ELSE NULL
 			END AS material_image_cdn
-		'
+		',
         );
 
         // Категория
@@ -383,7 +383,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
             'material_event',
             MaterialCategory::class,
             'material_event_category',
-            'material_event_category.event = material_event.id AND material_event_category.root = true'
+            'material_event_category.event = material_event.id AND material_event_category.root = true',
         );
 
 
@@ -391,7 +391,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
             'material_event_category',
             CategoryMaterial::class,
             'category',
-            'category.id = material_event_category.category'
+            'category.id = material_event_category.category',
         );
 
 
@@ -401,7 +401,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'category',
                 CategoryMaterialTrans::class,
                 'category_trans',
-                'category_trans.event = category.event AND category_trans.local = :local'
+                'category_trans.event = category.event AND category_trans.local = :local',
             );
 
         /** Ответственное лицо */
@@ -411,7 +411,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'event',
                 UserProfile::class,
                 'users_profile',
-                'users_profile.id = event.profile'
+                'users_profile.id = event.profile',
             );
 
 
@@ -422,7 +422,7 @@ final class AllMaterialSignPartRepository implements AllMaterialSignPartInterfac
                 'users_profile',
                 UserProfilePersonal::class,
                 'users_profile_personal',
-                'users_profile_personal.event = users_profile.event'
+                'users_profile_personal.event = users_profile.event',
             );
 
         /* Поиск */

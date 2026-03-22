@@ -44,14 +44,14 @@ final class MaterialSignFileForm extends AbstractType
                     'required' => false,
                     'attr' => ['accept' => ".pdf"],
                     'multiple' => true,
-                ]
+                ],
             );
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => MaterialSignFileDTO::class
+            'data_class' => MaterialSignFileDTO::class,
         ]);
     }
 }
