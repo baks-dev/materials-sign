@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -28,6 +29,8 @@ namespace BaksDev\Materials\Sign\Messenger\MaterialSignPdf\MaterialSignScaner;
 use BaksDev\Barcode\Reader\BarcodeRead;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
+use BaksDev\Materials\Catalog\Repository\CurrentMaterialIdentifier\CurrentMaterialIdentifierByBarcodeInterface;
+use BaksDev\Materials\Catalog\Repository\CurrentMaterialIdentifier\CurrentMaterialResult;
 use BaksDev\Materials\Catalog\Repository\ExistMaterialBarcode\ExistMaterialBarcodeInterface;
 use BaksDev\Materials\Catalog\Type\Barcode\MaterialBarcode;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
@@ -35,17 +38,23 @@ use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusError;
 use BaksDev\Materials\Sign\UseCase\Admin\New\MaterialSignDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\New\MaterialSignHandler;
+use BaksDev\Products\Product\Type\Material\MaterialUid;
 use Doctrine\ORM\Mapping\Table;
 use Exception;
 use Imagick;
 use Psr\Log\LoggerInterface;
 use ReflectionAttribute;
 use ReflectionClass;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+/**
+ * Сканирует предварительно разделенные и обрезанные страницы pdf с ЧЗ и сохраняет информацию о них в БД
+ */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
 final readonly class MaterialSignScannerDispatcher
 {
@@ -57,6 +66,7 @@ final readonly class MaterialSignScannerDispatcher
         private BarcodeRead $barcodeRead,
         private MessageDispatchInterface $messageDispatch,
         private ExistMaterialBarcodeInterface $ExistMaterialBarcodeRepository,
+        private CurrentMaterialIdentifierByBarcodeInterface $currentMaterialIdentifierByBarcodeRepository,
     ) {}
 
     public function __invoke(MaterialSignScannerMessage $message): void
@@ -77,8 +87,10 @@ final readonly class MaterialSignScannerDispatcher
         if(!isset($current->getArguments()['name']))
         {
             $this->logger->critical(
-                sprintf('Невозможно определить название таблицы из класса сущности %s ', MaterialSignCode::class),
-                [self::class.':'.__LINE__],
+                message: sprintf(
+                    'materials-sign:Невозможно определить название таблицы из класса сущности %s ',
+                    MaterialSignCode::class),
+                context: [self::class.':'.__LINE__],
             );
         }
 
@@ -153,7 +165,7 @@ final readonly class MaterialSignScannerDispatcher
             }
             catch(Exception $e)
             {
-                $this->logger->critical('products-sign: Ошибка при добавлении рамки к изображению. Пробуем отсканировать как есть.', [$e->getMessage()]);
+                $this->logger->critical('materials-sign: Ошибка при добавлении рамки к изображению. Пробуем отсканировать как есть.', [$e->getMessage()]);
             }
 
             $Imagick->writeImage($fileTemp);
@@ -261,11 +273,92 @@ final readonly class MaterialSignScannerDispatcher
                 ->setUsr($message->getUsr())
                 ->setProfile($message->getProfile())
                 ->setSeller($message->isNotShare() ? $message->getProfile() : null)
-                ->setNumber($message->getNumber())
-                ->setMaterial($message->getMaterial())
-                ->setOffer($message->getOffer())
-                ->setVariation($message->getVariation())
-                ->setModification($message->getModification());
+                ->setNumber($message->getNumber());
+
+
+            /**
+             * Если material НЕ ПЕРЕДАН в сообщении - находим его по штрихкоду из файла Честного знака
+             */
+            if(false === ($message->getMaterial() instanceof MaterialUid))
+            {
+                /** Получаем Штрихкод (GTIN) из Честного знака */
+                $parseCode = preg_match('/^\(\d+\)(.*?)\(\d+\)/', $code, $matches);
+
+                if(0 === $parseCode || false === $parseCode)
+                {
+                    $this->logger->critical(
+                        message: 'materials-sign: Не удалось извлечь штрихкод после сканирования Честного знака. Code: '.$code,
+                        context: [self::class.':'.__LINE__, $code],
+                    );
+
+                    /** Удаляем файл в случае неудачной обработки */
+                    $this->filesystem->remove($pdfPath);
+
+                    return;
+                }
+
+                /** Находим material по штрихкоду */
+                if(1 === $parseCode)
+                {
+                    /** Код партии */
+                    $partCode = $matches[1];
+                    $barcodes = [$matches[1]];
+
+                    /** Если штрихкод начинается с 0 - добавляем вариант без 0 */
+                    if(str_starts_with($matches[1], '0'))
+                    {
+                        $barcodes[] = ltrim($matches[1], '0');
+                    }
+
+                    /** Продукт по штрихкоду */
+                    $material = $this->currentMaterialIdentifierByBarcodeRepository
+                        ->byBarcodes($barcodes)
+                        ->find();
+
+                    /** Присваиваем продукт Честному знаку */
+                    if(true === ($material instanceof CurrentMaterialResult))
+                    {
+                        $MaterialSignInvariableDTO
+                            ->setMaterial($material->getMaterial())
+                            ->setOffer($material->getOfferConst())
+                            ->setVariation($material->getVariationConst())
+                            ->setModification($material->getModificationConst());
+                    }
+
+                    /** Если продукт не найден */
+                    if(false === ($material instanceof CurrentMaterialResult))
+                    {
+                        $this->logger->warning(
+                            message: sprintf(
+                                'Не удалось найти material по штрихкоду %s из Честного знака. Честный знак НЕ БУДЕТ создан',
+                                $partCode,
+                            ),
+                            context: [
+                                'штрихкоды' => $barcodes,
+                                self::class.':'.__LINE__,
+                            ],
+                        );
+
+                        /** Удаляем файл в случае неудачной обработки */
+                        $this->filesystem->remove($pdfPath);
+
+                        return;
+                    }
+                }
+            }
+
+
+            /**
+             * Если material ПЕРЕДАН в сообщении - присваиваем его из сообщения
+             */
+            if(true === ($message->getMaterial() instanceof MaterialUid))
+            {
+                $MaterialSignInvariableDTO
+                    ->setMaterial($message->getMaterial())
+                    ->setOffer($message->getOffer())
+                    ->setVariation($message->getVariation())
+                    ->setModification($message->getModification());
+            }
 
             $handle = $this->materialSignHandler->handle($MaterialSignDTO);
 
@@ -293,7 +386,7 @@ final readonly class MaterialSignScannerDispatcher
                     [self::class.':'.__LINE__],
                 );
 
-                /** Создаем комманду для отправки файла CDN */
+                /** Создаем команду для отправки файла CDN */
                 $this->messageDispatch->dispatch(
                     new CDNUploadImageMessage($handle->getId(), MaterialSignCode::class, $md5),
                     transport: 'files-res-low',
