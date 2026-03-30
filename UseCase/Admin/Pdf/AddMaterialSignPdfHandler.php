@@ -45,7 +45,7 @@ final readonly class AddMaterialSignPdfHandler
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private string $projectDir,
-        #[Target('productsSignLogger')] private LoggerInterface $logger,
+        #[Target('materialsSignLogger')] private LoggerInterface $logger,
         private MessageDispatchInterface $messageDispatch,
         private ValidatorCollectionInterface $validatorCollection,
     ) {}
