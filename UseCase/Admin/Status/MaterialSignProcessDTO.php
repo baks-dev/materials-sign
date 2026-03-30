@@ -69,7 +69,6 @@ final readonly class MaterialSignProcessDTO implements MaterialSignEventInterfac
         /** Присваиваем продавца  */
         $this->invariable = new Invariable\MaterialSignInvariableDTO();
         $this->invariable->setSeller($profile);
-
     }
 
     /**

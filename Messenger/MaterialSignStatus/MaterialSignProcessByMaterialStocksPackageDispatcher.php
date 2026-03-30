@@ -255,66 +255,6 @@ final readonly class MaterialSignProcessByMaterialStocksPackageDispatcher
                         message: $MaterialSignProcessMessage,
                         transport: 'materials-sign',
                     );
-
-
-                    continue;
-
-                    //                    $MaterialSignEvent = $this->MaterialSignNew
-                    //                        ->forUser($User)
-                    //                        ->forProfile($UserProfileUid)
-                    //                        ->forMaterial($CurrentMaterialDTO->getMaterial())
-                    //                        ->forOfferConst($CurrentMaterialDTO->getOfferConst())
-                    //                        ->forVariationConst($CurrentMaterialDTO->getVariationConst())
-                    //                        ->forModificationConst($CurrentMaterialDTO->getModificationConst())
-                    //                        ->getOneMaterialSign();
-                    //
-                    //                    if(false === $MaterialSignEvent)
-                    //                    {
-                    //                        $this->logger->warning(
-                    //                            'Честный знак на сырьё не найдено',
-                    //                            [$ProductStockEvent, $CurrentMaterialDTO, self::class.':'.__LINE__],
-                    //                        );
-                    //
-                    //                        break;
-                    //                    }
-                    //
-                    //                    $MaterialSignProcessDTO = new MaterialSignProcessDTO(
-                    //                        $UserProfileUid,
-                    //                        $ProductStockEvent->getOrder(),
-                    //                    );
-                    //
-                    //                    $ProductSignInvariableDTO = $MaterialSignProcessDTO->getInvariable();
-                    //                    $ProductSignInvariableDTO->setPart($MaterialSignUid);
-                    //
-                    //                    $MaterialSignEvent->getDto($MaterialSignProcessDTO);
-                    //
-                    //                    $MaterialSign = $this->MaterialSignStatusHandler->handle($MaterialSignProcessDTO);
-                    //
-                    //                    if(false === ($MaterialSign instanceof MaterialSign))
-                    //                    {
-                    //                        $this->logger->critical(
-                    //                            sprintf('%s: Ошибка при обновлении статуса честного знака на сырье', $MaterialSign),
-                    //                            [$MaterialSignProcessDTO, self::class.':'.__LINE__],
-                    //                        );
-                    //
-                    //                        continue 2;
-                    //                    }
-                    //
-                    //
-                    //                    $this->logger->info(
-                    //                        'Отметили Честный знак Process «В процессе» на сырье',
-                    //                        [$MaterialSignEvent, self::class.':'.__LINE__],
-                    //                    );
-                    //
-                    //                    /** Прогреваем кеш стикеров честных знаков заказа */
-                    //                    $MaterialSignMatrixCodeMessage = new MaterialSignMatrixCodeMessage($MaterialSign);
-                    //
-                    //                    $this->messageDispatch->dispatch(
-                    //                        message: $MaterialSignMatrixCodeMessage,
-                    //                        transport: 'files-res',
-                    //                    );
-
-
                 }
             }
         }
