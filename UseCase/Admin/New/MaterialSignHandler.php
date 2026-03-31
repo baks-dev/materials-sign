@@ -44,7 +44,6 @@ final class MaterialSignHandler extends AbstractHandler
 {
     public function __construct(
         private readonly ExistsMaterialSignCodeInterface $existsMaterialSignCode,
-
         EntityManagerInterface $entityManager,
         MessageDispatchInterface $messageDispatch,
         ValidatorCollectionInterface $validatorCollection,
@@ -62,10 +61,7 @@ final class MaterialSignHandler extends AbstractHandler
         $Invariable = $command->getInvariable();
         $Barcode = $command->getCode();
 
-        $isExistsBarcode = $this->existsMaterialSignCode->isExists(
-            $Invariable->getUsr(),
-            $Barcode->getCode(),
-        );
+        $isExistsBarcode = $this->existsMaterialSignCode->isExists($Barcode->getCode());
 
         if($isExistsBarcode === true)
         {

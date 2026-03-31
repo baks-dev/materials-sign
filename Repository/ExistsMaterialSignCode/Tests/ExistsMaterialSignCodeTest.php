@@ -79,10 +79,7 @@ class ExistsMaterialSignCodeTest extends KernelTestCase
         {
             /** @var ExistsMaterialSignCodeInterface $ExistsMaterialSignCodeInterface */
             $ExistsMaterialSignCodeInterface = self::getContainer()->get(ExistsMaterialSignCodeInterface::class);
-            $ExistsMaterialSignCodeEvent = $ExistsMaterialSignCodeInterface->isExists(
-                self::$usr,
-                self::$code,
-            );
+            $ExistsMaterialSignCodeEvent = $ExistsMaterialSignCodeInterface->isExists(self::$code);
 
             self::assertTrue($ExistsMaterialSignCodeEvent);
         }

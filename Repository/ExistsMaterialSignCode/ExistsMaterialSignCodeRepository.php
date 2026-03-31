@@ -27,11 +27,6 @@ namespace BaksDev\Materials\Sign\Repository\ExistsMaterialSignCode;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
-use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
-use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
-use BaksDev\Materials\Sign\Entity\MaterialSign;
-use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
-use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusError;
 use BaksDev\Users\User\Type\Id\UserUid;
 
 final class ExistsMaterialSignCodeRepository implements ExistsMaterialSignCodeInterface
@@ -46,7 +41,7 @@ final class ExistsMaterialSignCodeRepository implements ExistsMaterialSignCodeIn
     }
 
     /** Метод проверяет имеется ли у пользователя такой код (Без ошибки)  */
-    public function isExists(UserUid $user, string $code): bool
+    public function isExists(string $code): bool
     {
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
 
@@ -54,41 +49,6 @@ final class ExistsMaterialSignCodeRepository implements ExistsMaterialSignCodeIn
             ->from(MaterialSignCode::class, 'sign_code')
             ->where('sign_code.code = :code')
             ->setParameter('code', $code);
-
-        $dbal
-            ->join(
-                'sign_code',
-                MaterialSign::class,
-                'sign',
-                'sign.id = sign_code.main',
-            );
-
-        $dbal
-            ->join(
-                'sign_code',
-                MaterialSignInvariable::class,
-                'invariable',
-                'invariable.main = sign_code.main AND invariable.usr = :usr',
-            )
-            ->setParameter(
-                'usr',
-                $user,
-                UserUid::TYPE,
-            );
-
-
-        $dbal
-            ->join(
-                'sign',
-                MaterialSignEvent::class,
-                'event',
-                'event.id = sign.event AND event.status != :status',
-            )
-            ->setParameter(
-                'status',
-                MaterialSignStatusError::class,
-                MaterialSignStatus::TYPE,
-            );
 
         return $dbal->fetchExist();
     }
