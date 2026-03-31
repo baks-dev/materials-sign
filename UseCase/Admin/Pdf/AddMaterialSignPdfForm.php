@@ -27,9 +27,6 @@ declare(strict_types=1);
 namespace BaksDev\Materials\Sign\UseCase\Admin\Pdf;
 
 use BaksDev\Materials\Sign\UseCase\Admin\Pdf\MaterialSignFile\MaterialSignFileForm;
-use BaksDev\Products\Sign\UseCase\Admin\Pdf\AddProductSignPdfDTO;
-use BaksDev\Products\Sign\UseCase\Admin\Pdf\AddProductSignPdfDTO as AddProductSignPdfDTOAlias;
-use BaksDev\Products\Sign\UseCase\Admin\Pdf\ProductSignFile\ProductSignFileDTO;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileChoice\UserProfileChoiceInterface;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;

@@ -27,7 +27,6 @@ declare(strict_types=1);
 namespace BaksDev\Materials\Sign\UseCase\Admin\Pdf;
 
 use BaksDev\Materials\Sign\UseCase\Admin\Pdf\MaterialSignFile\MaterialSignFileDTO;
-use BaksDev\Products\Sign\UseCase\Admin\Pdf\ProductSignFile\ProductSignFileDTO;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\Common\Collections\ArrayCollection;

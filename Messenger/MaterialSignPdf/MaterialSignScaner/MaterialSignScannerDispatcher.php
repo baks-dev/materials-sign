@@ -227,7 +227,10 @@ final readonly class MaterialSignScannerDispatcher
                 {
                     $this->logger->warning(
                         sprintf('Баркод %s не соответствует выбранному продукту', $code),
-                        [self::class.':'.__LINE__],
+                        [
+                            var_export($message, true),
+                            self::class.':'.__LINE__
+                        ],
                     );
 
 
