@@ -143,9 +143,9 @@ final class MaterialSignInvariableDTO implements MaterialSignInvariableInterface
         return $this->offer;
     }
 
-    public function setOffer(?MaterialOfferConst $offer): self
+    public function setOffer(MaterialOfferConst|null|false $offer): self
     {
-        $this->offer = $offer;
+        $this->offer = empty($offer) ? null : $offer;
         return $this;
     }
 
@@ -157,9 +157,9 @@ final class MaterialSignInvariableDTO implements MaterialSignInvariableInterface
         return $this->variation;
     }
 
-    public function setVariation(?MaterialVariationConst $variation): self
+    public function setVariation(MaterialVariationConst|null|false $variation): self
     {
-        $this->variation = $variation;
+        $this->variation = empty($variation) ? null : $variation;
         return $this;
     }
 
@@ -171,9 +171,9 @@ final class MaterialSignInvariableDTO implements MaterialSignInvariableInterface
         return $this->modification;
     }
 
-    public function setModification(?MaterialModificationConst $modification): self
+    public function setModification(MaterialModificationConst|null|false $modification): self
     {
-        $this->modification = $modification;
+        $this->modification = empty($modification) ? null : $modification;
         return $this;
     }
 
