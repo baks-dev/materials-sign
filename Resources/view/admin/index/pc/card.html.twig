@@ -56,12 +56,12 @@
     </td>
 
     <td class="w-25">
-        {% if item.order_number %}
+        {% if item.order_posting %}
             <button data-href='{{ item.order_id ? path('orders-order:admin.detail', { id: item.order_id }) : '#' }}'
                     data-id='{{ item.order_id }}'
                     class="btn btn-sm btn-link fw-bolder text-decoration-none material-name offcanvas-link text-nowrap p-0"
             >
-                {{ item.order_number }}
+                {{ item.order_posting }}
             </button>
         {% endif %}
 

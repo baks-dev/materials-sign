@@ -56,6 +56,7 @@ use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Entity\Modify\MaterialSignModify;
 use BaksDev\Materials\Sign\Forms\MaterialSignFilter\MaterialSignFilterDTO;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
+use BaksDev\Orders\Order\Entity\Event\Posting\OrderPosting;
 use BaksDev\Orders\Order\Entity\Invariable\OrderInvariable;
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Users\Profile\UserProfile\Entity\Event\Personal\UserProfilePersonal;
@@ -205,6 +206,16 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 OrderInvariable::class,
                 'orders_invariable',
                 'orders_invariable.main = event.ord',
+            );
+
+
+        $dbal
+            ->addSelect('orders_posting.value AS order_posting')
+            ->leftJoin(
+                'event',
+                OrderPosting::class,
+                'orders_posting',
+                'orders_posting.main = event.ord',
             );
 
 
@@ -527,12 +538,16 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
                 || str_starts_with($this->search->getQuery(), 'o-')
                 || str_starts_with($this->search->getQuery(), 'y-')
                 || str_starts_with($this->search->getQuery(), 'w-')
+                || str_starts_with($this->search->getQuery(), 'a-')
             )
             {
-
                 $dbal
                     ->createSearchQueryBuilder($this->search)
                     ->addSearchLike('orders_invariable.number');
+
+                $dbal
+                    ->createSearchQueryBuilder($this->search)
+                    ->addSearchLike('orders_posting.value');
             }
 
             // поиск по номеру ГТД формата 10702070/190725/5247456
@@ -545,10 +560,12 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
 
             else
             {
+                /** По умолчанию поиск по артикулу */
+
                 $dbal
                     ->createSearchQueryBuilder($this->search)
-                    ->addSearchLike('code.code')
-                    ->addSearchLike('invariable.number')
+                    //->addSearchLike('code.code')
+                    //->addSearchLike('invariable.number')
                     ->addSearchLike('orders_invariable.number')
                     ->addSearchLike('material_modification.article')
                     ->addSearchLike('material_variation.article')
