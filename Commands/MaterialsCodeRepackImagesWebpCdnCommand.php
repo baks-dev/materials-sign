@@ -27,7 +27,7 @@ namespace BaksDev\Materials\Sign\Commands;
 
 
 use BaksDev\Core\Messenger\MessageDispatchInterface;
-use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImage;
+use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageDispatcher;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Materials\Sign\Repository\UnCompressMaterialsCode\UnCompressMaterialsCodeInterface;
 use BaksDev\Materials\Sign\Repository\UnCompressMaterialsCode\UnCompressMaterialsCodeResult;
@@ -49,7 +49,7 @@ class MaterialsCodeRepackImagesWebpCdnCommand extends Command
 {
     public function __construct(
         private readonly UnCompressMaterialsCodeInterface $UnCompressMaterialsCode,
-        private readonly CDNUploadImage $CDNUploadImage,
+        private readonly CDNUploadImageDispatcher $CDNUploadImage,
         private readonly MessageDispatchInterface $MessageDispatch
     )
     {

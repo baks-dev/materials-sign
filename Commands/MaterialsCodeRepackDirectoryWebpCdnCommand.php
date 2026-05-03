@@ -27,7 +27,7 @@ namespace BaksDev\Materials\Sign\Commands;
 
 
 use BaksDev\Core\Messenger\MessageDispatchInterface;
-use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImage;
+use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageDispatcher;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Files\Resources\Upload\UploadEntityInterface;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
@@ -58,7 +58,7 @@ class MaterialsCodeRepackDirectoryWebpCdnCommand extends Command
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private string $upload,
-        private readonly CDNUploadImage $CDNUploadImage,
+        private readonly CDNUploadImageDispatcher $CDNUploadImage,
         private readonly MessageDispatchInterface $MessageDispatch,
         private readonly MaterialSignCodeByDigestInterface $MaterialSignCodeByDigest,
     )
