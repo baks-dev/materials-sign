@@ -287,7 +287,7 @@ final readonly class MaterialSignScannerDispatcher
                 /** Получаем Штрихкод (GTIN) из Честного знака */
                 $parseCode = preg_match('/^\(\d+\)(.*?)\(\d+\)/', $code, $matches);
 
-                if(0 === $parseCode || false === $parseCode)
+                if(empty($parseCode))
                 {
                     $this->logger->critical(
                         message: 'materials-sign: Не удалось извлечь штрихкод после сканирования Честного знака. Code: '.$code,
