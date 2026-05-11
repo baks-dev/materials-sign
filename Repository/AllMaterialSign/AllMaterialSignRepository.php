@@ -137,7 +137,7 @@ final class AllMaterialSignRepository implements AllMaterialSignInterface
 
         $dbal
             ->addSelect('code.code AS sign_code')
-            ->addSelect("CONCAT('/upload/".$dbal->table(MaterialSignCode::class)."' , '/', code.name) AS sign_code_name")
+            ->addSelect("CONCAT('/upload/barcode', '/', code.name) AS sign_code_name")
             ->addSelect('code.ext AS sign_code_ext')
             ->addSelect('code.cdn AS sign_code_cdn')
             ->leftJoin(

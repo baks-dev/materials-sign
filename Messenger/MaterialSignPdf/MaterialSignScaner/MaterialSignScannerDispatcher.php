@@ -43,8 +43,6 @@ use Doctrine\ORM\Mapping\Table;
 use Exception;
 use Imagick;
 use Psr\Log\LoggerInterface;
-use ReflectionAttribute;
-use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -71,27 +69,10 @@ final readonly class MaterialSignScannerDispatcher
 
     public function __invoke(MaterialSignScannerMessage $message): void
     {
-
         /** Файла больше не существует */
         if(false === $this->filesystem->exists($message->getRealPath()))
         {
             return;
-        }
-
-        /** Директория загрузки файла с кодом */
-
-        $ref = new ReflectionClass(MaterialSignCode::class);
-        /** @var ReflectionAttribute $current */
-        $current = current($ref->getAttributes(Table::class));
-
-        if(!isset($current->getArguments()['name']))
-        {
-            $this->logger->critical(
-                message: sprintf(
-                    'materials-sign:Невозможно определить название таблицы из класса сущности %s ',
-                    MaterialSignCode::class),
-                context: [self::class.':'.__LINE__],
-            );
         }
 
         /**
@@ -102,7 +83,7 @@ final readonly class MaterialSignScannerDispatcher
         $pathCode[] = $this->upload;
         $pathCode[] = 'public';
         $pathCode[] = 'upload';
-        $pathCode[] = $current->getArguments()['name'];
+        $pathCode[] = 'barcode';
         $pathCode[] = '';
 
         $dirCode = implode(DIRECTORY_SEPARATOR, $pathCode);
@@ -192,7 +173,6 @@ final readonly class MaterialSignScannerDispatcher
             $decode = $this->barcodeRead->decode($fileMove);
             $code = $decode->getText();
 
-
             /**
              * Создаем для сохранения честный знак
              * в случае ошибки сканирования - присваивается статус с ошибкой
@@ -229,7 +209,7 @@ final readonly class MaterialSignScannerDispatcher
                         sprintf('Баркод %s не соответствует выбранному продукту', $code),
                         [
                             var_export($message, true),
-                            self::class.':'.__LINE__
+                            self::class.':'.__LINE__,
                         ],
                     );
 

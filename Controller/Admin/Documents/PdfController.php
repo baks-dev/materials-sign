@@ -31,15 +31,12 @@ use BaksDev\Files\Resources\Twig\ImagePathExtension;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
-use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Repository\MaterialSignByOrder\MaterialSignByOrderInterface;
 use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartInterface;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use Doctrine\ORM\Mapping\Table;
-use ReflectionAttribute;
-use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -88,18 +85,14 @@ final class PdfController extends AbstractController
          * Создаем путь для создания PDF файла
          */
 
-        $ref = new ReflectionClass(MaterialSignCode::class);
-        /** @var ReflectionAttribute $current */
-        $current = current($ref->getAttributes(Table::class));
-        $dirName = $current->getArguments()['name'] ?? 'barcode';
-
         $paths[] = $projectDir;
         $paths[] = 'public';
         $paths[] = 'upload';
-        $paths[] = $dirName;
+        $paths[] = 'barcode';
 
         $paths[] = (string) $order;
-        !$material ?: $paths[] = (string) $material;
+        $paths[] = (string) $material;
+
         !$offer ?: $paths[] = (string) $offer;
         !$variation ?: $paths[] = (string) $variation;
         !$modification ?: $paths[] = (string) $modification;
@@ -188,15 +181,10 @@ final class PdfController extends AbstractController
          * Создаем путь для создания PDF файла
          */
 
-        $ref = new ReflectionClass(MaterialSignCode::class);
-        /** @var ReflectionAttribute $current */
-        $current = current($ref->getAttributes(Table::class));
-        $dirName = $current->getArguments()['name'] ?? 'barcode';
-
         $paths[] = $projectDir;
         $paths[] = 'public';
         $paths[] = 'upload';
-        $paths[] = $dirName;
+        $paths[] = 'barcode';
 
         $paths[] = (string) $part;
 
