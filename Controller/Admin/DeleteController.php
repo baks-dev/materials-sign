@@ -75,7 +75,7 @@ final class DeleteController extends AbstractController
                 ->withStatusNew()
                 ->findAll();
 
-            if(false === $signs)
+            if(false === $signs || false === $signs->valid())
             {
                 $this->addFlash(
                     'page.cancel',
@@ -87,11 +87,10 @@ final class DeleteController extends AbstractController
                 return $this->redirectToRoute('materials-sign:admin.index');
             }
 
-
-            foreach($signs as $sign)
+            foreach($signs as $MaterialSignByPartResult)
             {
-                $MaterialSignDeleteDTO = new MaterialSignDeleteDTO($this->getProfileUid());
-                $MaterialSignDeleteDTO->setId(new MaterialSignEventUid($sign['sign_event']));
+                $MaterialSignDeleteDTO = new MaterialSignDeleteDTO();
+                $MaterialSignDeleteDTO->setId(new MaterialSignEventUid($MaterialSignByPartResult->getSignEvent()));
                 $handle = $MaterialSignDeleteHandler->handle($MaterialSignDeleteDTO);
             }
 

@@ -9,7 +9,7 @@
         {% for item in codes %}
 
             {# Обложка  #}
-            {% set image_path = '/assets/'~version~'/img/blank.svg' %}
+            {# {% set image_path = '/assets/'~version~'/img/blank.svg' %}
 
             {% if item.code_ext is defined and item.code_ext is not null %}
                 {% set img_host =  item.code_cdn == true  ? CDN_HOST : '' %}
@@ -18,7 +18,39 @@
                 {% set image_path = img_host ~ img_dir ~ img_file %}
             {% endif %}
 
-            <img src="{{ image_path }}" alt="Честный знак">
+            <img src="{{ image_path }}" alt="Честный знак"> #}
+
+            {# @var item \BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartResult #}
+
+            <div class="d-flex gap-1 align-content-center align-items-center small"
+                 style="margin-left: 20px; height: 240px; max-height: 140px; max-width: 200px;">
+
+                <svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"
+                     fill="currentColor"
+                     viewBox="8 8 40 40">
+                    {{ item.render|raw }}
+                </svg>
+
+                <div class="small">
+                    <strong>
+                        {{ item.materialName }}
+                    </strong>
+
+                    <span>
+                        {{ item.materialVariationValue|call_twig_func(item.materialVariationReference~'_render') }}
+                        {{ item.materialModificationValue|call_twig_func(item.materialModificationReference~'_render') }}
+
+                        {{ item.materialOfferValue|call_twig_func(item.materialOfferReference~'_render') }}
+                    </span>
+
+                    <span>
+                        {{ item.getMatrixCode }}
+                    </span>
+                </div>
+
+
+            </div>
+
             <div style="page-break-after: always !important;"></div>
 
         {% endfor %}

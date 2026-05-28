@@ -26,6 +26,7 @@ namespace BaksDev\Materials\Sign\Repository\MaterialSignByPart;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use Generator;
 
 interface MaterialSignByPartInterface
 {
@@ -55,6 +56,8 @@ interface MaterialSignByPartInterface
     /**
      * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
      * По умолчанию возвращает знаки со статусом Process «В процессе»
+     *
+     * @return Generator<MaterialSignByPartResult>|false
      */
-    public function findAll(): array|false;
+    public function findAll(): Generator|false;
 }

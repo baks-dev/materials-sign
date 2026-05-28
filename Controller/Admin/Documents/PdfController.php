@@ -33,10 +33,12 @@ use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationCon
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
 use BaksDev\Materials\Sign\Repository\MaterialSignByOrder\MaterialSignByOrderInterface;
 use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartInterface;
+use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartResult;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use Doctrine\ORM\Mapping\Table;
+use Generator;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -102,7 +104,8 @@ final class PdfController extends AbstractController
 
     }
 
-    private function BinaryFileResponse(array $paths, array $codes): BinaryFileResponse
+
+    private function BinaryFileResponse(array $paths, Generator $codes): BinaryFileResponse
     {
         $filesystem = new Filesystem();
 
@@ -141,9 +144,16 @@ final class PdfController extends AbstractController
             '',
         ]);
 
-        foreach($codes as $code)
+        /** @var MaterialSignByPartResult $MaterialSignByPartResult */
+        foreach($codes as $MaterialSignByPartResult)
         {
-            $Process[] = ($code['code_cdn'] === false ? $projectDir : '').$this->ImagePathExtension->imagePath($code['code_image'], $code['code_ext'], $code['code_cdn']);
+            $Process[] = ($MaterialSignByPartResult->getCodeCdn() === false ? $projectDir : '')
+                .$this->ImagePathExtension->imagePath(
+                    name: $MaterialSignByPartResult->getCodeImage(),
+                    ext: $MaterialSignByPartResult->getCodeExt(),
+                    cdn: $MaterialSignByPartResult->getCodeCdn(),
+                );
+
         }
 
         $Process[] = $uploadFile;
@@ -176,6 +186,11 @@ final class PdfController extends AbstractController
             ->forPart($part)
             ->withStatusDone()
             ->findAll();
+
+        if(false === $codes || false === $codes->valid())
+        {
+            return new Response(status: Response::HTTP_NOT_FOUND);
+        }
 
         /**
          * Создаем путь для создания PDF файла

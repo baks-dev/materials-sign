@@ -143,10 +143,9 @@ final class TxtController extends AbstractController
             ->withStatusDecommission()
             ->findAll();
 
-        if($codes === false)
+        if(false === $codes || false === $codes->valid())
         {
             $this->addFlash('danger', 'Честных знаков не найдено');
-
             return $this->redirectToReferer();
         }
 
@@ -157,43 +156,7 @@ final class TxtController extends AbstractController
             // Запись данных
             foreach($codes as $data)
             {
-                /** Обрезаем честный знак до длины */
-
-                $code = explode('(91)EE10(92)', $data['code_string']);
-
-                // Преобразуем строку в массив символов
-                $chars = str_split(current($code));
-
-                // Удаляем символы по указанным позициям (индексы начинаются с 0)
-
-                // 1 символ (индекс 0)
-                if($chars[0] === '(')
-                {
-                    unset($chars[0]);
-                }
-
-                // 4 символ (индекс 3)
-                if($chars[3] === ')')
-                {
-                    unset($chars[3]);
-                }
-
-                // 19 символ (индекс 18)
-                if($chars[18] === '(')
-                {
-                    unset($chars[18]);
-                }
-
-                // 22 символ (индекс 21)
-                if($chars[21] === ')')
-                {
-                    unset($chars[21]);
-                }
-
-                // Собираем строку обратно
-                $result = implode('', $chars);
-
-                fwrite($handle, $result.PHP_EOL);
+                fwrite($handle, $data->getSmallCode().PHP_EOL);
             }
 
             fclose($handle);

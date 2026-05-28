@@ -73,7 +73,7 @@ final class CancelController extends AbstractController
                 ->withStatusDecommission()
                 ->findAll();
 
-            if(false === $signs)
+            if(false === $signs || false === $signs->valid())
             {
                 $this->addFlash(
                     'page.cancel',
@@ -86,10 +86,10 @@ final class CancelController extends AbstractController
             }
 
 
-            foreach($signs as $sign)
+            foreach($signs as $MaterialSignByPartResult)
             {
-                $MaterialSignStatusDTO = new MaterialSignCancelDTO($this->getProfileUid());
-                $MaterialSignStatusDTO->setId(new MaterialSignEventUid($sign['sign_event']));
+                $MaterialSignStatusDTO = new MaterialSignCancelDTO();
+                $MaterialSignStatusDTO->setId($MaterialSignByPartResult->getSignEvent());
 
                 $handle = $MaterialSignStatusHandler->handle($MaterialSignStatusDTO);
 

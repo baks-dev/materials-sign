@@ -25,6 +25,9 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Controller\Admin\Documents;
 
+use BaksDev\Barcode\Writer\BarcodeFormat;
+use BaksDev\Barcode\Writer\BarcodeType;
+use BaksDev\Barcode\Writer\BarcodeWrite;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
@@ -36,6 +39,7 @@ use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartInter
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
@@ -72,18 +76,54 @@ final class PrintController extends AbstractController
 
     #[Route('/admin/material/sign/document/print/parts/{part}', name: 'admin.print.parts', methods: ['GET'])]
     public function parts(
-        MaterialSignByPartInterface $materialSignByPart,
         #[ParamConverter(MaterialSignUid::class)] $part,
+        MaterialSignByPartInterface $materialSignByPart,
+        BarcodeWrite $BarcodeWrite,
     ): Response
     {
-
         $codes = $materialSignByPart
             ->forPart($part)
-            ->withStatusDone()
+            //->withStatusDone()
             ->findAll();
 
+        if(false === $codes || false === $codes->valid())
+        {
+            return new Response(status: Response::HTTP_NOT_FOUND);
+        }
+
+        $matrix = null;
+
+        foreach($codes as $MaterialSignByPartResult)
+        {
+            $datamatrix = $BarcodeWrite
+                ->text($MaterialSignByPartResult->getBigCode())
+                ->type(BarcodeType::DataMatrix)
+                ->format(BarcodeFormat::SVG)
+                ->generate();
+
+            if($datamatrix === false)
+            {
+                /**
+                 * Проверить права на исполнение
+                 * chmod +x /home/bundles.baks.dev/vendor/baks-dev/barcode/Writer/Generate
+                 * chmod +x /home/bundles.baks.dev/vendor/baks-dev/barcode/Reader/Decode
+                 * */
+                throw new RuntimeException('Datamatrix write error');
+            }
+
+            // Генерируем «Честный знак» в формате SVG
+            $render = $BarcodeWrite->render();
+            $BarcodeWrite->remove(); // удаляем временный файл
+            $render = strip_tags($render, ['path']);
+            $render = trim($render);
+
+            $MaterialSignByPartResult->setRender($render);
+
+            $matrix[] = $MaterialSignByPartResult;
+        }
+
         return $this->render(
-            ['codes' => $codes,],
+            ['codes' => $matrix],
             dir: 'admin.print',
         );
     }
