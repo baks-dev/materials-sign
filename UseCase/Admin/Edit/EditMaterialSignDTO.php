@@ -27,11 +27,20 @@ namespace BaksDev\Materials\Sign\UseCase\Admin\Edit;
 
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariableInterface;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
+use BaksDev\Materials\Sign\UseCase\Admin\Edit\Invariable\EditMaterialSignInvariableDTO;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see MaterialSignInvariable */
 final class EditMaterialSignDTO implements MaterialSignInvariableInterface
 {
+    /**
+     * Владелец честного пользователя
+     */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private UserProfileUid $profile;
+
     /** Группа штрихкодов, для отмены  */
     #[Assert\NotBlank]
     #[Assert\Uuid]
@@ -41,8 +50,10 @@ final class EditMaterialSignDTO implements MaterialSignInvariableInterface
     #[Assert\NotBlank]
     private ?string $number = null;
 
-    public function __construct() {}
+    /** Признак, что честными знаками может делиться с другими */
+    private bool $share = false;
 
+    public function __construct() {}
 
     /**
      * Group
@@ -52,8 +63,13 @@ final class EditMaterialSignDTO implements MaterialSignInvariableInterface
         return $this->part;
     }
 
-    public function setPart(MaterialSignUid $part): self
+    public function setPart(MaterialSignUid|string $part): self
     {
+        if(false === ($part instanceof MaterialSignUid))
+        {
+            $part = new MaterialSignUid($part);
+        }
+
         $this->part = $part;
         return $this;
     }
@@ -72,5 +88,25 @@ final class EditMaterialSignDTO implements MaterialSignInvariableInterface
         return $this;
     }
 
+    public function isShare(): bool
+    {
+        return $this->share;
+    }
 
+    public function setShare(bool $share): self
+    {
+        $this->share = $share;
+        return $this;
+    }
+
+    public function getProfile(): UserProfileUid
+    {
+        return $this->profile;
+    }
+
+    //    public function setProfile(UserProfileUid $profile): self
+    //    {
+    //        $this->profile = $profile;
+    //        return $this;
+    //    }
 }

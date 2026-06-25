@@ -51,6 +51,7 @@ final class EditController extends AbstractController
 
         $MaterialSignDTO = new EditMaterialSignDTO();
         $MaterialSignInvariable->getDto($MaterialSignDTO);
+        $MaterialSignDTO->setShare($MaterialSignInvariable->isOnlySeller());
 
         // Форма
         $form = $this->createForm(EditMaterialSignForm::class, $MaterialSignDTO, [

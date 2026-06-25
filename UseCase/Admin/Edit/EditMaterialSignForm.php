@@ -27,6 +27,7 @@ namespace BaksDev\Materials\Sign\UseCase\Admin\Edit;
 
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -37,6 +38,8 @@ final class EditMaterialSignForm extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('number', TextType::class);
+
+        $builder->add('share', CheckboxType::class, ['required' => false]);
 
         /* Сохранить ******************************************************/
         $builder->add(

@@ -130,6 +130,12 @@ class MaterialSignInvariable extends EntityReadonly
         return $this->profile;
     }
 
+    public function isOnlySeller(): bool
+    {
+        return $this->seller instanceof UserProfileUid;
+    }
+
+
     public function setEvent(MaterialSignEvent $event): self
     {
         $this->event = $event;

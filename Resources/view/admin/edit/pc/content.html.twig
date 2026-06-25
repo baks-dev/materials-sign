@@ -15,9 +15,35 @@
         <div class="modal-body">
             {# {{  include('@manufacture-part/admin/newedit/_form/'~baks_settings.device~'/form.html.twig') }} #}
 
-            {{ form_row(form.number, {
-                label: 'Номер грузовой таможенной декларации (ГТД)'
-            }) }}
+            <div class="clearfix mb-0 d-flex gap-3 align-items-center">
+                <div class="w-75">
+                    {{ form_row(form.number, {
+                        label: 'Номер грузовой таможенной декларации (ГТД)'
+                    }) }}
+                </div>
+                <div class="w-50">
+                    <label for="edit_material_sign_form_number" class="form-label required">&nbsp;</label>
+                    <div class="d-flex radio-buttons mb-3" data-buttons="true">
+                        <label class="btn p-0 border-dotted rounded-3 active">
+                            <span class="d-flex align-items-center">
+                                <span class="flex-grow-1">
+                                <span class="h6">
+                                    <span class="form-check px-3 d-flex align-items-start">
+                                        {{ form_widget(form.share, { label: false }) }}
+                                        <span style="margin-top: 2px;">
+                                            Доступен только владельцу
+                                        </span>
+                                    </span>
+                                </span>
+                                </span>
+                            </span>
+                        </label>
+                    </div>
+
+                </div>
+            </div>
+
+
         </div>
 
         <div class="modal-footer ">

@@ -44,6 +44,7 @@ final readonly class EditMaterialSignHandler
     /** @see MaterialSign */
     public function handle(EditMaterialSignDTO $command): int
     {
+
         /** Валидация DTO  */
         $this->validatorCollection
             ->init()
@@ -55,6 +56,7 @@ final readonly class EditMaterialSignHandler
             return 0;
         }
 
+
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
 
         $dbal
@@ -62,7 +64,10 @@ final readonly class EditMaterialSignHandler
             ->where('part = :part')
             ->setParameter('part', $command->getPart(), MaterialSignUid::TYPE)
             ->set('number', ':number')
-            ->setParameter('number', $command->getNumber());
+            ->setParameter('number', $command->getNumber())
+            ->set('seller', ':seller')
+            ->setParameter('seller', $command->isShare() ? $command->getProfile() : null);
+
 
         $cache = $this->cache->init('materials-sign');
         $cache->clear();
