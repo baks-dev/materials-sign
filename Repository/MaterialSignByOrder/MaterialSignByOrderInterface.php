@@ -32,6 +32,7 @@ use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use Generator;
 
 interface MaterialSignByOrderInterface
 {
@@ -59,6 +60,8 @@ interface MaterialSignByOrderInterface
     /**
      * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
      * По умолчанию возвращает знаки со статусом Process «В процессе»
+     *
+     * @return Generator<MaterialSignByOrderResult>|false
      */
-    public function findAll(): array|false;
+    public function findAll(): Generator|false;
 }

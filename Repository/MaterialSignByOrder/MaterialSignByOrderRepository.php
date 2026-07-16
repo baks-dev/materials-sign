@@ -27,9 +27,16 @@ namespace BaksDev\Materials\Sign\Repository\MaterialSignByOrder;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Materials\Catalog\Entity\Material;
+use BaksDev\Materials\Catalog\Entity\Offers\MaterialOffer;
+use BaksDev\Materials\Catalog\Entity\Offers\Variation\MaterialVariation;
+use BaksDev\Materials\Catalog\Entity\Offers\Variation\Modification\MaterialModification;
+use BaksDev\Materials\Catalog\Entity\Trans\MaterialTrans;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
+use BaksDev\Materials\Category\Entity\Offers\CategoryMaterialOffers;
+use BaksDev\Materials\Category\Entity\Offers\Variation\CategoryMaterialVariation;
+use BaksDev\Materials\Category\Entity\Offers\Variation\Modification\CategoryMaterialModification;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
@@ -44,6 +51,7 @@ use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\UserProfile\Entity\Event\UserProfileEvent;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use Generator;
 use InvalidArgumentException;
 
 final class MaterialSignByOrderRepository implements MaterialSignByOrderInterface
@@ -192,15 +200,19 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
     /**
      * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
      * По умолчанию возвращает знаки со статусом Process «В процессе»
+     *
+     * @return Generator<MaterialSignByOrderResult>|false
      */
-    public function findAll(): array|false
+    public function findAll(): Generator|false
     {
         if($this->order === false)
         {
             throw new InvalidArgumentException('Не передан обязательный параметр order через вызов метода ->forOrder(...)');
         }
 
-        $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
+        $dbal = $this->DBALQueryBuilder
+            ->createQueryBuilder(self::class)
+            ->bindLocal();
 
         $dbal->from(
             MaterialSignEvent::class,
@@ -243,7 +255,8 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
         }
 
         $dbal
-            ->addSelect('main.id')
+            ->addSelect('main.id AS sign_id')
+            ->addSelect('main.event AS sign_event')
             ->join(
                 'event',
                 MaterialSign::class,
@@ -304,9 +317,111 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
             );
 
 
+        $dbal
+            ->addSelect('material.id AS material_id')
+            ->addSelect('material.event AS material_event')
+            ->leftJoin(
+                'invariable',
+                Material::class,
+                'material',
+                'material.id = invariable.material',
+            );
+
+
+        /** Название продукта */
+        $dbal
+            ->addSelect('material_trans.name AS material_name')
+            ->leftJoin(
+                'material',
+                MaterialTrans::class,
+                'material_trans',
+                '
+                        material_trans.event = material.event 
+                        AND material_trans.local = :local
+                    ');
+
+
+        /**
+         * Торговое предложение
+         */
+
+        $dbal
+            ->addSelect('material_offer.value as material_offer_value')
+            ->leftJoin(
+                'material',
+                MaterialOffer::class,
+                'material_offer',
+                'material_offer.event = material.event 
+                AND material_offer.const = invariable.offer',
+            );
+
+
+        // Получаем тип торгового предложения
+        $dbal
+            ->addSelect('category_offer.reference as material_offer_reference')
+            ->leftJoin(
+                'material_offer',
+                CategoryMaterialOffers::class,
+                'category_offer',
+                'category_offer.id = material_offer.category_offer',
+            );
+
+
+        /**
+         * Множественные варианты торгового предложения
+         */
+
+        $dbal
+            ->addSelect('material_variation.value as material_variation_value')
+            ->leftJoin(
+                'material_offer',
+                MaterialVariation::class,
+                'material_variation',
+                'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation',
+            );
+
+
+        // Получаем тип множественного варианта
+        $dbal
+            ->addSelect('category_variation.reference as material_variation_reference')
+            ->leftJoin(
+                'material_variation',
+                CategoryMaterialVariation::class,
+                'category_variation',
+                'category_variation.id = material_variation.category_variation',
+            );
+
+
+        /**
+         * Модификация множественного варианта торгового предложения
+         */
+
+        $dbal
+            ->addSelect('material_modification.value as material_modification_value')
+            ->leftJoin(
+                'material_variation',
+                MaterialModification::class,
+                'material_modification',
+                'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification',
+            );
+
+        // Получаем тип модификации множественного варианта
+        $dbal
+            ->addSelect('category_offer_modification.reference as material_modification_reference')
+            ->leftJoin(
+                'material_modification',
+                CategoryMaterialModification::class,
+                'category_offer_modification',
+                'category_offer_modification.id = material_modification.category_modification',
+            );
+
         return $dbal
             // ->enableCache('Namespace', 3600)
-            ->fetchAllAssociative() ?: false;
+            ->fetchAllHydrate(MaterialSignByOrderResult::class) ?: false;
+
+        //        return $dbal
+        //            // ->enableCache('Namespace', 3600)
+        //            ->fetchAllAssociative() ?: false;
     }
 
 

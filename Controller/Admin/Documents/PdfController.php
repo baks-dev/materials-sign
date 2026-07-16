@@ -25,6 +25,9 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Controller\Admin\Documents;
 
+use BaksDev\Barcode\Writer\BarcodeFormat;
+use BaksDev\Barcode\Writer\BarcodeType;
+use BaksDev\Barcode\Writer\BarcodeWrite;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Files\Resources\Twig\ImagePathExtension;
@@ -32,6 +35,7 @@ use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
 use BaksDev\Materials\Sign\Repository\MaterialSignByOrder\MaterialSignByOrderInterface;
+use BaksDev\Materials\Sign\Repository\MaterialSignByOrder\MaterialSignByOrderResult;
 use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartInterface;
 use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartResult;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
@@ -60,6 +64,7 @@ final class PdfController extends AbstractController
     public function orders(
         MaterialSignByOrderInterface $materialSignByOrder,
         ImagePathExtension $ImagePathExtension,
+        BarcodeWrite $barcodeWrite,
         string $article,
         #[Autowire('%kernel.project_dir%')] string $projectDir,
         #[ParamConverter(OrderUid::class)] OrderUid $order,
@@ -100,12 +105,12 @@ final class PdfController extends AbstractController
         !$modification ?: $paths[] = (string) $modification;
 
 
-        return $this->BinaryFileResponse($paths, $codes);
+        return $this->BinaryFileResponse($paths, $codes, $barcodeWrite);
 
     }
 
 
-    private function BinaryFileResponse(array $paths, Generator $codes): BinaryFileResponse
+    private function BinaryFileResponse(array $paths, Generator $codes, BarcodeWrite $barcodeWrite): BinaryFileResponse
     {
         $filesystem = new Filesystem();
 
@@ -144,16 +149,18 @@ final class PdfController extends AbstractController
             '',
         ]);
 
-        /** @var MaterialSignByPartResult $MaterialSignByPartResult */
-        foreach($codes as $MaterialSignByPartResult)
+        /** @var MaterialSignByPartResult|MaterialSignByOrderResult $MaterialSignResult */
+        foreach($codes as $MaterialSignResult)
         {
-            $Process[] = ($MaterialSignByPartResult->getCodeCdn() === false ? $projectDir : '')
-                .$this->ImagePathExtension->imagePath(
-                    name: $MaterialSignByPartResult->getCodeImage(),
-                    ext: $MaterialSignByPartResult->getCodeExt(),
-                    cdn: $MaterialSignByPartResult->getCodeCdn(),
-                );
+            $barcodeWrite
+                ->text($MaterialSignResult->getBigCode())
+                ->type(BarcodeType::DataMatrix)
+                ->format(BarcodeFormat::PNG)
+                ->generate(filename: (string) $MaterialSignResult->getCodeEvent());
 
+            $path = $barcodeWrite->getPath();
+
+            $Process[] = $path.$MaterialSignResult->getCodeEvent().'.png';
         }
 
         $Process[] = $uploadFile;
@@ -176,6 +183,7 @@ final class PdfController extends AbstractController
         string $article,
         MaterialSignByPartInterface $materialSignByPart,
         ImagePathExtension $ImagePathExtension,
+        BarcodeWrite $barcodeWrite,
     ): Response
     {
         $this->projectDir = $projectDir;
@@ -203,7 +211,7 @@ final class PdfController extends AbstractController
 
         $paths[] = (string) $part;
 
-        return $this->BinaryFileResponse($paths, $codes);
+        return $this->BinaryFileResponse($paths, $codes, $barcodeWrite);
     }
 
 }

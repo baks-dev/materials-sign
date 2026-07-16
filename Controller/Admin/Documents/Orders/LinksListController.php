@@ -107,7 +107,7 @@ final class LinksListController extends AbstractController
                 $productName = $productSign->getMaterialName().$strOffer;
 
                 $parameters = [
-                    'part' => $productSign->getSignPart(),
+                    //'part' => $productSign->getSignPart(),
                     'article' => $productSign->getMaterialArticle(),
                     'order' => $order->getId(),
                     'material' => $productSign->getMaterialId(),

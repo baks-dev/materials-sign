@@ -28,7 +28,6 @@ namespace BaksDev\Materials\Sign\Repository\GroupMaterialSignsByOrder;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
-use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 
 final readonly class GroupMaterialSignsByOrderResult
@@ -36,7 +35,7 @@ final readonly class GroupMaterialSignsByOrderResult
 
     public function __construct(
         private int $counter, // " => 100
-        private string $sign_part, // " => "019643c2-9025-7050-b731-95ce5a4cbc77"
+        //private string $sign_part, // " => "019643c2-9025-7050-b731-95ce5a4cbc77"
 
         private string $material_id, // " => "0194d10e-d18b-7ee9-9bbb-0ba83582342c"
         private string $material_name, // " => "Футболка короткий рукав"
@@ -61,10 +60,10 @@ final readonly class GroupMaterialSignsByOrderResult
         return $this->counter;
     }
 
-    public function getSignPart(): MaterialSignUid
-    {
-        return new MaterialSignUid($this->sign_part);
-    }
+    //    public function getSignPart(): MaterialSignUid
+    //    {
+    //        return new MaterialSignUid($this->sign_part);
+    //    }
 
     public function getMaterialId(): MaterialUid
     {
