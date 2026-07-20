@@ -84,7 +84,8 @@ final class ExportDoneController extends AbstractController
 
         $data = $MaterialSignReport
             ->fromSeller($profile->getId())
-            ->onlyStatusDone()
+            ->resetOrderStatus()
+            ->addStatusDone()
             ->dateFrom($from)
             ->dateTo($to)
             ->findAll();

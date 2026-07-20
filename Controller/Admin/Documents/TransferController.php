@@ -70,11 +70,15 @@ final class TransferController extends AbstractController
                 ->fromProfile($MaterialSignReportDTO->getProfile())
                 ->fromSeller($MaterialSignReportDTO->getSeller())
                 ->dateFrom($MaterialSignReportDTO->getFrom())
-                ->dateTo($MaterialSignReportDTO->getTo());
+                ->dateTo($MaterialSignReportDTO->getTo())
+                ->forDelivery($MaterialSignReportDTO->getDelivery());
 
-            /** Получаем только в процессе */
+            /** Получаем в процессе, списанные и реализованные */
             $data = $MaterialSignReport
-                ->onlyStatusProcess()
+                ->resetOrderStatus()
+                ->addStatusProcess()
+                ->addStatusDecommission()
+                ->addStatusDone()
                 ->findAll();
 
             if(false === $data)

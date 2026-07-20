@@ -83,12 +83,18 @@
                 <div class="w-100 d-flex gap-3">
 
                     <div class="w-100">
+                        {{ form_row(form.delivery, { label: 'Тип заказа', placeholder: 'Заказы всех типов ...', attr: { placeholder: 'Заказы всех типов ...' } }) }}
+                    </div>
+
+                    <div class="w-100">
                         {{ form_row(form.from, { label: 'Дата начала' }) }}
                     </div>
 
                     <div class="w-100">
                         {{ form_row(form.to, { label: 'Дата окончания' }) }}
                     </div>
+
+
                 </div>
             </div>
 

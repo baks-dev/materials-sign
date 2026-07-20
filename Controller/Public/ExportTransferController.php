@@ -85,7 +85,9 @@ final class ExportTransferController extends AbstractController
 
         $data = $MaterialSignReport
             ->fromProfile($profile->getId())
-            ->onlyStatusProcess()
+            ->resetOrderStatus()
+            ->addStatusProcess()
+            ->addStatusDecommission()
             ->dateFrom($from)
             ->dateTo($to)
             ->findAll();

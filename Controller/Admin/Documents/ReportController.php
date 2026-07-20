@@ -73,7 +73,8 @@ final class ReportController extends AbstractController
 
             /** Получаем только в завершенные и возвращаем хвост кодировки */
             $data = $MaterialSignReport
-                ->onlyStatusDone()
+                ->resetOrderStatus()
+                ->addStatusDone()
                 ->findAll();
 
             if(false === $data)

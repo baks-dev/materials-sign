@@ -26,6 +26,8 @@ declare(strict_types=1);
 namespace BaksDev\Materials\Sign\Repository\MaterialSignReport;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
+use BaksDev\Delivery\Entity\Delivery;
+use BaksDev\Delivery\Type\Id\DeliveryUid;
 use BaksDev\Materials\Catalog\Entity\Material;
 use BaksDev\Materials\Catalog\Entity\Offers\MaterialOffer;
 use BaksDev\Materials\Catalog\Entity\Offers\Variation\MaterialVariation;
@@ -41,13 +43,14 @@ use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
 use BaksDev\Materials\Sign\Entity\Modify\MaterialSignModify;
-use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusDecommission;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusDone;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusProcess;
 use BaksDev\Orders\Order\Entity\Invariable\OrderInvariable;
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Entity\Products\Price\OrderPrice;
+use BaksDev\Orders\Order\Entity\User\Delivery\OrderDelivery;
+use BaksDev\Orders\Order\Entity\User\OrderUser;
 use BaksDev\Products\Product\Type\Material\MaterialUid;
 use BaksDev\Users\Profile\TypeProfile\Entity\Section\Fields\TypeProfileSectionField;
 use BaksDev\Users\Profile\UserProfile\Entity\Event\Value\UserProfileValue;
@@ -76,6 +79,12 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
     private MaterialVariationConst|false $variation = false;
 
     private MaterialModificationConst|false $modification = false;
+
+    /**
+     * Способ доставки
+     */
+    private DeliveryUid|false $delivery = false;
+
 
     private array|false $status = false;
 
@@ -122,6 +131,19 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
         }
 
         $this->seller = $seller;
+
+        return $this;
+    }
+
+    public function forDelivery(DeliveryUid|null|false $delivery): self
+    {
+        if(empty($delivery))
+        {
+            $this->delivery = false;
+            return $this;
+        }
+
+        $this->delivery = $delivery;
 
         return $this;
     }
@@ -226,12 +248,33 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
         return $this;
     }
 
-    public function onlyStatusProcess(): self
+    public function resetOrderStatus(): self
     {
-        $this->status = [MaterialSignStatusProcess::STATUS, MaterialSignStatusDecommission::STATUS,];
+        $this->status = false;
+        return $this;
+    }
+
+    public function addStatusDone(): self
+    {
+        $this->status[] = MaterialSignStatusDone::STATUS;
 
         return $this;
     }
+
+    public function addStatusProcess(): self
+    {
+        $this->status[] = MaterialSignStatusProcess::STATUS;
+
+        return $this;
+    }
+
+    public function addStatusDecommission(): self
+    {
+        $this->status[] = MaterialSignStatusProcess::STATUS;
+
+        return $this;
+    }
+
 
     /**
      * Метод получает все реализованные честные знаки
@@ -457,6 +500,31 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
         );
 
 
+        if($this->delivery instanceof DeliveryUid)
+        {
+            $dbal->join(
+                'ord',
+                OrderUser::class,
+                'order_user',
+                'order_user.event = ord.event',
+            );
+
+            $dbal
+                ->join(
+                    'ord',
+                    OrderDelivery::class,
+                    'order_delivery',
+                    'order_delivery.usr = order_user.id
+                    AND order_delivery.delivery = :delivery',
+                )
+                ->setParameter(
+                    key: 'delivery',
+                    value: $this->delivery,
+                    type: DeliveryUid::TYPE,
+                );
+        }
+
+
         $dbal
             ->addSelect('order_invariable.number')
             ->leftJoin(
@@ -556,6 +624,8 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
         $dbal->allGroupByExclude();
 
         $result = $dbal->fetchAllHydrate(MaterialSignReportResult::class);
+
+        $this->status = false;
 
         return $result->valid() ? $result : false;
     }

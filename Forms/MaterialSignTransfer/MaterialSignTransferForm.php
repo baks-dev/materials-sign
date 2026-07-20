@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Forms\MaterialSignTransfer;
 
+use BaksDev\Delivery\Forms\Delivery\DeliveryForm;
 use BaksDev\Materials\Catalog\Repository\MaterialChoice\MaterialChoiceInterface;
 use BaksDev\Materials\Catalog\Repository\MaterialModificationChoice\MaterialModificationChoiceInterface;
 use BaksDev\Materials\Catalog\Repository\MaterialOfferChoice\MaterialOfferChoiceInterface;
@@ -101,6 +102,10 @@ final class MaterialSignTransferForm extends AbstractType
             'format' => 'dd.MM.yyyy',
             'input' => 'datetime_immutable',
         ]);
+
+
+        /** Все имеющиеся типы заказов */
+        $builder->add('delivery', DeliveryForm::class, ['required' => false]);
 
 
         /** Все профили пользователя */

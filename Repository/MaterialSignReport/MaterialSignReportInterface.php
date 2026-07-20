@@ -58,9 +58,16 @@ interface MaterialSignReportInterface
     public function setModification(MaterialModificationConst|string|null|false $modification): self;
 
 
-    public function onlyStatusDone(): self;
+    /** Фильтр по статусам */
 
-    public function onlyStatusProcess(): self;
+    public function resetOrderStatus(): self;
+
+    public function addStatusDone(): self;
+
+    public function addStatusProcess(): self;
+
+    public function addStatusDecommission(): self;
+
 
     /**
      * Метод получает все реализованные честные знаки

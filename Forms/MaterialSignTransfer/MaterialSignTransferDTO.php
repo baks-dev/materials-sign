@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Materials\Sign\Forms\MaterialSignTransfer;
 
+use BaksDev\Delivery\Type\Id\DeliveryUid;
 use BaksDev\Materials\Catalog\Type\Offers\ConstId\MaterialOfferConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\ConstId\MaterialVariationConst;
 use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\MaterialModificationConst;
@@ -61,6 +62,12 @@ final class MaterialSignTransferDTO
     private ?DateTimeImmutable $from = null;
 
     private ?DateTimeImmutable $to = null;
+
+
+    /**
+     * Способ доставки
+     */
+    private ?DeliveryUid $delivery = null;
 
     /**
      * Category
@@ -143,4 +150,14 @@ final class MaterialSignTransferDTO
         return $this;
     }
 
+    public function getDelivery(): ?DeliveryUid
+    {
+        return $this->delivery;
+    }
+
+    public function setDelivery(?DeliveryUid $delivery): self
+    {
+        $this->delivery = $delivery;
+        return $this;
+    }
 }
