@@ -86,7 +86,7 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
     private DeliveryUid|false $delivery = false;
 
     /** Категория товара */
-    private CategoryMaterialUid|false $category;
+    private CategoryMaterialUid|false $category = false;
 
     private array|false $status = false;
 

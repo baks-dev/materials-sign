@@ -56,12 +56,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 final class MaterialSignTransferForm extends AbstractType
 {
     public function __construct(
-        #[AutowireIterator('baks.reference.choice')] private readonly iterable $reference,
         private readonly CategoryMaterialChoiceInterface $categoryChoice,
-        private readonly MaterialChoiceInterface $materialChoice,
-        private readonly MaterialOfferChoiceInterface $materialOfferChoice,
-        private readonly MaterialVariationChoiceInterface $materialVariationChoice,
-        private readonly MaterialModificationChoiceInterface $modificationChoice,
         private readonly UserProfileChoiceInterface $userProfileChoice,
         private readonly UserProfileTokenStorageInterface $userProfileTokenStorage,
     ) {}
@@ -80,7 +75,7 @@ final class MaterialSignTransferForm extends AbstractType
             'label' => false,
             'expanded' => false,
             'multiple' => false,
-            //'required' => false,
+            'required' => false,
         ]);
 
 

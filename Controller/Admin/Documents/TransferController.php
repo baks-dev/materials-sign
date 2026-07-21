@@ -67,6 +67,7 @@ final class TransferController extends AbstractController
             $this->refreshTokenForm($form);
 
             $MaterialSignReport
+                ->setCategory($MaterialSignReportDTO->getCategory())
                 ->fromProfile($MaterialSignReportDTO->getProfile())
                 ->fromSeller($MaterialSignReportDTO->getSeller())
                 ->dateFrom($MaterialSignReportDTO->getFrom())
