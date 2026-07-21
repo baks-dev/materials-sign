@@ -38,6 +38,7 @@ use BaksDev\Materials\Category\Entity\Offers\Variation\CategoryMaterialVariation
 use BaksDev\Materials\Category\Entity\Offers\Variation\Modification\CategoryMaterialModification;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
+use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\MaterialSignStatusProcess;
@@ -121,14 +122,14 @@ final class GroupMaterialSignsByOrderRepository implements GroupMaterialSignsByO
                 'main.event = event.id',
             );
 
-        //        $dbal
-        //            ->addSelect('invariable.part AS sign_part')
-        //            ->join(
-        //                'event',
-        //                MaterialSignInvariable::class,
-        //                'invariable',
-        //                'invariable.main = main.id',
-        //            );
+        $dbal
+            //->addSelect('invariable.part AS sign_part')
+            ->join(
+                'event',
+                MaterialSignInvariable::class,
+                'invariable',
+                'invariable.main = main.id',
+            );
 
 
         $dbal

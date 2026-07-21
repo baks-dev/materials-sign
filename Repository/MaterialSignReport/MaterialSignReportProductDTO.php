@@ -35,8 +35,6 @@ final class MaterialSignReportProductDTO
     public function __construct(
 
         private readonly string $name,
-        private readonly ?int $price,
-        private readonly ?int $count,
         private readonly string $article,
 
         private readonly ?string $offer_value,
@@ -49,6 +47,9 @@ final class MaterialSignReportProductDTO
         private readonly ?string $modification_reference,
 
         string $code,
+
+        private readonly ?int $price = null,
+        private readonly ?int $count = null,
 
     )
     {

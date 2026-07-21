@@ -43,7 +43,7 @@ interface MaterialSignReportInterface
 
     public function dateTo(DateTimeImmutable $to): self;
 
-    //public function setCategory(CategoryMaterialUid|string|null|false $category): self;
+    public function setCategory(CategoryMaterialUid|null|false $category): self;
 
     /**
      * Material

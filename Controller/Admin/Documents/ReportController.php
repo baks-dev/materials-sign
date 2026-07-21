@@ -67,6 +67,7 @@ final class ReportController extends AbstractController
             $this->refreshTokenForm($form);
 
             $MaterialSignReport
+                ->setCategory($MaterialSignReportDTO->getCategory())
                 ->fromSeller($MaterialSignReportDTO->getSeller())
                 ->dateFrom($MaterialSignReportDTO->getFrom())
                 ->dateTo($MaterialSignReportDTO->getTo());

@@ -28,6 +28,7 @@ namespace BaksDev\Materials\Sign\Repository\MaterialSignReport;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Delivery\Entity\Delivery;
 use BaksDev\Delivery\Type\Id\DeliveryUid;
+use BaksDev\Materials\Catalog\Entity\Category\MaterialCategory;
 use BaksDev\Materials\Catalog\Entity\Material;
 use BaksDev\Materials\Catalog\Entity\Offers\MaterialOffer;
 use BaksDev\Materials\Catalog\Entity\Offers\Variation\MaterialVariation;
@@ -39,6 +40,7 @@ use BaksDev\Materials\Catalog\Type\Offers\Variation\Modification\ConstId\Materia
 use BaksDev\Materials\Category\Entity\Offers\CategoryMaterialOffers;
 use BaksDev\Materials\Category\Entity\Offers\Variation\CategoryMaterialVariation;
 use BaksDev\Materials\Category\Entity\Offers\Variation\Modification\CategoryMaterialModification;
+use BaksDev\Materials\Category\Type\Id\CategoryMaterialUid;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Entity\Event\MaterialSignEvent;
 use BaksDev\Materials\Sign\Entity\Invariable\MaterialSignInvariable;
@@ -80,13 +82,14 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
 
     private MaterialModificationConst|false $modification = false;
 
-    /**
-     * Способ доставки
-     */
+    /** Способ доставки */
     private DeliveryUid|false $delivery = false;
 
+    /** Категория товара */
+    private CategoryMaterialUid|false $category;
 
     private array|false $status = false;
+
 
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder)
     {
@@ -148,6 +151,19 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
         return $this;
     }
 
+
+    public function setCategory(CategoryMaterialUid|false|null $category): self
+    {
+        if(empty($category))
+        {
+            $this->category = false;
+            return $this;
+        }
+
+        $this->category = $category;
+
+        return $this;
+    }
 
     public function dateFrom(DateTimeImmutable $from): self
     {
@@ -434,6 +450,24 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
             'material.id = invariable.material',
         );
 
+        if($this->category instanceof CategoryMaterialUid)
+        {
+            $dbal
+                ->join(
+                    'material',
+                    MaterialCategory::class,
+                    'material_categories_material',
+                    'material_categories_material.event = material.event
+                    AND material_categories_material.category = :category',
+                )
+                ->setParameter(
+                    key: 'category',
+                    value: $this->category,
+                    type: CategoryMaterialUid::TYPE,
+                );
+        }
+
+
         $dbal->join(
             'material',
             MaterialTrans::class,
@@ -574,8 +608,8 @@ final class MaterialSignReportRepository implements MaterialSignReportInterface
                                     material_offer.article
                                 ),
 
-                                'price', order_price.price,
-                                'count', order_price.total,
+                                /*'price', order_price.price,
+                                'count', order_price.total,*/
                                 'code', code.code
                             )
         
