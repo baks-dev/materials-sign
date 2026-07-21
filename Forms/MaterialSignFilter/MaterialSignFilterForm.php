@@ -26,8 +26,12 @@ declare(strict_types=1);
 namespace BaksDev\Materials\Sign\Forms\MaterialSignFilter;
 
 use BaksDev\Core\Form\Search\SearchDTO;
+use BaksDev\Materials\Sign\Forms\MaterialSignReport\MaterialSignReportDTO;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\Collection\MaterialSignStatusCollection;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\Collection\MaterialSignStatusInterface;
+use BaksDev\Users\Profile\UserProfile\Repository\UserProfileChoice\UserProfileChoiceInterface;
+use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Wildberries\Orders\Forms\WbOrdersStatusFilter\WbOrdersStatusFilterDTO;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -46,6 +50,8 @@ final class MaterialSignFilterForm extends AbstractType
     private SessionInterface|false $session = false;
 
     public function __construct(
+        private readonly UserProfileTokenStorageInterface $userProfileTokenStorage,
+        private readonly UserProfileChoiceInterface $userProfileChoice,
         private readonly MaterialSignStatusCollection $status,
         private readonly RequestStack $request
     )
@@ -56,8 +62,6 @@ final class MaterialSignFilterForm extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-
-
         $builder->add('status', ChoiceType::class, [
             'choices' => $this->status->cases(),
             'choice_value' => function(?MaterialSignStatusInterface $region) {
@@ -90,6 +94,40 @@ final class MaterialSignFilterForm extends AbstractType
             'input' => 'datetime_immutable',
         ]);
 
+
+        /** @var MaterialSignReportDTO $data */
+
+        $UserUid = $this->userProfileTokenStorage->getUser();
+        $profiles = $this->userProfileChoice->getActiveUserProfile($UserUid);
+
+        $builder
+            ->add('profile', ChoiceType::class, [
+                'choices' => $profiles,
+                'choice_value' => function(?UserProfileUid $profile) {
+                    return $profile?->getValue();
+                },
+                'choice_label' => function(UserProfileUid $profile) {
+                    return $profile->getAttr();
+                },
+
+                'label' => false,
+            ]);
+
+
+        $builder
+            ->add('seller', ChoiceType::class, [
+                'choices' => $profiles,
+                'choice_value' => function(?UserProfileUid $profile) {
+                    return $profile?->getValue();
+                },
+                'choice_label' => function(UserProfileUid $profile) {
+                    return $profile->getAttr();
+                },
+
+                'label' => false,
+            ]);
+
+
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
             function(FormEvent $event): void {
@@ -120,6 +158,8 @@ final class MaterialSignFilterForm extends AbstractType
                     $sessionArray = $sessionJson !== false && json_validate($sessionJson) ? json_decode($sessionJson, true) : [];
 
                     $data->setStatus($sessionArray['status'] ?? null);
+                    $data->setProfile($sessionArray['profile'] ?? null);
+                    $data->setSeller($sessionArray['seller'] ?? null);
                     $data->setFrom($sessionArray['from']['date'] ?? null);
                     $data->setTo($sessionArray['to']['date'] ?? null);
                 }
@@ -142,6 +182,8 @@ final class MaterialSignFilterForm extends AbstractType
                     $sessionArray = [];
 
                     $data->getStatus() ? $sessionArray['status'] = $data->getStatus()->getValue() : false;
+                    $data->getProfile() ? $sessionArray['profile'] = $data->getProfile()->getValue() : false;
+                    $data->getSeller() ? $sessionArray['seller'] = $data->getSeller()->getValue() : false;
                     $data->getFrom() ? $sessionArray['from'] = $data->getFrom() : false;
                     $data->getTo() ? $sessionArray['to'] = $data->getTo() : false;
 

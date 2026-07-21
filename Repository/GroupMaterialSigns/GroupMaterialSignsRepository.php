@@ -121,11 +121,39 @@ final class GroupMaterialSignsRepository implements GroupMaterialSignsInterface
             ->setParameter('usr', $user, UserUid::TYPE);
 
 
-        if($this->filter->getAll() === false)
+        if($this->status?->getProfile() instanceof UserProfileUid)
         {
-            $dbal->andWhere('(invariable.profile = :profile OR invariable.seller = :profile)')
+            $dbal
+                ->andWhere('invariable.profile = :profile')
+                ->setParameter(
+                    'profile',
+                    $this->status->getProfile(),
+                    UserProfileUid::TYPE,
+                );
+        }
+
+        if($this->status?->getSeller() instanceof UserProfileUid)
+        {
+            $dbal
+                ->andWhere('invariable.seller = :seller')
+                ->setParameter(
+                    'seller',
+                    $this->status->getSeller(),
+                    UserProfileUid::TYPE,
+                );
+        }
+
+        if(
+            $this->filter->getAll() === false
+            && (false === $this->status?->getProfile() instanceof UserProfileUid)
+            && (false === $this->status?->getSeller() instanceof UserProfileUid)
+        )
+        {
+            $dbal
+                ->andWhere('(invariable.profile = :profile OR invariable.seller = :profile)')
                 ->setParameter('profile', $profile, UserProfileUid::TYPE);
         }
+
 
         $dbal
             ->leftJoin(

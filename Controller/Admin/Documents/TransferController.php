@@ -79,7 +79,6 @@ final class TransferController extends AbstractController
                 ->resetOrderStatus()
                 ->addStatusProcess()
                 ->addStatusDecommission()
-                ->addStatusDone()
                 ->findAll();
 
             if(false === $data)

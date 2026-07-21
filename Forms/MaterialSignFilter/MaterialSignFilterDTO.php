@@ -27,6 +27,7 @@ namespace BaksDev\Materials\Sign\Forms\MaterialSignFilter;
 
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus;
 use BaksDev\Materials\Sign\Type\Status\MaterialSignStatus\Collection\MaterialSignStatusInterface;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use DateTimeImmutable;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -38,6 +39,13 @@ final class MaterialSignFilterDTO
     private ?DateTimeImmutable $from = null;
 
     private ?DateTimeImmutable $to = null;
+
+    /** Владелец */
+    private UserProfileUid|null $profile = null;
+
+    /** Продавец */
+    private UserProfileUid|null $seller = null;
+
 
     /**
      * Status
@@ -98,4 +106,35 @@ final class MaterialSignFilterDTO
         return $this;
     }
 
+    public function getProfile(): ?UserProfileUid
+    {
+        return $this->profile;
+    }
+
+    public function setProfile(UserProfileUid|string|null $profile): self
+    {
+        if(is_string($profile))
+        {
+            $profile = new UserProfileUid($profile);
+        }
+
+        $this->profile = $profile;
+        return $this;
+    }
+
+    public function getSeller(): ?UserProfileUid
+    {
+        return $this->seller;
+    }
+
+    public function setSeller(UserProfileUid|string|null $seller): self
+    {
+        if(is_string($seller))
+        {
+            $seller = new UserProfileUid($seller);
+        }
+
+        $this->seller = $seller;
+        return $this;
+    }
 }
