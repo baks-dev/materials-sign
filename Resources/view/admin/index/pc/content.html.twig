@@ -288,10 +288,22 @@
                 </thead>
 
                 <tbody>
+                {% set counter = 0 %}
+
                 {% for item in query.data %}
+                    {% set counter = counter + item.counter %}
                     {{ include(_self|replace({ "content.html.twig": "card.html.twig" })) }}
                 {% endfor %}
                 </tbody>
+
+                <tfoot>
+                <tr>
+                    <td colspan="2">&nbsp;</td>
+                    <td class="text-end">Итого:</td>
+                    <td class="text-center">{{ counter }}</td>
+                </tr>
+                </tfoot>
+
             </table>
 
             {% include Template('_includes/'~baks_settings.device~'/pagination.html.twig') with { 'pagination' : query } %}

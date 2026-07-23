@@ -264,6 +264,25 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
                 'main.id = event.main',
             );
 
+        $dbal
+            ->addSelect("
+                CASE
+                   WHEN code.name IS NOT NULL 
+                   THEN CONCAT ('/upload/barcode', '/', code.name)
+                   ELSE NULL
+                END AS code_image
+            ")
+            ->addSelect("code.ext AS code_ext")
+            ->addSelect("code.cdn AS code_cdn")
+            ->addSelect("code.event AS code_event")
+            ->addSelect("code.code AS code_string")
+            ->leftJoin(
+                'event',
+                MaterialSignCode::class,
+                'code',
+                'code.main = main.id',
+            );
+
 
         if($this->material)
         {
@@ -294,126 +313,110 @@ final class MaterialSignByOrderRepository implements MaterialSignByOrderInterfac
                     $this->material,
                     MaterialUid::TYPE,
                 );
-        }
 
 
-        $dbal
-            ->addSelect("
-                CASE
-                   WHEN code.name IS NOT NULL 
-                   THEN CONCAT ('/upload/barcode', '/', code.name)
-                   ELSE NULL
-                END AS code_image
-            ")
-            ->addSelect("code.ext AS code_ext")
-            ->addSelect("code.cdn AS code_cdn")
-            ->addSelect("code.event AS code_event")
-            ->addSelect("code.code AS code_string")
-            ->leftJoin(
-                'event',
-                MaterialSignCode::class,
-                'code',
-                'code.main = main.id',
-            );
+            $dbal
+                ->addSelect('material.id AS material_id')
+                ->addSelect('material.event AS material_event')
+                ->leftJoin(
+                    'invariable',
+                    Material::class,
+                    'material',
+                    'material.id = invariable.material',
+                );
 
 
-        $dbal
-            ->addSelect('material.id AS material_id')
-            ->addSelect('material.event AS material_event')
-            ->leftJoin(
-                'invariable',
-                Material::class,
-                'material',
-                'material.id = invariable.material',
-            );
-
-
-        /** Название продукта */
-        $dbal
-            ->addSelect('material_trans.name AS material_name')
-            ->leftJoin(
-                'material',
-                MaterialTrans::class,
-                'material_trans',
-                '
+            /** Название продукта */
+            $dbal
+                ->addSelect('material_trans.name AS material_name')
+                ->leftJoin(
+                    'material',
+                    MaterialTrans::class,
+                    'material_trans',
+                    '
                         material_trans.event = material.event 
                         AND material_trans.local = :local
                     ');
 
 
-        /**
-         * Торговое предложение
-         */
+            /**
+             * Торговое предложение
+             */
 
-        $dbal
-            ->addSelect('material_offer.value as material_offer_value')
-            ->leftJoin(
-                'material',
-                MaterialOffer::class,
-                'material_offer',
-                'material_offer.event = material.event 
-                AND material_offer.const = invariable.offer',
-            );
-
-
-        // Получаем тип торгового предложения
-        $dbal
-            ->addSelect('category_offer.reference as material_offer_reference')
-            ->leftJoin(
-                'material_offer',
-                CategoryMaterialOffers::class,
-                'category_offer',
-                'category_offer.id = material_offer.category_offer',
-            );
+            $dbal
+                ->addSelect('material_offer.value as material_offer_value')
+                ->leftJoin(
+                    'material',
+                    MaterialOffer::class,
+                    'material_offer',
+                    'material_offer.event = material.event 
+                    AND material_offer.const = invariable.offer',
+                );
 
 
-        /**
-         * Множественные варианты торгового предложения
-         */
-
-        $dbal
-            ->addSelect('material_variation.value as material_variation_value')
-            ->leftJoin(
-                'material_offer',
-                MaterialVariation::class,
-                'material_variation',
-                'material_variation.offer = material_offer.id AND material_variation.const = invariable.variation',
-            );
+            // Получаем тип торгового предложения
+            $dbal
+                ->addSelect('category_offer.reference as material_offer_reference')
+                ->leftJoin(
+                    'material_offer',
+                    CategoryMaterialOffers::class,
+                    'category_offer',
+                    'category_offer.id = material_offer.category_offer',
+                );
 
 
-        // Получаем тип множественного варианта
-        $dbal
-            ->addSelect('category_variation.reference as material_variation_reference')
-            ->leftJoin(
-                'material_variation',
-                CategoryMaterialVariation::class,
-                'category_variation',
-                'category_variation.id = material_variation.category_variation',
-            );
+            /**
+             * Множественные варианты торгового предложения
+             */
+
+            $dbal
+                ->addSelect('material_variation.value as material_variation_value')
+                ->leftJoin(
+                    'material_offer',
+                    MaterialVariation::class,
+                    'material_variation',
+                    'material_variation.offer = material_offer.id 
+                    AND material_variation.const = invariable.variation',
+                );
 
 
-        /**
-         * Модификация множественного варианта торгового предложения
-         */
+            // Получаем тип множественного варианта
+            $dbal
+                ->addSelect('category_variation.reference as material_variation_reference')
+                ->leftJoin(
+                    'material_variation',
+                    CategoryMaterialVariation::class,
+                    'category_variation',
+                    'category_variation.id = material_variation.category_variation',
+                );
 
-        $dbal
-            ->addSelect('material_modification.value as material_modification_value')
-            ->leftJoin(
-                'material_variation',
-                MaterialModification::class,
-                'material_modification',
-                'material_modification.variation = material_variation.id AND material_modification.const = invariable.modification',
-            );
 
-        // Получаем тип модификации множественного варианта
-        $dbal
-            ->addSelect('category_offer_modification.reference as material_modification_reference')
-            ->leftJoin(
-                'material_modification',
-                CategoryMaterialModification::class,
-                'category_offer_modification',
-                'category_offer_modification.id = material_modification.category_modification',
-            );
+            /**
+             * Модификация множественного варианта торгового предложения
+             */
+
+            $dbal
+                ->addSelect('material_modification.value as material_modification_value')
+                ->leftJoin(
+                    'material_variation',
+                    MaterialModification::class,
+                    'material_modification',
+                    'material_modification.variation = material_variation.id 
+                    AND material_modification.const = invariable.modification',
+                );
+
+            // Получаем тип модификации множественного варианта
+            $dbal
+                ->addSelect('category_offer_modification.reference as material_modification_reference')
+                ->leftJoin(
+                    'material_modification',
+                    CategoryMaterialModification::class,
+                    'category_offer_modification',
+                    'category_offer_modification.id = material_modification.category_modification',
+                );
+
+        }
+
 
         return $dbal
             // ->enableCache('Namespace', 3600)

@@ -40,27 +40,32 @@ final  class MaterialSignByOrderResult
 
     public function __construct(
 
-        private readonly string $material_id,
-        private readonly string $material_event,
 
-        private readonly ?string $material_offer_value,
-        private readonly ?string $material_offer_reference,
-
-        private readonly ?string $material_variation_value,
-        private readonly ?string $material_variation_reference,
-
-        private readonly ?string $material_modification_value,
-        private readonly ?string $material_modification_reference,
-
-        private readonly string $material_name,
 
         private readonly string $sign_id,
         private readonly string $sign_event,
+
         private readonly string $code_image,
         private readonly string $code_ext,
         private readonly string $code_event,
         private readonly string $code_string,
         private readonly bool $code_cdn,
+
+
+        private readonly ?string $material_id = null,
+        private readonly ?string $material_event = null,
+
+        private readonly ?string $material_offer_value = null,
+        private readonly ?string $material_offer_reference = null,
+
+        private readonly ?string $material_variation_value = null,
+        private readonly ?string $material_variation_reference = null,
+
+        private readonly ?string $material_modification_value = null,
+        private readonly ?string $material_modification_reference = null,
+
+        private readonly ?string $material_name = null,
+
     ) {}
 
     public function getSignId(): MaterialSignUid
@@ -160,14 +165,14 @@ final  class MaterialSignByOrderResult
         return $this->code_cdn === true;
     }
 
-    public function getMaterialId(): MaterialUid
+    public function getMaterialId(): ?MaterialUid
     {
-        return new MaterialUid($this->material_id);
+        return $this->material_id ? new MaterialUid($this->material_id) : null;
     }
 
-    public function getMaterialEvent(): MaterialEventUid
+    public function getMaterialEvent(): ?MaterialEventUid
     {
-        return new MaterialEventUid($this->material_event);
+        return $this->material_event ? new MaterialEventUid($this->material_event) : null;
     }
 
     public function getMaterialOfferValue(): ?string
@@ -200,7 +205,7 @@ final  class MaterialSignByOrderResult
         return $this->material_modification_reference;
     }
 
-    public function getMaterialName(): string
+    public function getMaterialName(): ?string
     {
         return $this->material_name;
     }
