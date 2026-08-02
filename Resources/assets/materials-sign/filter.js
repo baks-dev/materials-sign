@@ -42,13 +42,17 @@ executeFunc(function submitMaterialSignFilter()
 
 
     const myCollapsible = document.getElementById("filterMaterialSign");
-    myCollapsible.addEventListener("show.bs.collapse", event =>
+
+    if(myCollapsible)
     {
-        if(typeof idFormDebounce !== "undefined" && idFormDebounce !== false)
+        myCollapsible.addEventListener("show.bs.collapse", event =>
         {
-            clearTimeout(idFormDebounce);
-        }
-    });
+            if(typeof idFormDebounce !== "undefined" && idFormDebounce !== false)
+            {
+                clearTimeout(idFormDebounce);
+            }
+        });
+    }
 
     return true;
 });
