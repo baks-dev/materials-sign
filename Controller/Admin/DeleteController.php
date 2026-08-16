@@ -30,7 +30,6 @@ use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Materials\Sign\Entity\MaterialSign;
 use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartInterface;
-use BaksDev\Materials\Sign\Type\Event\MaterialSignEventUid;
 use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
 use BaksDev\Materials\Sign\UseCase\Admin\Delete\MaterialSignDeleteDTO;
 use BaksDev\Materials\Sign\UseCase\Admin\Delete\MaterialSignDeleteForm;
@@ -90,7 +89,7 @@ final class DeleteController extends AbstractController
             foreach($signs as $MaterialSignByPartResult)
             {
                 $MaterialSignDeleteDTO = new MaterialSignDeleteDTO();
-                $MaterialSignDeleteDTO->setId(new MaterialSignEventUid($MaterialSignByPartResult->getSignEvent()));
+                $MaterialSignDeleteDTO->setId($MaterialSignByPartResult->getSignEvent());
                 $handle = $MaterialSignDeleteHandler->handle($MaterialSignDeleteDTO);
             }
 

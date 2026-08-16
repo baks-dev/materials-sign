@@ -99,6 +99,9 @@ final class ReportController extends AbstractController
             $sheet->getColumnDimension('A')->setAutoSize(true);
             $sheet->getColumnDimension('B')->setAutoSize(true);
             $sheet->getColumnDimension('C')->setAutoSize(true);
+            $sheet->getColumnDimension('D')->setAutoSize(true); // дата продажи
+            $sheet->getColumnDimension('E')->setAutoSize(true); // Стоимость продажи
+            $sheet->getColumnDimension('F')->setAutoSize(true); // Номер заказа
 
 
             $key = 1;
@@ -144,6 +147,8 @@ final class ReportController extends AbstractController
                     $sheet->setCellValue('A'.$key, trim($name)); // Наименование товара
                     $sheet->setCellValue('B'.$key, $product->getGtin()); // GTIN
                     $sheet->setCellValue('C'.$key, $product->codeSmallFormat()); // Код маркировки/агрегата
+                    $sheet->setCellValue('D'.$key, $item->getDate()->format('d.m.Y')); // дата продажи
+                    $sheet->setCellValue('E'.$key, empty($product->getPrice()->getValue()) ? $item->getTotalPrice() : $product->getPrice()); // стоимость продажи
 
                     $key++;
                 }
